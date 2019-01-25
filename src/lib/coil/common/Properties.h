@@ -1068,6 +1068,58 @@ namespace coil
      */
     Properties& operator<<(const Properties& prop);
 
+
+
+    /*!
+     * @if jp
+     * @brief Propertyをstd::vector<std::string>への型変換演算子
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    explicit operator std::vector<std::string>() const;
+    /*!
+     * @if jp
+     * @brief Propertyの内容を文字列に格納する
+     *
+     * @param out 文字列
+     * @param curr 対象のプロパティ
+     * @param index 現在のプロパティ階層
+     *
+     * @else
+     * @brief
+     *
+     * @param out 
+     * @param curr 
+     * @param index 
+     *
+     * @endif
+     */
+    void _dump(std::string& out, const Properties& curr, int index) const;
+
+    /*!
+     * @if jp
+     * @brief Propertyの内容を文字列のリストに格納する
+     *
+     * @param out 文字列のリスト
+     * @param curr 対象のプロパティ
+     * @param index 現在のプロパティ階層
+     *
+     * @else
+     * @brief
+     *
+     * @param out
+     * @param curr
+     * @param index
+     *
+     * @endif
+     */
+    void _dump(std::vector<std::string>& out, const Properties& curr, int index) const;
+
   protected:
     /*!
      * @if jp

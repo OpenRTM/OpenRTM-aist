@@ -54,7 +54,7 @@ namespace RTC
    * @endif
    */
   class FluentBitStream
-    : public StreambufType
+    : public coil::LogStreamBuffer
   {
   public:
     FluentBitStream();
@@ -67,11 +67,12 @@ namespace RTC
 
     bool createInputStream(const coil::Properties& prop);
 
-  protected:
-    std::streamsize pushLogger();
+    int setServiceOption(const coil::Properties& prop);
 
-    virtual std::streamsize xsputn(const char_type* str,
-                                   std::streamsize insize);
+    virtual void write(int level, const std::string &name, const std::string &date, const std::string &mes);
+
+  protected:
+    std::streamsize pushLogger(int level, const std::string &name, const std::string &date, const char* mes);
 
   private:
     char m_buf[BUFFER_LEN];
@@ -287,7 +288,7 @@ namespace RTC
      *
      * @endif
      */
-    virtual StreambufType* getStreamBuffer();
+    virtual coil::LogStreamBuffer* getStreamBuffer();
 
   protected:
     FluentBitStream m_fbstream;

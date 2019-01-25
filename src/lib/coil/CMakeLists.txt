@@ -115,6 +115,7 @@ set(coil_srcs
 	common/coil/Timer.cpp
 	common/coil/crc.cpp
 	common/coil/stringutil.cpp
+	common/coil/Logger.cpp
 	${COIL_OS_DIR}/coil/Condition.cpp
 	${COIL_OS_DIR}/coil/DynamicLib.cpp
 	${COIL_OS_DIR}/coil/Mutex.cpp

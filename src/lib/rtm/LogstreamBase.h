@@ -52,7 +52,7 @@ namespace RTC
    *
    * @endif
    */
-  typedef std::basic_streambuf<char> StreambufType;
+  typedef coil::LogStreamBuffer StreambufType;
   class LogstreamBase
   {
   public:

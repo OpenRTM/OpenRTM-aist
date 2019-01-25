@@ -843,4 +843,58 @@ namespace coil
   {
     return rhs._dump(lhs, rhs, 0);
   }
+
+
+  Properties::operator std::vector<std::string>() const
+  {
+      std::vector<std::string> out;
+
+      this->_dump(out, *this, 0);
+
+      return out;
+  }
+
+  void Properties::_dump(std::string& out, const Properties& curr, int index) const
+  {
+      if (index != 0) out += indent(index) + "- " + curr.name;
+      if (curr.leaf.empty())
+      {
+          if (curr.value.empty())
+          {
+              out += ": " + curr.default_value + "\n";
+          }
+          else
+          {
+              out += ": " + curr.value + "\n";
+          }
+          return;
+      }
+      if (index != 0) out += "\n";
+      for (size_t i(0), len(curr.leaf.size()); i < len; ++i)
+      {
+          _dump(out, *(curr.leaf[i]), index + 1);
+      }
+  }
+
+  void Properties::_dump(std::vector<std::string>& out, const Properties& curr, int index) const
+  {
+      if (index != 0) out.push_back(indent(index) + "- " + curr.name);
+      if (curr.leaf.empty())
+      {
+          if (curr.value.empty())
+          {
+              out.push_back(": " + curr.default_value);
+          }
+          else
+          {
+              out.push_back(": " + curr.value);
+          }
+          return;
+      }
+      if (index != 0)out.push_back("");
+      for (size_t i(0), len(curr.leaf.size()); i < len; ++i)
+      {
+          _dump(out, *(curr.leaf[i]), index + 1);
+      }
+  }
 };  // namespace coil
