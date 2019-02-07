@@ -440,8 +440,16 @@ if(WIN32)
 	add_library(${RTM_PROJECT_NAME}_static STATIC ${rtm_srcs} )
 	
 	add_dependencies(${RTM_PROJECT_NAME}_static ALL_IDL_TGT)
+
 	#add_dependencies(${RTM_PROJECT_NAME}_static ${RTCSKEL_PROJECT_NAME})
 	get_property(rtm_static_location TARGET ${RTM_PROJECT_NAME}_static PROPERTY LOCATION)
+
+
+	install(TARGETS ${RTM_PROJECT_NAME}_static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+					ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
+					RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
+					COMPONENT openrtm)
+
 	#message(STATUS ${rtm_static_location})
 	add_custom_command(OUTPUT ${DEF_FILE_NAME}
 		COMMAND python ${MAKE_DEF_COMMAND} ${rtm_static_location} ${RTM_PROJECT_NAME} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}

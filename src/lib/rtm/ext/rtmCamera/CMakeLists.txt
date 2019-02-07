@@ -96,6 +96,11 @@ if(WIN32)
 	set_source_files_properties(${ALL_IDL_SRCS_RTM} PROPERTIES GENERATED 1)
 	get_property(rtm_static_location TARGET ${target}_static PROPERTY LOCATION)
 
+	install(TARGETS ${target}_static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+					ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
+					RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
+					COMPONENT ext)
+
 	add_custom_command(OUTPUT ${DEF_FILE_NAME}
 		COMMAND python ${MAKE_DEF_COMMAND} ${rtm_static_location} ${target} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}
 		
