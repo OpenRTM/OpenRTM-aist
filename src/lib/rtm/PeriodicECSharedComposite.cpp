@@ -71,13 +71,15 @@ namespace SDOPackage
     for (::CORBA::ULong i(0), len(sdo_list.length()); i < len; ++i)
       {
         const SDO_var sdo(sdo_list[i]);
-        ::OpenRTM::DataFlowComponent_var dfc;
+
 #ifndef ORB_IS_RTORB
-        if (!sdoToDFC(sdo.in(), dfc.out())) { continue; }
+        ::OpenRTM::DataFlowComponent_ptr dfc_ptr;
+        if (!sdoToDFC(sdo.in(), dfc_ptr)) { continue; }
 #else  // ORB_IS_RTORB
         ::OpenRTM::DataFlowComponent_ptr dfc_ptr(dfc.object());
         if (!sdoToDFC(sdo.in(), dfc_ptr)) { continue; }
 #endif  // ORB_IS_RTORB
+        ::OpenRTM::DataFlowComponent_var dfc = ::OpenRTM::DataFlowComponent::_duplicate(dfc_ptr);
 
         Member member(dfc.in());
         stopOwnedEC(member);
@@ -117,8 +119,9 @@ namespace SDOPackage
 #else
         const SDO_var sdo  = sdo_list[i];
 #endif
-        ::OpenRTM::DataFlowComponent_var dfc;
-        if (!sdoToDFC(sdo.in(), dfc.out())) { continue; }
+        ::OpenRTM::DataFlowComponent_ptr dfc_ptr;
+        if (!sdoToDFC(sdo.in(), dfc_ptr)) { continue; }
+        ::OpenRTM::DataFlowComponent_var dfc = ::OpenRTM::DataFlowComponent::_duplicate(dfc_ptr);
 #else  // ORB_IS_RTORB
         const SDO_var sdo  = sdo_list[i].object();
 
@@ -175,7 +178,6 @@ namespace SDOPackage
         removePort(member, m_expPorts);
         m_rtobj->getProperties()["conf.default.exported_ports"] =
           ::coil::flatten(m_expPorts);
-
         removeParticipantFromEC(member);
         removeOrganizationFromTarget(member);
         startOwnedEC(member);
@@ -204,7 +206,7 @@ namespace SDOPackage
     updateExportedPortsList();
     MemIt it(m_rtcMembers.begin());
     MemIt it_end(m_rtcMembers.end());
-	
+    
     while (it != it_end)
       {
         Member& member(*it);
@@ -352,8 +354,9 @@ namespace SDOPackage
           for (CORBA::ULong j(0); j < sdos->length(); ++j)
           {
 #ifndef ORB_IS_RTORB
-              ::OpenRTM::DataFlowComponent_var dfc;
-              if (!sdoToDFC(sdos[j].in(), dfc.out())) { continue; }
+              ::OpenRTM::DataFlowComponent_ptr dfc_ptr;
+              if (!sdoToDFC(sdos[j].in(), dfc_ptr)) { continue; }
+              ::OpenRTM::DataFlowComponent_var dfc = ::OpenRTM::DataFlowComponent::_duplicate(dfc_ptr);
 #else  // ORB_IS_RTORB
               ::OpenRTM::DataFlowComponent_var dfc;
               ::OpenRTM::DataFlowComponent_ptr dfc_ptr(dfc);
@@ -388,15 +391,16 @@ namespace SDOPackage
       }
     m_ec->remove_component(member.rtobj_.in());
 
-    OrganizationList_var orglist = member.rtobj_->get_organizations();
+    OrganizationList_var orglist = member.rtobj_->get_owned_organizations();
     for (CORBA::ULong i(0); i < orglist->length(); ++i)
       {
         SDOPackage::SDOList_var sdos = orglist[i]->get_members();
         for (CORBA::ULong j(0); j < sdos->length(); ++j)
           {
 #ifndef ORB_IS_RTORB
-            ::OpenRTM::DataFlowComponent_var dfc;
-            if (!sdoToDFC(sdos[j].in(), dfc.out())) { continue; }
+            ::OpenRTM::DataFlowComponent_ptr dfc_ptr;
+            if (!sdoToDFC(sdos[j].in(), dfc_ptr)) { continue; }
+            ::OpenRTM::DataFlowComponent_var dfc = ::OpenRTM::DataFlowComponent::_duplicate(dfc_ptr);
 #else  // ORB_IS_RTORB
             ::OpenRTM::DataFlowComponent_var dfc;
             ::OpenRTM::DataFlowComponent_ptr dfc_ptr(dfc);
@@ -831,6 +835,7 @@ namespace RTC
     throw (CORBA::SystemException)
   {
     ReturnCode_t ret = RTObject_impl::exit();
+    
     try
       {
         PortableServer::ObjectId_var oid;

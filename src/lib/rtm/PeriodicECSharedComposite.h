@@ -334,7 +334,7 @@ namespace SDOPackage
         rtobj_   = RTC::RTObject::_duplicate(rtobj);
         profile_ = rtobj->get_component_profile();
         eclist_  = rtobj->get_owned_contexts();
-        config_  = rtobj->get_configuration();
+        config_  = SDOPackage::Configuration::_duplicate(rtobj->get_configuration());
       }
 
       virtual ~Member(void)
