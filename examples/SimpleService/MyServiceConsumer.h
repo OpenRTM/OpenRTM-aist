@@ -17,6 +17,7 @@
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 #include <iostream>
+#include <utility>
 #include <coil/Async.h>
 
 // Service implementation headers
@@ -155,7 +156,7 @@ class MyServiceConsumer
   {
   public:
     echo_functor(std::string msg, std::string& result)
-      : m_msg(msg), m_result(result) {}
+      : m_msg(std::move(msg)), m_result(result) {}
     void operator()(RTC::CorbaConsumer<SimpleService::MyService>* obj)
     {
       try

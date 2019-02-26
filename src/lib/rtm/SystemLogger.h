@@ -299,7 +299,7 @@ namespace RTC
      *
      * @endif
      */
-    void setClockType(std::string clocktype);
+    void setClockType(const std::string& clocktype);
 
     /*!
      * @if jp

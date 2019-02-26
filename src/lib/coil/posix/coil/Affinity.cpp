@@ -47,7 +47,7 @@ namespace coil
     return true;
   }
 
-  bool setProcCpuAffinity(std::vector<unsigned int> mask)
+  bool setProcCpuAffinity(const std::vector<unsigned int>& mask)
   {
 #ifndef COIL_OS_QNX
     pid_t pid(getpid());
@@ -65,7 +65,7 @@ namespace coil
     return true;
   }
 
-  bool setProcCpuAffinity(std::string cpu_mask)
+  bool setProcCpuAffinity(const std::string& cpu_mask)
   {
 #ifndef COIL_OS_QNX
     coil::vstring tmp = coil::split(cpu_mask, ",", true);
@@ -106,7 +106,7 @@ namespace coil
     return true;
   }
 
-  bool setThreadCpuAffinity(std::vector<unsigned int> mask)
+  bool setThreadCpuAffinity(const std::vector<unsigned int>& mask)
   {
 #ifndef COIL_OS_QNX
     pthread_t tid(pthread_self());
@@ -124,7 +124,7 @@ namespace coil
     return true;
   }
 
-  bool setThreadCpuAffinity(std::string cpu_mask)
+  bool setThreadCpuAffinity(const std::string& cpu_mask)
   {
 #ifndef COIL_OS_QNX
     coil::vstring tmp = coil::split(cpu_mask, ",", true);

@@ -817,7 +817,7 @@ namespace coil
    *
    * @endif
    */
-  std::string flatten(vstring sv, std::string delimiter = ", ");
+  std::string flatten(vstring sv, const std::string& delimiter = ", ");
 
   /*!
    * @if jp

@@ -117,7 +117,7 @@ namespace coil
     return true;
   }
 
-  IClock& ClockManager::getClock(std::string clocktype)
+  IClock& ClockManager::getClock(const std::string& clocktype)
   {
     if (clocktype == "logical")
       {

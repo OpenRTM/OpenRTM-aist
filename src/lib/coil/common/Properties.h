@@ -1252,7 +1252,7 @@ namespace coil
      * @endif
      */
     static void _propertiyNames(std::vector<std::string>& names,
-                                std::string curr_name,
+                                const std::string& curr_name,
                                 const Properties* curr);
 
     /*!
@@ -1276,7 +1276,7 @@ namespace coil
      *
      * @endif
      */
-    static void _store(std::ostream& out, std::string curr_name,
+    static void _store(std::ostream& out, const std::string& curr_name,
                        Properties* curr);
 
     /*!

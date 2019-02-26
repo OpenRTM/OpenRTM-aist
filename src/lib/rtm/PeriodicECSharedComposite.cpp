@@ -337,7 +337,7 @@ namespace SDOPackage
 
   }
 
-  void PeriodicECOrganization::addRTCToEC(RTC::RTObject_var rtobj)
+  void PeriodicECOrganization::addRTCToEC(const RTC::RTObject_var& rtobj)
   {
       SDOPackage::OrganizationList_var orglist = rtobj->get_owned_organizations();
       if (orglist->length() == 0)
@@ -747,7 +747,7 @@ namespace RTC
     return ::RTC::RTC_OK;
   }
 
-  void PeriodicECSharedComposite::activateChildComp(RTC::RTObject_var rtobj)
+  void PeriodicECSharedComposite::activateChildComp(const RTC::RTObject_var& rtobj)
   {
       ::RTC::ExecutionContextList_var ecs(get_owned_contexts());
       SDOPackage::OrganizationList_var orglist = rtobj->get_owned_organizations();

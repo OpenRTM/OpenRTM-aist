@@ -117,7 +117,7 @@ namespace coil
    *
    * @endif
    */
-  bool ifname_to_ipaddr(std::string ifname, std::string& ipaddr);
+  bool ifname_to_ipaddr(const std::string& ifname, std::string& ipaddr);
 
 
   };  // namespace coil

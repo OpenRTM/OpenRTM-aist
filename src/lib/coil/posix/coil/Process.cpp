@@ -43,7 +43,7 @@ namespace coil
    * @brief Launching a process
    * @endif
    */
-  int launch_shell(std::string command)
+  int launch_shell(const std::string& command)
   {
     signal(SIGCHLD, SIG_IGN);
 
@@ -84,7 +84,7 @@ namespace coil
     return ::daemon(nochdir, noclose);
   }
 
-  int create_process(std::string command, std::vector<std::string> &out)
+  int create_process(const std::string& command, std::vector<std::string> &out)
   {
     FILE* fd;
     out.clear();

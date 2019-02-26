@@ -201,7 +201,7 @@ namespace RTC
    *
    * @endif
    */
-  void NamingOnCorba::getComponentByName(CosNaming::NamingContext_ptr context, std::string name, RTC::RTCList& rtcs)
+  void NamingOnCorba::getComponentByName(CosNaming::NamingContext_ptr context, const std::string& name, RTC::RTCList& rtcs)
   {
 
 	  CORBA::ULong length = 500;
@@ -470,7 +470,7 @@ namespace RTC
    *
    * @endif
    */
-  RTM::Manager_ptr NamingOnManager::getManager(std::string name)
+  RTM::Manager_ptr NamingOnManager::getManager(const std::string& name)
   {
 	  
 	  if (name == "*")
@@ -996,7 +996,7 @@ namespace RTC
    *
    * @endif
    */
-  RTCList NamingManager::string_to_component(std::string name)
+  RTCList NamingManager::string_to_component(const std::string& name)
   {
 	  
 	  for (std::vector<NamingService*>::iterator itr = m_names.begin(); itr != m_names.end(); ++itr) {

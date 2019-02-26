@@ -21,6 +21,7 @@
 #include <rtm/idl/ExtendedFsmServiceStub.h>
 #include "ExtendedFsmServiceProvider.h"
 #include <iostream>
+#include <utility>
 
 namespace RTC
 {
@@ -214,7 +215,7 @@ namespace RTC
    */
   void ExtendedFsmServiceProvider::changeStatus(std::string state)
   {
-    m_fsmState = state;
+    m_fsmState = std::move(state);
   }
 
   /*!
@@ -224,7 +225,7 @@ namespace RTC
    * @brief Sending a heartbeart signal to observer
    * @endif
    */
-  void ExtendedFsmServiceProvider::changeStructure(std::string fsm_structure)
+  void ExtendedFsmServiceProvider::changeStructure(const std::string& fsm_structure)
   {
     m_fsmStructure.structure = fsm_structure.c_str();
   }

@@ -356,7 +356,7 @@ namespace RTM
     return cprof._retn();
   }
 
-  std::string ManagerServant::getParameterByModulename(const std::string param_name, std::string &module_name)
+  std::string ManagerServant::getParameterByModulename(const std::string& param_name, std::string &module_name)
   {
 	  int pos0 = module_name.find("&" + param_name + "=");
 	  int pos1 = module_name.find("?" + param_name + "=");
@@ -1177,7 +1177,7 @@ namespace RTM
    * @brief Obtain Manager's reference by name
    * @endif
    */
-  RTM::Manager_ptr ManagerServant::findManagerByName(const std::string mgr_name)
+  RTM::Manager_ptr ManagerServant::findManagerByName(const std::string& mgr_name)
   {
     RTC_TRACE(("findManagerByName(%s)", mgr_name.c_str()));
 
@@ -1202,7 +1202,7 @@ namespace RTM
    * @brief Obtain Manager's reference by name
    * @endif
    */
-  RTM::Manager_ptr ManagerServant::findManagerFromList(const std::string name,
+  RTM::Manager_ptr ManagerServant::findManagerFromList(const std::string& name,
                                                        RTM::ManagerList& mlist)
   {
     for (CORBA::ULong i(0); i < mlist.length(); ++i)
@@ -1243,7 +1243,7 @@ namespace RTM
    * @endif
    */
   RTC::RTObject_ptr
-  ManagerServant::createComponentByManagerName(const std::string create_arg)
+  ManagerServant::createComponentByManagerName(const std::string& create_arg)
   {
     RTC_TRACE(("createComponentByManagerName(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
@@ -1400,7 +1400,7 @@ namespace RTM
    * @endif
    */
   RTC::RTObject_ptr
-  ManagerServant::createComponentByAddress(const std::string create_arg)
+  ManagerServant::createComponentByAddress(const std::string& create_arg)
   {
     RTC_TRACE(("createComponentByAddress(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
@@ -1564,7 +1564,7 @@ namespace RTM
 	  }
   }
 
-  bool ManagerServant::isProcessIDManager(std::string mgrname)
+  bool ManagerServant::isProcessIDManager(const std::string& mgrname)
   {
 	  int pos = mgrname.find("manager_");
 	  if (pos != -1)

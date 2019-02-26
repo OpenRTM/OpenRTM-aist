@@ -268,7 +268,7 @@ namespace RTC
    *
    * @endif
    */
-  FileStream::FileStream(std::string filename)
+  FileStream::FileStream(const std::string& filename)
   {
       
 

@@ -157,7 +157,7 @@ namespace RTM
    * @endif
    */
   bool
-  LocalServiceAdmin::getServiceProfile(std::string name,
+  LocalServiceAdmin::getServiceProfile(const std::string& name,
                                        ::RTM::LocalServiceProfile& prof)
   {
     Guard guard(m_services_mutex);

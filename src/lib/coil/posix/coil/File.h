@@ -217,7 +217,7 @@ namespace coil
   *
   * @endif
   */
-  inline void findFile(std::string dir, std::string filename, coil::vstring &filelist)
+  inline void findFile(const std::string& dir, const std::string& filename, coil::vstring &filelist)
   {
 	struct dirent **namelist=nullptr;
 #ifndef COIL_OS_QNX
@@ -272,7 +272,7 @@ namespace coil
   *
   * @endif
   */
-  inline void getFileList(std::string dir, std::string ext, coil::vstring &filelist)
+  inline void getFileList(const std::string& dir, const std::string& ext, coil::vstring &filelist)
   {
 	struct dirent **namelist=nullptr;
 #ifndef COIL_OS_QNX

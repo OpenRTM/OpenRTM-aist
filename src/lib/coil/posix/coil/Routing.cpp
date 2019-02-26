@@ -18,6 +18,7 @@
  */
 
 #include <cstdio>
+#include <utility>
 #include <netdb.h>       // gethostbyname
 #include <arpa/inet.h>   // inet_ntoa
 #include <netinet/in.h>  // sockaddr_in
@@ -39,7 +40,7 @@ namespace coil
   bool dest_to_endpoint(std::string dest_addr, std::string& endpoint)
   {
     std::string dest_if = std::string();
-    if (!find_dest_ifname(dest_addr, dest_if))
+    if (!find_dest_ifname(std::move(dest_addr), dest_if))
       {
         return false;
       }
@@ -136,7 +137,7 @@ namespace coil
    * @brief Get IP address from a network interface name
    * @endif
    */
-  bool ifname_to_ipaddr(std::string ifname, std::string& ipaddr)
+  bool ifname_to_ipaddr(const std::string& ifname, std::string& ipaddr)
   {
     std::string cmd("ifconfig ");
     cmd += ifname;

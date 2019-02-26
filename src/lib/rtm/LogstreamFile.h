@@ -333,7 +333,7 @@ namespace RTC
        *
        * @endif
        */
-      FileStream(std::string filename);
+      FileStream(const std::string& filename);
       /*!
        * @if jp
        *

@@ -421,7 +421,7 @@ namespace RTC
     {
     public:
       DataPortAction(ComponentObserverConsumer& coc,
-                     const std::string msg,
+                     const std::string& msg,
                      coil::TimeValue interval)
         : m_coc(coc), m_msg(msg), m_interval(interval),
           m_last(coil::gettimeofday())

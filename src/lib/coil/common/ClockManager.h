@@ -179,7 +179,7 @@ namespace coil
 #endif
   {
   public:
-    IClock& getClock(std::string clocktype);
+    IClock& getClock(const std::string& clocktype);
 #ifdef WIN32
     static ClockManager& instance();
     static ClockManager* clockmgr;

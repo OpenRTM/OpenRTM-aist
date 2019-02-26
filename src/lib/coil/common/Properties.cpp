@@ -709,7 +709,7 @@ namespace coil
    */
   void
   Properties::_propertiyNames(std::vector<std::string>& names,
-                              std::string curr_name,
+                              const std::string& curr_name,
                               const Properties* curr)
   {
     if (!curr->leaf.empty())
@@ -737,7 +737,7 @@ namespace coil
    * @endif
    */
   void
-  Properties::_store(std::ostream& out, std::string curr_name,
+  Properties::_store(std::ostream& out, const std::string& curr_name,
                      Properties* curr)
   {
     if (!curr->leaf.empty())

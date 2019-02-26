@@ -612,7 +612,7 @@ namespace RTM
       * @return Manager's object reference 
       * @endif
       */
-    RTM::Manager_ptr findManagerByName(const std::string mgr_name);
+    RTM::Manager_ptr findManagerByName(const std::string& mgr_name);
 
     /*!
       * @if jp
@@ -642,7 +642,7 @@ namespace RTM
       * @return Manager's object reference 
       * @endif
       */
-    RTM::Manager_ptr findManagerFromList(const std::string name,
+    RTM::Manager_ptr findManagerFromList(const std::string& name,
                                          RTM::ManagerList& mlist);
 
     /*!
@@ -668,7 +668,7 @@ namespace RTM
      * @endif
      */
     RTC::RTObject_ptr
-    createComponentByManagerName(const std::string module_name);
+    createComponentByManagerName(const std::string& module_name);
 
     /*
      * @if jp
@@ -689,7 +689,7 @@ namespace RTM
      * @endif
      */
     RTC::RTObject_ptr
-    createComponentByAddress(const std::string module_name);
+    createComponentByAddress(const std::string& module_name);
 	/*
 	* @if jp
 	* @brief マスターマネージャの有無を確認してリストを更新する
@@ -703,8 +703,8 @@ namespace RTM
 	* @endif
 	*/
 	void updateMasterManager();
-	std::string getParameterByModulename(const std::string param_name, std::string &module_name);
-	bool isProcessIDManager(std::string mgrname);
+	std::string getParameterByModulename(const std::string& param_name, std::string &module_name);
+	bool isProcessIDManager(const std::string& mgrname);
 
   private:
     typedef coil::Guard<coil::Mutex> Guard;

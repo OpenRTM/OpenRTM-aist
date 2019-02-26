@@ -175,7 +175,7 @@ namespace RTM
      *
      * @endif
      */
-    bool getServiceProfile(std::string name,
+    bool getServiceProfile(const std::string& name,
                            ::RTM::LocalServiceProfile& prof);
 
     /*!

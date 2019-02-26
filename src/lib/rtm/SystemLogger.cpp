@@ -130,7 +130,7 @@ namespace RTC
     m_usEnable = coil::replaceString(m_dateFormat, "%q", "#u#");
   }
 
-  void Logger::setClockType(std::string clocktype)
+  void Logger::setClockType(const std::string& clocktype)
   {
     m_clock = &coil::ClockManager::instance().getClock(clocktype);
   }

@@ -227,7 +227,7 @@ namespace RTC
      * @brief Unsetting heartbeat
      * @endif
      */
-    void changeStructure(std::string fsm_structure);
+    void changeStructure(const std::string& fsm_structure);
 
     //============================================================
     // FSM status related functions

@@ -27,6 +27,7 @@
 #include <iostream>
 #include <cstring>
 #include <cctype>
+#include <utility>
 #include <cstdio>
 #include <coil/OS.h>
 
@@ -476,7 +477,7 @@ namespace coil
   bool includes(const std::string& list, std::string value, bool ignore_case)
   {
     vstring vlist(split(list, ","));
-    return includes(vlist, value, ignore_case);
+    return includes(vlist, std::move(value), ignore_case);
   }
 
   /*!
@@ -714,7 +715,7 @@ namespace coil
    * @brief Create CSV file from the given string list
    * @endif
    */
-  std::string flatten(vstring sv, std::string delimiter)
+  std::string flatten(vstring sv, const std::string& delimiter)
   {
     if (sv.empty()) { return ""; }
 

@@ -1761,7 +1761,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	PortServiceList_var getPortsOnNameServers(std::string nsname, std::string kind);
+	PortServiceList_var getPortsOnNameServers(const std::string& nsname, const std::string& kind);
 	/*!
 	* @if jp
 	* @brief

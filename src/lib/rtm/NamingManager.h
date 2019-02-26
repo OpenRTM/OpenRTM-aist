@@ -388,7 +388,7 @@ namespace RTC
 	 *
 	 * @endif
 	 */
-	void getComponentByName(CosNaming::NamingContext_ptr context, std::string name, RTC::RTCList& rtcs);
+	void getComponentByName(CosNaming::NamingContext_ptr context, const std::string& name, RTC::RTCList& rtcs);
 	/*!
 	* @if jp
 	*
@@ -595,7 +595,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	RTM::Manager_ptr getManager(std::string name);
+	RTM::Manager_ptr getManager(const std::string& name);
 
   private:
     Logger rtclog;
@@ -841,7 +841,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	RTCList string_to_component(std::string name);
+	RTCList string_to_component(const std::string& name);
     
   protected:
     /*!

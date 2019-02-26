@@ -20,6 +20,7 @@
 #include <coil/SharedMemory.h>
 //#include "SharedMemory.h"
 #include <cstring>
+#include <utility>
 
 
 namespace coil
@@ -115,7 +116,7 @@ namespace coil
                      unsigned long long memory_size)
   {
 
-    m_shm_address = shm_address;
+    m_shm_address = std::move(shm_address);
     m_memory_size = memory_size;
  
 
@@ -160,7 +161,7 @@ namespace coil
    */
   int SharedMemory::open(std::string shm_address, unsigned long long memory_size)
   {
-    m_shm_address = shm_address;
+    m_shm_address = std::move(shm_address);
 	m_memory_size = memory_size;
 
 
