@@ -413,7 +413,7 @@ namespace coil
      */
     struct suspend_t
     {
-      explicit suspend_t(bool sus) : suspend(sus), mutex(), cond(mutex) {}
+      explicit suspend_t(bool sus) : suspend(sus),  cond(mutex) {}
       bool suspend;
       coil::Mutex mutex;
       coil::Condition<coil::Mutex> cond;

@@ -48,7 +48,7 @@ namespace RTC_exp
    */
   MultilayerCompositeEC::
   MultilayerCompositeEC()
-  : PeriodicExecutionContext(), m_ownersm(nullptr)
+  :  m_ownersm(nullptr)
   {
     RTC_TRACE(("MultilayerCompositeEC()"));
   }

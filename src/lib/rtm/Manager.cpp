@@ -103,7 +103,7 @@ namespace RTC
    */
   Manager::Manager()
     : m_initProc(nullptr), m_namingManager(nullptr), m_timer(nullptr),
-      m_logStreamBuf(), rtclog(&m_logStreamBuf),
+       rtclog(&m_logStreamBuf),
       m_runner(nullptr), m_terminator(nullptr)
   {
     new coil::SignalAction((coil::SignalHandler) handler, SIGINT);
@@ -118,7 +118,7 @@ namespace RTC
    */
   Manager::Manager(const Manager& manager)
     : m_initProc(nullptr), m_namingManager(nullptr), m_timer(nullptr),
-      m_logStreamBuf(), rtclog(&m_logStreamBuf),
+       rtclog(&m_logStreamBuf),
       m_runner(nullptr), m_terminator(nullptr)
   {
     new coil::SignalAction((coil::SignalHandler) handler, SIGINT);

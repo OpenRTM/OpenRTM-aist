@@ -87,8 +87,7 @@ Throughput::Throughput(RTC::Manager* manager)
     m_inFloatIn("in", m_inFloat),   m_outFloatOut("out", m_outFloat),
     m_inDoubleIn("in", m_inDouble), m_outDoubleOut("out", m_outDouble),
 
-    // Other private members
-    m_fs(),
+    
     m_datasize(1),
     m_record(m_maxsample),
     m_sendcount(0),

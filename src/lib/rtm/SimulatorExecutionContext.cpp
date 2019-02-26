@@ -35,7 +35,7 @@ namespace RTC
    * @endif
    */
   SimulatorExecutionContext::SimulatorExecutionContext()
-		: RTC::OpenHRPExecutionContext()
+		 
   {
 	  
 	  

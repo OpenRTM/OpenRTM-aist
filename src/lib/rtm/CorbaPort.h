@@ -1225,8 +1225,8 @@ namespace RTC
                           PortableServer::RefCountServantBase* servant)
         : m_typeName(type_name),
           m_instanceName(instance_name),
-          m_servant(servant),
-          m_ior()
+          m_servant(servant)
+          
       {
 #ifndef ORB_IS_RTORB
 #ifdef ORB_IS_OMNIORB
