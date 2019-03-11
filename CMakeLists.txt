@@ -13,8 +13,6 @@ set(CORBA omniORB CACHE STRING "set CORBA ")
 
 
 
-
-
 set(ORB_ROOT ${ORB_ROOT} CACHE PATH "set ORB_ROOT")
 
 
@@ -103,6 +101,18 @@ if(MSVC)
 	if (${CMAKE_GENERATOR} STREQUAL "Visual Studio 15 2017 ARM")
 		set(RTM_VC_VER "vc141")
 	endif()
+
+	set(WARNING_LEVEL ${WARNING_LEVEL} CACHE STRING "set WARNING_LEVEL ")
+
+	if(WARNING_LEVEL)
+		if((${WARNING_LEVEL} LESS 6) OR (${WARNING_LEVEL} GREATER 0))
+			if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+				string(REGEX REPLACE "/W[0-4]" "/W${WARNING_LEVEL}" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+			else()
+				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W${WARNING_LEVEL}")
+			endif()
+		endif()
+	endif(WARNING_LEVEL)
 endif(MSVC)
 
 
