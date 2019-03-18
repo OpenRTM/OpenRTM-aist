@@ -30,16 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost REQUIRED COMPONENTS chrono filesystem signals system)
 
-include_directories(${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/ros ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
-
-
 link_directories(${ORB_LINK_DIR})
-include_directories(
-		${RTM_INCLUDE_DIR}
-		${ORB_INCLUDE_DIR}
-		)
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
 
@@ -58,9 +49,14 @@ if(VXWORKS AND NOT RTP)
 	set(libs ${RTCSKEL_PROJECT_NAME})
 
 	add_executable(${target} ${srcs})
+	openrtm_common_set_compile_props(${target})
+	openrtm_include_rtm(${target})
+	target_include_directories(${target} SYSTEM
+	  PRIVATE ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/ros
+	  PRIVATE${catkin_INCLUDE_DIRS}
+	  PRIVATE${Boost_INCLUDE_DIRS})
 	target_link_libraries(${target} ${libs} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
-
+	
 	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
 				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
 				RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
@@ -72,10 +68,14 @@ else()
 		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME})
 	endif(VXWORKS)
 
-
 	add_library(${target} SHARED ${srcs})
-	target_link_libraries(${target} ${libs} ${RTM_LINKER_OPTION} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
+	openrtm_common_set_compile_props(${target})
+	openrtm_include_rtm(${target})
+	target_include_directories(${target} SYSTEM
+		PRIVATE ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/ros
+		PRIVATE${catkin_INCLUDE_DIRS}
+		PRIVATE${Boost_INCLUDE_DIRS})
+	target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
 

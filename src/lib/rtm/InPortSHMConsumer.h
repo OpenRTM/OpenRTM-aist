@@ -161,13 +161,13 @@ private:
 protected:
 	InPortConsumer::ReturnCode convertReturnCode(OpenRTM::PortStatus ret);
 
-	mutable Logger rtclog;
 	coil::Properties m_properties;
 	coil::Mutex m_mutex;
 	std::string m_shm_address;
 	SharedMemoryPort m_shmem;
 	int m_memory_size;
 	bool m_endian;
+	mutable Logger rtclog;
   };
 } // namespace RTC
 

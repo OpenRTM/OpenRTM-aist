@@ -62,7 +62,7 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager::FastRTPSManager(const FastRTPSManager &manager)// : rtclog("FastRTPSManager")
+  FastRTPSManager::FastRTPSManager(const FastRTPSManager &/*mgr*/)// : rtclog("FastRTPSManager")
   {
     
   }

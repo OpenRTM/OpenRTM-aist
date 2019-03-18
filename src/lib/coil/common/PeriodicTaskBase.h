@@ -432,7 +432,7 @@ namespace coil
      *
      * @endif
      */
-    virtual void executionMeasureCount(int n) = 0;
+    virtual void executionMeasureCount(unsigned int n) = 0;
 
     /*!
      * @if jp
@@ -474,7 +474,7 @@ namespace coil
      *
      * @endif
      */
-    virtual void periodicMeasureCount(int n) = 0;
+    virtual void periodicMeasureCount(unsigned int n) = 0;
 
     /*!
      * @if jp

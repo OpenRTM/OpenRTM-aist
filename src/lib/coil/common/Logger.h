@@ -545,7 +545,7 @@ namespace coil
        *
        * @endif
        */
-      virtual ~LogStream() {};
+      virtual ~LogStream() {}
       LogStreamBuffer* ostream_type;
 
   private:

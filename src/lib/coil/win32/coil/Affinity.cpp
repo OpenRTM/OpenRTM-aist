@@ -25,15 +25,15 @@ namespace coil
   DWORD_PTR listToCUPNUM(CpuMask &cpu_mask)
   {
     DWORD_PTR cpu_num = 0;
-    for(CpuMask::iterator itr = cpu_mask.begin(); itr != cpu_mask.end(); ++itr) {
-      DWORD_PTR p = (DWORD_PTR)0x01 << (*itr);
+    for(auto & m : cpu_mask)
+    {
+      DWORD_PTR p = (DWORD_PTR)0x01 << m;
       cpu_num += p;
     }
     return cpu_num;
   }
   bool getProcCpuAffinity(CpuMask& cpu_mask)
   {
-    DWORD_PTR cpu_num = listToCUPNUM(cpu_mask);
     DWORD_PTR processMask, systemMask = 0;
     HANDLE h = GetCurrentProcess();
 	BOOL success = GetProcessAffinityMask(h, (PDWORD_PTR)&processMask, (PDWORD_PTR)&systemMask);
@@ -84,7 +84,7 @@ namespace coil
     return setProcCpuAffinity(mask);
   }
 
-  bool getThreadCpuAffinity(CpuMask& cpu_mask)
+  bool getThreadCpuAffinity(CpuMask& /*cpu_mask*/)
   {
     return true;
   }

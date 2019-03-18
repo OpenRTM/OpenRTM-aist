@@ -88,7 +88,7 @@ namespace MicrowaveFsm
   void Programmed::minute(RTC::TimedLong time)
   {
     std::cout << "[Microwave] >>> Timer incremented <<<" << std::endl;
-    for (size_t i(0); i < static_cast<size_t>(time.data); ++i)
+    for (CORBA::Long i(0); i < time.data; ++i)
       {
         TOP::box().incrementTimer();
       }

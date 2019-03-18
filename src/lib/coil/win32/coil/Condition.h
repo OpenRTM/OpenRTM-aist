@@ -52,7 +52,7 @@ namespace coil
   } pthread_cond_t;
 
 
-  static int pthread_cond_init(pthread_cond_t *cv)
+  inline int pthread_cond_init(pthread_cond_t *cv)
   {
     cv->waiters_count_ = 0;
     cv->was_broadcast_ = 0;
@@ -239,7 +239,7 @@ namespace coil
      *
      * @endif
      */
-  int pthread_cond_wait(coil::pthread_cond_t *cv,
+  DWORD pthread_cond_wait(coil::pthread_cond_t *cv,
                         coil::Mutex *external_mutex, DWORD aMilliSecond)
   {
     DWORD result;
@@ -295,7 +295,7 @@ namespace coil
         // This call atomically signals the <waiters_done_> event and
         // waits until it can acquire the <external_mutex>.  This is
         // required to ensure fairness.
-        DWORD result = SignalObjectAndWait(cv->waiters_done_,
+        result = SignalObjectAndWait(cv->waiters_done_,
                                            external_mutex->mutex_,
                                            INFINITE, FALSE);
 //        std::cout << "result " << result << std::endl;

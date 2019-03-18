@@ -83,7 +83,7 @@ namespace coil
      *
      * @endif
      */
-    explicit TimeMeasure(int buflen = 100);
+    explicit TimeMeasure(unsigned long buflen = 100);
 
     /*!
      * @if jp

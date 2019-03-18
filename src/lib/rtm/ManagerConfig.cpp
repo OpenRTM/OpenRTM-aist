@@ -163,7 +163,7 @@ namespace RTC
                 std::cerr << "Configuration file: " << m_configFile;
                 std::cerr << " not found." << std::endl;
 #ifndef __QNX__
-                for (size_t i(0); i < static_cast<size_t>(argc); ++i)
+                for (int i(0); i < argc; ++i)
                   {
                     std::string tmp(argv[i]);
                     if (tmp == "-i") { ignoreNoConf = true; }
@@ -178,12 +178,12 @@ namespace RTC
               break;
           case 'o':
             {
-              std::string optarg(get_opts.optarg);
-              std::string::size_type pos(optarg.find(':'));
+              std::string opt_arg(get_opts.optarg);
+              std::string::size_type pos(opt_arg.find(':'));
               if (pos != std::string::npos)
                 {
-                  std::string key = optarg.substr(0, pos);
-                  std::string value = optarg.substr(pos + 1);
+                  std::string key = opt_arg.substr(0, pos);
+                  std::string value = opt_arg.substr(pos + 1);
 
                   key = coil::unescape(key);
                   coil::eraseHeadBlank(key);

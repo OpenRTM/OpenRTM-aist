@@ -315,8 +315,6 @@ namespace SDOPackage
            InvalidParameter, NotAvailable, InternalError)
   {
     RTC_TRACE(("set_members()"));
-    if (sdos.length() < 0)
-      throw InvalidParameter("set_members(): number of SDOList is invalid.");
     try
       {
         m_memberList = sdos;
@@ -341,7 +339,7 @@ namespace SDOPackage
            InvalidParameter, NotAvailable, InternalError)
   {
     RTC_TRACE(("add_members()"));
-    if (sdo_list.length() < 0)
+    if (sdo_list.length() == 0)
       throw InvalidParameter("set_members(): number of SDOList is invalid.");
     try
       {

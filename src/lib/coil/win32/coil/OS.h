@@ -55,13 +55,12 @@ namespace coil
       {
 
       }
+      osversion(const osversion& obj) : major(obj.major), minor(obj.minor)
+      {
+
+      }
       osversion(DWORD majar_version,DWORD minor_version) : major(majar_version), minor(minor_version)
       {
-      }
-      osversion(osversion &obj)
-      {
-          major = obj.major;
-          minor = obj.minor;
       }
       DWORD major;
       DWORD minor;
@@ -192,14 +191,14 @@ namespace coil
         oslist["Windows 8.1"] = osversion(6, 3);
         oslist["Windows 10"] = osversion(10, 0);
 
-        for (std::map<std::string, osversion>::iterator itr = oslist.begin(); itr != oslist.end(); ++itr)
+        for(auto & o : oslist)
         {
             // name.release, name.version
             OSVERSIONINFOEX version_info;
             ULONGLONG condition = 0;
             version_info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-            version_info.dwMajorVersion = itr->second.major;
-            version_info.dwMinorVersion = itr->second.minor;
+            version_info.dwMajorVersion = o.second.major;
+            version_info.dwMinorVersion = o.second.minor;
             VER_SET_CONDITION(condition, VER_MAJORVERSION, VER_EQUAL);
             VER_SET_CONDITION(condition, VER_MINORVERSION, VER_EQUAL);
 
@@ -492,8 +491,10 @@ namespace coil
         return(-1);
       }
     }                    /* option letter okay? */
-    if ((optopt = static_cast<int>(*place++)) == static_cast<int>(':') ||
-        !(oli = strchr(ostr, optopt))) {
+    optopt = static_cast<int>(*place++);
+    oli = strchr(ostr, optopt);
+    if (optopt == static_cast<int>(':') ||
+        oli == nullptr) {
       /*
        * if the user didn't specify '-' as an option,
        * assume it means -1 (EOF).
@@ -503,7 +504,8 @@ namespace coil
       if (!*place)
         ++optind;
       if (opterr && *ostr != ':') {
-        if (!(p = strrchr(*nargv, '/')))
+        p = strrchr(*nargv, '/');
+        if (p == nullptr)
           p = *nargv;
         else
           ++p;
@@ -527,7 +529,8 @@ namespace coil
         else if (nargc <= ++optind)
           {    /* no arg */
             place = EMSG;
-            if (!(p = strrchr(*nargv, '/')))
+            p = strrchr(*nargv, '/');
+            if (p == nullptr)
               {
                 p = *nargv;
               }
@@ -593,9 +596,8 @@ namespace coil
      * @endif
      */
     GetOpt(int argc, char* const argv[], const char* opt, int flag)
-      : m_argc(argc), m_argv(argv), m_opt(opt),
-        m_flag(flag), optind(1), opterr(1), optopt(0)
-
+      : optind(1), opterr(1), optopt(0),
+        m_argc(argc), m_argv(argv), m_opt(opt), m_flag(flag)
     {
       this->optarg = coil::optarg;
       coil::optind = 1;

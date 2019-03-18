@@ -541,7 +541,7 @@ namespace coil
      *
      *@endif
      */
-    std::string setProperty(const std::string& key, const std::string& value);
+    std::string setProperty(const std::string& key, const std::string& invalue);
 
     /*!
      * @if jp
@@ -566,7 +566,7 @@ namespace coil
      *
      * @endif
      */
-    std::string setDefault(const std::string& key, const std::string& value);
+    std::string setDefault(const std::string& key, const std::string& invalue);
 
     /*!
      * @if jp
@@ -933,7 +933,7 @@ namespace coil
      *
      * @endif
      */
-    Properties* const findNode(const std::string& key) const;
+    Properties* findNode(const std::string& key) const;
     /*!
      * @if jp
      * @brief ノードを取得する

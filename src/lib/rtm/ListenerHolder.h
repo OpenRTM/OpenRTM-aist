@@ -172,13 +172,12 @@ namespace util
     virtual ~ListenerHolder()
     {
       Guard guard(m_mutex);
-      EntryIterator it(m_listeners.begin());
 
-      for (; it != m_listeners.end(); ++it)
+      for(auto & listener : m_listeners)
         {
-          if ((*it).second)
+          if (listener.second)
             {
-              delete (*it).first;
+              delete listener.first;
             }
         }
       m_listeners.clear();

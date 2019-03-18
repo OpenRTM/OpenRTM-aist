@@ -41,7 +41,7 @@ extern "C"
    * @endif
    */
   DLL_EXPORT void ROS2TransportInit(RTC::Manager* manager);
-};
+}
 
 #endif // RTC_ROS2TRANSPORT_H
 

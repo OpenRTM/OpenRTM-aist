@@ -129,9 +129,8 @@ namespace RTM
     {
       RTC_TRACE(("reinit()"));
       RTC_DEBUG_STR((props));
-      bool ret(processServiceProfile(props));
       m_profile.properties << props;
-      return ret;
+      return true;
     }
     
     /*!
@@ -355,21 +354,6 @@ namespace RTM
     
     /*!
      * @if jp
-     * @brief プロパティの処理
-     * TODO: Documentation
-     * @else
-     * @brief Processing properties
-     * TODO: Documentation
-     * @endif
-     */
-    bool
-    FileNameservice::processServiceProfile(const ::coil::Properties&  /*prof*/)
-    {
-      return true;
-    }
-    
-    /*!
-     * @if jp
      * @brief コンストラクタ
      * @else
      * @brief Constructor
@@ -428,7 +412,7 @@ namespace RTM
      * @endif
      */
     void
-    NamingAction::postBind(RTC::RTObject_impl* rtobj, coil::vstring& name)
+    NamingAction::postBind(RTC::RTObject_impl* /*rtobj*/, coil::vstring& /*name*/)
     {
     }
     
@@ -442,7 +426,7 @@ namespace RTM
      * @endif
      */
     void
-    NamingAction::preUnbind(RTC::RTObject_impl* rtobj, coil::vstring& name)
+    NamingAction::preUnbind(RTC::RTObject_impl* /*rtobj*/, coil::vstring& /*name*/)
     {
     }
     

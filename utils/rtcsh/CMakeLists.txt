@@ -6,25 +6,16 @@ project (${target}
 
 
 link_directories(${ORB_LINK_DIR})
-include_directories(
-		${RTM_INCLUDE_DIR}
-		${ORB_INCLUDE_DIR}
-		)
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
 
 add_executable(${target} rtcsh.cpp)
-
-
-add_dependencies(${target} ${RTM_PROJECT_NAME})
-
+openrtm_common_set_compile_props(${target})
+openrtm_include_rtm(${target})
 
 set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME})
 
-
 target_link_libraries(${target} ${libs} ${RTM_LINKER_OPTION})
-
 
 if(VXWORKS)
 	if(RTP)

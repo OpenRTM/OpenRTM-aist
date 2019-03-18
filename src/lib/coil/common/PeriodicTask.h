@@ -266,7 +266,7 @@ namespace coil
      * @brief Task execute time measurement period
      * @endif
      */
-    void executionMeasureCount(int n) override;
+    void executionMeasureCount(unsigned int n) override;
 
     /*!
      * @if jp
@@ -284,7 +284,7 @@ namespace coil
      * @brief Task period time measurement count
      * @endif
      */
-    void periodicMeasureCount(int n) override;
+    void periodicMeasureCount(unsigned int n) override;
 
     /*!
      * @if jp

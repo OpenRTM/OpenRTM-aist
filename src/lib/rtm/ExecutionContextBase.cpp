@@ -780,7 +780,7 @@ namespace RTC
    * @brief Getting a reference of the owner component
    * @endif
    */
-  const RTC::RTObject_ptr ExecutionContextBase::getOwner() const
+  RTC::RTObject_ptr ExecutionContextBase::getOwner() const
   {
     return m_profile.getOwner();
   }

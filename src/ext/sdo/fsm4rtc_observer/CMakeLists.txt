@@ -1,61 +1,37 @@
 cmake_minimum_required (VERSION 3.0.2)
 
-project (ComponentObserverConsumer
+project (FSMComponentObserverConsumer
 	VERSION ${RTM_VERSION}
-	LANGUAGES CXX))
+	LANGUAGES CXX)
 
+set(${PROJECT_NAME}_IDLS ComponentObserver.idl)
+set(${PROJECT_NAME}_SRCS ComponentObserverConsumer.cpp)
 
-
-set(idl_name ComponentObserver)
-
-
-
-
-
-set(${idl_name}_RTC_DIR ${CMAKE_CURRENT_BINARY_DIR})
-set(${idl_name}_RTC_SKEL ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Skel.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Skel.h)
-set(${idl_name}_RTC_STUB ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Stub.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Stub.h)
-
-
-add_custom_command(
-		OUTPUT ${idl_name}Skel.cpp ${idl_name}Stub.cpp
-		COMMAND ${IDL_COMPILE_COMMAND} ${IDLCOMMAND_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR} -I${CMAKE_SOURCE_DIR}/src/lib/rtm/idl ${CMAKE_CURRENT_SOURCE_DIR}/${idl_name}.idl
-		COMMAND python -B ${SKELWRAPPER_COMMAND} --include-dir="" --skel-suffix=Skel --stub-suffix=Stub --idl-file=${idl_name}.idl
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
-add_custom_target(${idl_name}_RTC_TGT DEPENDS ${idl_name}Skel.cpp ${idl_name}Stub.cpp)
-
-
-
+openrtm_idl_compile_all(${PROJECT_NAME}
+	"${${PROJECT_NAME}_IDLS}"
+	"-I${CMAKE_CURRENT_SOURCE_DIR};-I${CMAKE_SOURCE_DIR}/src/lib/rtm/idl")
 
 link_directories(${ORB_LINK_DIR})
-include_directories(
-		${RTM_INCLUDE_DIR}
-		${ORB_INCLUDE_DIR}
-		${${idl_name}_RTC_DIR}
-		)
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
-
-
-set(target ComponentObserverConsumer)
-
-set(srcs ComponentObserverConsumer.cpp ComponentObserverConsumer.h ${${idl_name}_RTC_STUB})
-
 
 if(VXWORKS AND NOT RTP)
 	set(libs ${RTCSKEL_PROJECT_NAME})
 
-	add_executable(${target} ${srcs})
-	target_link_libraries(${target} ${libs})
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
-	add_dependencies(${target} ${idl_name}_RTC_TGT)
+	add_executable(${target} ${${PROJECT_NAME}_SRCS} ${${PROJECT_NAME}_IDLSTUB})
+	openrtm_common_set_compile_props(${PROJECT_NAME})
+	openrtm_include_rtm(${PROJECT_NAME})
+	target_include_directories(${PROJECT_NAME} SYSTEM
+		PUBLIC ${PROJECT_BINARY_DIR})
+	target_link_libraries(${PROJECT_NAME} ${libs})
+	add_dependencies(${PROJECT_NAME} ${RTM_PROJECT_NAME})
+	add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_IDLTGT)
 
-	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
+	install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				COMPONENT ext)
+
 else()
 	if(VXWORKS)
 		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTCSKEL_PROJECT_NAME})
@@ -63,32 +39,40 @@ else()
 		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME})
 	endif(VXWORKS)
 
+	add_library(${PROJECT_NAME}_objlib OBJECT ${${PROJECT_NAME}_SRCS})
+	openrtm_common_set_compile_props(${PROJECT_NAME}_objlib)
+	openrtm_include_rtm(${PROJECT_NAME}_objlib)
+	target_include_directories(${PROJECT_NAME}_objlib SYSTEM
+		PUBLIC ${PROJECT_BINARY_DIR})
+add_dependencies(${PROJECT_NAME}_objlib ${PROJECT_NAME}_IDLTGT)
 
-	add_library(${target} SHARED ${srcs})
-	target_link_libraries(${target} ${libs} ${RTM_LINKER_OPTION})
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
-	add_dependencies(${target} ${idl_name}_RTC_TGT)
-	set_target_properties(${target} PROPERTIES PREFIX "")
+	add_library(${PROJECT_NAME}_idl_objlib OBJECT ${${PROJECT_NAME}_IDLSTUB})
+	openrtm_gencode_set_compile_props(${PROJECT_NAME}_idl_objlib)
+	openrtm_include_rtm(${PROJECT_NAME}_idl_objlib)
+	target_include_directories(${PROJECT_NAME}_idl_objlib SYSTEM
+		PUBLIC ${PROJECT_BINARY_DIR})
+	add_dependencies(${PROJECT_NAME}_idl_objlib ${PROJECT_NAME}_IDLTGT)
 
+	add_library(${PROJECT_NAME} SHARED
+		$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
+		$<TARGET_OBJECTS:${PROJECT_NAME}_idl_objlib>)
+	target_link_libraries(${PROJECT_NAME} PRIVATE ${libs} ${RTM_LINKER_OPTION})
+	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		OUTPUT_NAME ComponentObserverConsumer
+		CLEAN_DIRECT_OUTPUT 1)
 
-	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
+	install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/sdo
 				COMPONENT ext)
 endif()
 
-
-set_source_files_properties(${${idl_name}_RTC_STUB} PROPERTIES GENERATED 1)
-
-
-
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ComponentObserverConsumer CLEAN_DIRECT_OUTPUT 1)
 
 if(VXWORKS)
 	if(RTP)
-	else(RTP)	
-		set_target_properties(${target} PROPERTIES SUFFIX ".out")
-	endif(RTP)
-endif(VXWORKS)
-
-
-
+	else()
+		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".out")
+	endif()
+endif()

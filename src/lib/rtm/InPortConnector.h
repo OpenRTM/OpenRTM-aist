@@ -356,7 +356,7 @@ namespace RTC
             return true;
         }
         return false;
-    };
+    }
 
   protected:
     /*!

@@ -67,7 +67,7 @@ namespace RTC
      *
      * @endif
      */
-    virtual ~LogstreamBase(){};
+    virtual ~LogstreamBase(){}
 
     /*!
      * @if jp

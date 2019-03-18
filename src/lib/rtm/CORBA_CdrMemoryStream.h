@@ -141,7 +141,7 @@ namespace RTC
                 return false;
             }
 #endif
-        };
+        }
 
         /*!
          * @if jp
@@ -197,7 +197,7 @@ namespace RTC
                 return false;
             }
 #endif
-        };
+        }
 
         /*!
          * @if jp
@@ -380,7 +380,7 @@ namespace RTC
             m_cdr = rhs.m_cdr;
             return *this;
 #endif
-        };
+        }
 
     protected:
 #ifdef ORB_IS_ORBEXPRESS
@@ -465,9 +465,9 @@ namespace RTC
          *
          * @endif
          */
-        void init(const coil::Properties& prop) override
+        void init(const coil::Properties& /*prop*/) override
         {
-        };
+        }
         /*!
          * @if jp
          * @brief 保持しているバッファにデータを書き込む
@@ -487,7 +487,7 @@ namespace RTC
         void writeData(const unsigned char* buffer, unsigned long length) override
         {
             m_cdr.writeCdrData(buffer, length);
-        };
+        }
 
         /*!
          * @if jp
@@ -508,7 +508,7 @@ namespace RTC
         void readData(unsigned char* buffer, unsigned long length) const override
         {
             m_cdr.readCdrData(buffer, length);
-        };
+        }
 
         /*!
          * @if jp
@@ -526,7 +526,7 @@ namespace RTC
         unsigned long getDataLength() const override
         {
             return m_cdr.getCdrDataLength();
-        };
+        }
 
         /*!
          * @if jp
@@ -546,7 +546,7 @@ namespace RTC
         bool serialize(const DataType& data) override
         {
             return m_cdr.serializeCDR(data);
-        };
+        }
 
         /*!
          * @if jp
@@ -564,7 +564,7 @@ namespace RTC
         bool deserialize(DataType& data) override
         {
             return m_cdr.deserializeCDR(data);
-        };
+        }
 
         /*!
          * @if jp
@@ -582,7 +582,7 @@ namespace RTC
         CORBA_CdrSerializer<DataType>(const CORBA_CdrSerializer<DataType> &rhs)
         {
             m_cdr = rhs.m_cdr;
-        };
+        }
 
         /*!
          * @if jp
@@ -603,7 +603,7 @@ namespace RTC
         {
             m_cdr = rhs.m_cdr;
             return *this;
-        };
+        }
 
         /*!
          * @if jp

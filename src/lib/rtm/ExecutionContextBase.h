@@ -371,14 +371,14 @@ namespace RTC
   public:
     /*!
      * @if jp
-     * @brief 仮想デストラクタ
+     * @brief コンストラクタ
      *
-     * 仮想デストラクタ
+     * コンストラクタ
      *
      * @else
-     * @brief Virtual Destructor
+     * @brief Constructor
      *
-     * Virtual Destructor
+     * Constructor
      *
      * @endif
      */
@@ -944,7 +944,7 @@ namespace RTC
      * @return a reference of the owner RT-Component
      * @endif
      */
-    const RTC::RTObject_ptr getOwner() const;
+    RTC::RTObject_ptr getOwner() const;
 
     /*!
      * @if jp
@@ -1036,19 +1036,19 @@ namespace RTC
     bool isAllCurrentState(RTC::LifeCycleState state)
     {
       return m_worker.isAllCurrentState(state);
-    };
+    }
     bool isAllNextState(RTC::LifeCycleState state)
     {
       return m_worker.isAllNextState(state);
-    };
+    }
     bool isOneOfCurrentState(RTC::LifeCycleState state)
     {
       return m_worker.isOneOfCurrentState(state);
-    };
+    }
     bool isOneOfNextState(RTC::LifeCycleState state)
     {
       return m_worker.isOneOfNextState(state);
-    };
+    }
 
     void invokeWorker()       { m_worker.invokeWorker(); }
     void invokeWorkerPreDo()  { m_worker.invokeWorkerPreDo(); }

@@ -73,7 +73,7 @@ namespace RTC
      *
      * @endif
      */
-    void ByteDataStreamBase::init(const coil::Properties& prop)
+    void ByteDataStreamBase::init(const coil::Properties& /*prop*/)
     {
 
     }
@@ -92,7 +92,7 @@ namespace RTC
      *
      * @endif
      */
-    void ByteDataStreamBase::isLittleEndian(bool little_endian)
+    void ByteDataStreamBase::isLittleEndian(bool /*little_endian*/)
     {
 
     }

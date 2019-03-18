@@ -66,7 +66,7 @@ namespace RTC
       }
 
       {
-        coil::sleep(1.0);
+        coil::sleep(coil::TimeValue(1.0));
         Guard guard(mutex);
       }
   }

@@ -486,11 +486,11 @@ namespace coil
 		}
 		do {
 			if (win32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				std::string filename = win32fd.cFileName;
-				if (filename != "." && filename != "..")
+				std::string name(win32fd.cFileName);
+				if (name != "." && name != "..")
 				{
 					std::string next_dir = dir + "\\" + win32fd.cFileName;
-					findFile(next_dir, filename, filelist);
+					findFile(next_dir, name, filelist);
 				}
 			}
 			else {

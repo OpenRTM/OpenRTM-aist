@@ -155,11 +155,9 @@ namespace RTC
    */
   void CorbaPort::activateInterfaces()
   {
-    CorbaProviderList::iterator it(m_providers.begin());
-    while (it != m_providers.end())
+    for(auto & provider : m_providers)
       {
-        it->activate();
-        ++it;
+        provider.activate();
       }
   }
 
@@ -172,11 +170,9 @@ namespace RTC
    */
   void CorbaPort::deactivateInterfaces()
   {
-    CorbaProviderList::iterator it(m_providers.begin());
-    while (it != m_providers.end())
+    for(auto & provider : m_providers)
       {
-        it->deactivate();
-        ++it;
+        provider.deactivate();
       }
   }
 
@@ -202,27 +198,25 @@ namespace RTC
       }
 
     NVList properties;
-    CorbaProviderList::iterator it(m_providers.begin());
-    while (it != m_providers.end())
+    for(auto & provider : m_providers)
       {
         //------------------------------------------------------------
         // new version descriptor
         // <comp_iname>.port.<port_name>.provided.<type_name>.<instance_name>
         std::string newdesc((const char*)m_profile.name);
         newdesc.insert(m_ownerInstanceName.size(), ".port");
-        newdesc += ".provided." + it->descriptor();
+        newdesc += ".provided." + provider.descriptor();
         CORBA_SeqUtil::
           push_back(properties,
-                    NVUtil::newNV(newdesc.c_str(), it->ior().c_str()));
+                    NVUtil::newNV(newdesc.c_str(), provider.ior().c_str()));
 
         //------------------------------------------------------------
         // old version descriptor
         // port.<type_name>.<instance_name>
-        std::string olddesc = "port." + it->descriptor();
+        std::string olddesc = "port." + provider.descriptor();
         CORBA_SeqUtil::
           push_back(properties,
-                    NVUtil::newNV(olddesc.c_str(), it->ior().c_str()));
-        ++it;
+                    NVUtil::newNV(olddesc.c_str(), provider.ior().c_str()));
       }
 
 #ifdef ORB_IS_RTORB

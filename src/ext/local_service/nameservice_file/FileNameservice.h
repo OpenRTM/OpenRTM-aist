@@ -200,17 +200,6 @@ namespace RTM
        */
       void cleanupFiles();
       
-      /*!
-       * @if jp
-       * @brief プロパティの処理
-       * TODO: Documentation
-       * @else
-       * @brief Processing properties
-       * TODO: Documentation
-       * @endif
-       */
-      bool processServiceProfile(const ::coil::Properties& props);
-      
     private:
       RTM::LocalServiceProfile m_profile;
       coil::vstring m_files;

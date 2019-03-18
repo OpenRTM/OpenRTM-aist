@@ -2282,7 +2282,7 @@ namespace RTC
       explicit OrbRunner(CORBA::ORB_ptr orb) : m_pORB(orb)
       {
         open(nullptr);
-      };
+      }
 
       /*!
        * @if jp
@@ -2415,8 +2415,8 @@ namespace RTC
        *
        * @endif
        */
-      explicit Terminator(Manager* manager, double waittime = 0)
-                : m_manager(manager), m_waittime(waittime) {};
+      explicit Terminator(Manager* mgr, double waittime = 0)
+                : m_manager(mgr), m_waittime(waittime) {}
 
       /*!
        * @if jp

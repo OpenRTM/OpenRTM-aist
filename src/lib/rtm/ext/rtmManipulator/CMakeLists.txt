@@ -1,166 +1,90 @@
 cmake_minimum_required (VERSION 3.0.2)
 
-
-
-
 if(WIN32)
 	set(target rtmManipulator${RTM_SHORT_VERSION}_${RTM_VC_VER})
-else(WIN32)
+else()
 	set(target rtmManipulator)
-endif(WIN32)
+endif()
 
 project (${target}
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)
 
+set(${PROJECT_NAME}_IDLS
+	ManipulatorCommonInterface_Common.idl
+	ManipulatorCommonInterface_DataTypes.idl
+	ManipulatorCommonInterface_Middle.idl)
 
-
-macro(idl_compile idl_name)
-
-	set(ALL_IDL_FILES ${ALL_IDL_FILES} ../${idl_name}.idl)
-	add_custom_command(
-		OUTPUT ${idl_name}Skel.cpp
-		COMMAND ${IDL_COMPILE_COMMAND} ${IDLCOMMAND_FLAGS} -I${PROJECT_SOURCE_DIR}/.. -I${PROJECT_SOURCE_DIR}/../../idl ${PROJECT_SOURCE_DIR}/../${idl_name}.idl
-		COMMAND python -B ${SKELWRAPPER_COMMAND} --include-dir="" --skel-suffix=Skel --stub-suffix=Stub --idl-file=${idl_name}.idl
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	)
-	
-
-	add_custom_target(${idl_name}_TGT DEPENDS ${idl_name}Skel.cpp)
-	set(ALL_IDL_SRCS ${ALL_IDL_SRCS} ${idl_name}Skel.cpp)
-	set(ALL_IDL_SRCS ${ALL_IDL_SRCS} ${idl_name}Skel.h)
-
-	set(ALL_IDL_HEADERS ${ALL_IDL_HEADERS} ${PROJECT_BINARY_DIR}/${idl_name}Skel.h)
-	set(ALL_IDL_HEADERS ${ALL_IDL_HEADERS} ${PROJECT_BINARY_DIR}/${idl_name}Stub.h)
-
-	if(NOT TARGET ALL_IDL_TGT)
-		add_custom_target(ALL_IDL_TGT)
-	endif(NOT TARGET ALL_IDL_TGT)
-	add_dependencies(ALL_IDL_TGT ${idl_name}_TGT)
-endmacro()
-
-
-
-set(idls
-	ManipulatorCommonInterface_Common
-	ManipulatorCommonInterface_DataTypes
-	ManipulatorCommonInterface_Middle
-	)
-
-
-
-
-foreach(idl ${idls})
-	idl_compile(${idl})
-endforeach(idl)
-
-
+openrtm_idl_compile_all(${PROJECT_NAME}
+	"${${PROJECT_NAME}_IDLS}"
+	"-I${PROJECT_SOURCE_DIR}/..;-I${PROJECT_SOURCE_DIR}/../../idl")
 
 link_directories(${ORB_LINK_DIR})
-include_directories(
-		${ORB_INCLUDE_DIR}
-		${PROJECT_BINARY_DIR}
-		)
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
 
-
-
-set_source_files_properties(${ALL_IDL_SRCS} PROPERTIES GENERATED 1)
-
-
-
-
-
 if(VXWORKS)
-	add_library(${target} SHARED ${ALL_IDL_SRCS})
-	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_BIN_DIR}
+	add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_IDLSKEL})
+	openrtm_common_set_compile_props(${PROJECT_NAME})
+	openrtm_include_rtm(${PROJECT_NAME})
+	target_include_directories(${PROJECT_NAME} SYSTEM
+		PUBLIC ${PROJECT_BINARY_DIR})
+	install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_BIN_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_BIN_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 						COMPONENT ext)
-else(VXWORKS)
-	add_library(${target}_objlib OBJECT ${ALL_IDL_SRCS})
-	set_property(TARGET ${target}_objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
-	add_dependencies(${target}_objlib ${RTCSKEL_PROJECT_NAME})
+else()
+	add_library(${PROJECT_NAME}_objlib OBJECT ${${PROJECT_NAME}_IDLSKEL})
+	openrtm_gencode_set_compile_props(${PROJECT_NAME}_objlib)
+	openrtm_include_rtm(${PROJECT_NAME}_objlib)
+	target_include_directories(${PROJECT_NAME}_objlib SYSTEM
+		PUBLIC ${PROJECT_BINARY_DIR})
 
-	add_library(${target}-static STATIC $<TARGET_OBJECTS:${target}_objlib>)
-	add_dependencies(${target}-static ${RTCSKEL_PROJECT_NAME})
-	add_dependencies(${target}-static ${target}_objlib)
+	add_library(${PROJECT_NAME}-static STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objlib>)
 
 	if(WIN32)
-		set(DEF_FILE_NAME  ${target}.def)
-		set_source_files_properties(${ALL_IDL_SRCS_RTM} PROPERTIES GENERATED 1)
-
-		add_custom_command(TARGET ${target}-static 
+		set(DEF_FILE_NAME  ${PROJECT_NAME}.def)
+		add_custom_command(TARGET ${PROJECT_NAME}-static
 			POST_BUILD
-			COMMAND python -B ${MAKE_DEF_COMMAND} $<TARGET_FILE:${target}-static> ${target} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}
+			COMMAND python -B ${MAKE_DEF_COMMAND} $<TARGET_FILE:${PROJECT_NAME}-static> ${PROJECT_NAME} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
-	endif(WIN32)
+	endif()
 
-	add_library(${target} SHARED $<TARGET_OBJECTS:${target}_objlib> ${CMAKE_CURRENT_BINARY_DIR}/${DEF_FILE_NAME})
-	set_target_properties(${target} PROPERTIES DEBUG_POSTFIX d)
-	target_link_libraries(${target} ${ORB_LIBRARIES} ${RTCSKEL_PROJECT_NAME})
-	add_dependencies(${target} ${target}_objlib)
+	add_library(${PROJECT_NAME} SHARED
+		$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
+		${CMAKE_CURRENT_BINARY_DIR}/${DEF_FILE_NAME})
+	set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
+	target_link_libraries(${PROJECT_NAME} PRIVATE ${ORB_LIBRARIES} ${RTCSKEL_PROJECT_NAME})
 
 	if(UNIX)
-		install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 						COMPONENT ext)
 
-		set_target_properties(${target}-static PROPERTIES DEBUG_POSTFIX d)
-		set_target_properties(${target}-static PROPERTIES OUTPUT_NAME ${target} CLEAN_DIRECT_OUTPUT 1)
-		install(TARGETS ${target}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		set_target_properties(${PROJECT_NAME}-static PROPERTIES DEBUG_POSTFIX d)
+		set_target_properties(${PROJECT_NAME}-static PROPERTIES OUTPUT_NAME ${PROJECT_NAME} CLEAN_DIRECT_OUTPUT 1)
+		install(TARGETS ${PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 						COMPONENT ext)
 	elseif(WIN32)
 		set_source_files_properties(${DEF_FILE_NAME} PROPERTIES GENERATED 1)
-		add_dependencies(${target} ${target}-static)
-		install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-static)
+		install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
 						COMPONENT ext)
 
-		install(TARGETS ${target}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		install(TARGETS ${PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
 						COMPONENT ext)
 	endif()
-endif(VXWORKS)
+  endif()
 
-
-
-
-
-
-
-if(NOT TARGET ALL_IDL_TGT)
-  add_custom_target(ALL_IDL_TGT)
-
-endif(NOT TARGET ALL_IDL_TGT)
-add_dependencies(${target} ALL_IDL_TGT)
-add_dependencies(${target} ${RTCSKEL_PROJECT_NAME})
-
-
-
-
-install(FILES ${ALL_IDL_FILES} ${ALL_IDL_HEADERS} DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext COMPONENT ext)
- 
-
-
-foreach(idl ${idls})
-	if(CORBA STREQUAL "ORBexpress")
-		set(SKEL_STUB_HEADER_FILES ${SKEL_STUB_HEADER_FILES} ${PROJECT_BINARY_DIR}/${idl}.h ${PROJECT_BINARY_DIR}/${idl}_c.h)
-		set(SKEL_STUB_SOURCE_FILES ${SKEL_STUB_SOURCE_FILES} ${PROJECT_BINARY_DIR}/${idl}.cc ${PROJECT_BINARY_DIR}/${idl}_c.cc)
-	elseif(CORBA STREQUAL "omniORB")
-		set(SKEL_STUB_HEADER_FILES ${SKEL_STUB_HEADER_FILES} ${PROJECT_BINARY_DIR}/${idl}.hh)
-		set(SKEL_STUB_SOURCE_FILES ${SKEL_STUB_SOURCE_FILES} ${PROJECT_BINARY_DIR}/${idl}SK.cc ${PROJECT_BINARY_DIR}/${idl}DynSK.cc)
-	elseif(CORBA STREQUAL "TAO")
-		set(SKEL_STUB_HEADER_FILES ${SKEL_STUB_HEADER_FILES} ${PROJECT_BINARY_DIR}/${idl}S.h ${PROJECT_BINARY_DIR}/${idl}C.h ${PROJECT_BINARY_DIR}/${idl}C.inl)
-		set(SKEL_STUB_SOURCE_FILES ${SKEL_STUB_SOURCE_FILES} ${PROJECT_BINARY_DIR}/${idl}S.cpp ${PROJECT_BINARY_DIR}/${idl}C.cpp)
-	endif()
-endforeach(idl)
-
-install(FILES ${SKEL_STUB_HEADER_FILES} DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext COMPONENT ext)
+install(FILES ${${PROJECT_NAME}_IDLS} DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext COMPONENT ext)
+foreach(hdr ${${PROJECT_NAME}_IDLHDR})
+	install(FILES "${PROJECT_BINARY_DIR}/${hdr}" DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext COMPONENT ext)
+endforeach()

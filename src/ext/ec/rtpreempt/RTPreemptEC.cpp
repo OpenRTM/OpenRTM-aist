@@ -29,7 +29,7 @@
 #include <coil/TimeValue.h>
 
 #include <rtm/RTObjectStateMachine.h>
-#include <RTPreemptEC.h>
+#include "RTPreemptEC.h"
 
 #define MAX_SAFE_STACK (8*1024)
 #define NSEC_PER_SEC 1000000000

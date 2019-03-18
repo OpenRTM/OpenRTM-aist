@@ -194,7 +194,7 @@ namespace RTC
     virtual ~CorbaConsumerBase()
     {
       releaseObject();
-    };
+    }
 
     /*!
      * @if jp
@@ -430,7 +430,7 @@ namespace RTC
     ~CorbaConsumer() override
     {
       releaseObject();
-    };
+    }
 
     /*!
      * @if jp

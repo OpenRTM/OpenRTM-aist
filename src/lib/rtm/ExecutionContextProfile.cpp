@@ -247,7 +247,7 @@ namespace RTC_impl
    * @brief Getting a reference of the owner component
    * @endif
    */
-  const RTC::RTObject_ptr ExecutionContextProfile::getOwner() const
+  RTC::RTObject_ptr ExecutionContextProfile::getOwner() const
   {
     RTC_TRACE(("getOwner()"));
     Guard guard(m_profileMutex);

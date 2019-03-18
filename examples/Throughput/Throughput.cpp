@@ -246,16 +246,16 @@ RTC::ReturnCode_t Throughput::onExecute(RTC::UniqueId ec_id)
       std::cout << "\tlogmulcnt%3: " << m_logmulcnt % 3;
       std::cout << "\tlogmul[]: " << logmul[m_logmulcnt % 3] << std::endl;
 #endif // DEBUG
-      m_datasize *= static_cast<long>(logmul[m_logmulcnt % 3]);
+      m_datasize *= static_cast<unsigned long>(logmul[m_logmulcnt % 3]);
       m_logmulcnt++;
     }
   else if (m_mode == "incr")
     {
-      m_datasize += m_increment;
+      m_datasize += static_cast<unsigned long>(m_increment);
     }
   else
     {
-      if(static_cast<long>(m_sendcount) > m_maxsend)
+      if(static_cast<unsigned long>(m_sendcount) > m_maxsend)
         {
           exit();
           return RTC::RTC_OK;
@@ -473,7 +473,7 @@ void Throughput::receiveData(const RTC::Time &tm, const CORBA::ULong seq_length)
   m_record[record_ptr] = received_time - send_time;
   size = seq_length;
   record_ptr++; record_num++;
-  if (static_cast<long>(record_ptr) == m_maxsample) { record_ptr = 0; }
+  if (static_cast<unsigned long>(record_ptr) == m_maxsample) { record_ptr = 0; }
   return;
 }
 

@@ -146,6 +146,7 @@ namespace coil
     }
 #endif
     m_name = dll_name;
+    m_closeflag = close_handle_on_destruction;
     return 0;
   }
 

@@ -48,22 +48,6 @@ namespace RTC
   class DirectInPortBase : public DirectPortBase
   {
   public:
-	  /*!
-	  * @if jp
-	  * @brief コンストラクタ
-	  *
-	  * @param value
-	  *
-	  * @else
-	  * @brief Constructor
-	  *
-	  * @param value
-	  *
-	  * @endif
-	  */
-    DirectInPortBase(DataType& value)
-    {
-    }
     
 	/*!
 	* @if jp
@@ -76,7 +60,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-    ~DirectInPortBase() override{};
+    ~DirectInPortBase() override{}
 
 
 
@@ -105,10 +89,7 @@ namespace RTC
      * 
      * @endif
      */
-    virtual bool isNew()
-    {
-		return false;
-    }
+    virtual bool isNew() = 0;
 
     /*!
      * @if jp
@@ -133,10 +114,7 @@ namespace RTC
      * 
      * @endif
      */
-    virtual bool isEmpty()
-    {
-		return true;
-    }
+    virtual bool isEmpty() = 0;
 
 	/*!
 	* @if jp
@@ -151,9 +129,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-    virtual void write(const DataType& data)
-    {
-    }
+    virtual void write(DataType& data) = 0;
 
 
   protected:

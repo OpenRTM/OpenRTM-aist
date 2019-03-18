@@ -141,7 +141,6 @@ namespace RTC
 #else
       : OutPortBase(name, ::CORBA_Util::toRepositoryId<DataType>()),
 #endif
-	  DirectOutPortBase<DataType>(value),
 	  m_value(value), m_onWrite(nullptr), m_onWriteConvert(nullptr),
 	  m_directNewData(false), m_directValue(value)
     {
@@ -231,7 +230,7 @@ namespace RTC
       bool result(true);
       std::vector<const char *> disconnect_ids;
       {
-        Guard guard(m_connectorsMutex);
+        Guard con_guard(m_connectorsMutex);
         // check number of connectors
         size_t conn_size(m_connectors.size());
         if (!(conn_size > 0)) { return false; }
@@ -258,7 +257,7 @@ namespace RTC
               }
             else
               {
-                Guard guard(m_valueMutex);
+                Guard value_guard(m_valueMutex);
                 if (m_onWriteConvert != nullptr)
                   {
                     RTC_DEBUG(("m_connectors.OnWriteConvert called"));

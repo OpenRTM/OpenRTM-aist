@@ -200,8 +200,8 @@ namespace coil
     FD_ZERO(&mask);
     FD_SET(ssoc, &mask);
 
-    tv.tv_sec = usec / 1000000;
-    tv.tv_usec = usec % 1000000;
+    tv.tv_sec = static_cast<long>(usec) / 1000000;
+    tv.tv_usec = static_cast<long>(usec) % 1000000;
     iret = ::select(static_cast<int>(ssoc+1), &mask, NULL, NULL, &tv);
     if ( iret == SOCKET_ERROR )
       {
@@ -254,7 +254,7 @@ namespace coil
       {
 	      ::GetSystemTimeAsFileTime(&ftime);
 	      lint.LowPart = ftime.dwLowDateTime;
-	      lint.HighPart = ftime.dwHighDateTime;
+	      lint.HighPart = static_cast<LONG>(ftime.dwHighDateTime);
 	      val64 = lint.QuadPart;
 	      val64 = val64 - EPOCHFILETIME;
 	      val64 = val64 / 10;
@@ -345,8 +345,8 @@ namespace coil
         val64 = (tv->tv_sec + bias * 60) * 1000000;
         val64 = val64 + tv->tv_usec;
         lint.QuadPart = val64;
-        ftime.dwHighDateTime = lint.LowPart;
-        ftime.dwHighDateTime = lint.HighPart;
+        ftime.dwHighDateTime = static_cast<DWORD>(lint.LowPart);
+        ftime.dwHighDateTime = static_cast<DWORD>(lint.HighPart);
         ::FileTimeToSystemTime(&ftime, &systime);
         ::SetSystemTime(&systime);
       }

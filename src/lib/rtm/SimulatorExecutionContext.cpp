@@ -95,7 +95,7 @@ namespace RTC
 	}
 	m_syncActivation = false;
 
-	RTC::ReturnCode_t ret = ExecutionContextBase::activateComponent(comp);
+	ExecutionContextBase::activateComponent(comp);
 	invokeWorkerPreDo();
 	if ((rtobj->isCurrentState(RTC::ACTIVE_STATE)))
 	{
@@ -145,7 +145,7 @@ namespace RTC
 		  return RTC::PRECONDITION_NOT_MET;
 	}
 	m_syncDeactivation = false;
-	RTC::ReturnCode_t ret = ExecutionContextBase::deactivateComponent(comp);
+	ExecutionContextBase::deactivateComponent(comp);
 	invokeWorkerPreDo();
 	invokeWorkerDo();
 	invokeWorkerPostDo();
@@ -198,7 +198,7 @@ namespace RTC
 		return RTC::PRECONDITION_NOT_MET;
 	}
 	m_syncReset = false;
-	RTC::ReturnCode_t ret = ExecutionContextBase::resetComponent(comp);
+	ExecutionContextBase::resetComponent(comp);
 	invokeWorkerPreDo();
 	invokeWorkerDo();
 	invokeWorkerPostDo();

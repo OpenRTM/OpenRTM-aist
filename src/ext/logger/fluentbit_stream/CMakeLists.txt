@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.0.2)
 
 project (FluentBit
 	VERSION ${RTM_VERSION}
-	LANGUAGES CXX))
+	LANGUAGES CXX)
 
 
 
@@ -19,22 +19,6 @@ if(NOT FLUENTBIT_WORKDIR)
 	message(FATAL_ERROR "Please set FLUENTBIT_WORKDIR.")
 endif()
 
-
-
-
-
-include_directories(${FLUENTBIT_ROOT}/include)
-include_directories(${FLUENTBIT_ROOT}/lib/monkey/include)
-include_directories(${FLUENTBIT_ROOT}/lib/mbedtls-2.14.1/include)
-include_directories(${FLUENTBIT_ROOT}/lib/msgpack-3.1.1/include)
-include_directories(${FLUENTBIT_ROOT}/lib/flb_libco)
-include_directories(${FLUENTBIT_ROOT}/lib/jemalloc-5.1.0/include)
-include_directories(${FLUENTBIT_ROOT}/lib/jsmn)
-include_directories(${FLUENTBIT_ROOT}/lib/onigmo)
-include_directories(${FLUENTBIT_ROOT}/lib/sha1)
-include_directories(${FLUENTBIT_ROOT}/lib/sqlite-amalgamation-3400000)
-
-
 link_directories(${FLUENTBIT_WORKDIR}/lib)
 
 
@@ -42,13 +26,9 @@ link_directories(${FLUENTBIT_WORKDIR}/lib)
 
 
 link_directories(${ORB_LINK_DIR})
-include_directories(
-		${RTM_INCLUDE_DIR}
-		${ORB_INCLUDE_DIR}
-		)
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
+add_definitions(-Dtypeof=decltype)
 
 
 set(target FluentBit)
@@ -60,8 +40,8 @@ if(VXWORKS AND NOT RTP)
 	set(libs ${RTCSKEL_PROJECT_NAME})
 
 	add_executable(${target} ${srcs})
+	openrtm_common_set_compile_props(${target})
 	target_link_libraries(${target} ${libs} fluent-bit)
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
 
 	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/logger
 				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/logger
@@ -74,10 +54,21 @@ else()
 		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME})
 	endif(VXWORKS)
 
-
 	add_library(${target} SHARED ${srcs})
-	target_link_libraries(${target} ${libs} ${RTM_LINKER_OPTION} fluent-bit)
-	add_dependencies(${target} ${RTM_PROJECT_NAME})
+	openrtm_common_set_compile_props(${target})
+	openrtm_include_rtm(${target})
+	target_include_directories(SYSTEM
+	PRIVATE ${FLUENTBIT_ROOT}/include
+	PRIVATE ${FLUENTBIT_ROOT}/lib/monkey/include
+	PRIVATE ${FLUENTBIT_ROOT}/lib/mbedtls-2.14.1/include
+	PRIVATE ${FLUENTBIT_ROOT}/lib/msgpack-3.1.1/include
+	PRIVATE ${FLUENTBIT_ROOT}/lib/flb_libco
+	PRIVATE ${FLUENTBIT_ROOT}/lib/jemalloc-5.1.0/include
+	PRIVATE ${FLUENTBIT_ROOT}/lib/jsmn
+	PRIVATE ${FLUENTBIT_ROOT}/lib/onigmo
+	PRIVATE ${FLUENTBIT_ROOT}/lib/sha1
+	PRIVATE ${FLUENTBIT_ROOT}/lib/sqlite-amalgamation-3400000)
+	target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} fluent-bit)
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
 

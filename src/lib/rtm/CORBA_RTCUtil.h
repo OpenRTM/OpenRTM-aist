@@ -836,7 +836,7 @@ namespace CORBA_RTCUtil
      * @param name
      * @endif
      */
-    find_port(const std::string name) : m_name(name) {};
+    find_port(const std::string name) : m_name(name) {}
     /*!
      * @if jp
      * @brief 対象のポートの名前と指定したポート名が一致するか判定

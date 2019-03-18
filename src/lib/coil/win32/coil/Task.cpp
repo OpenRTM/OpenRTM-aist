@@ -52,7 +52,7 @@ namespace coil
    * @brief Task open
    * @endif
    */
-  int Task::open(void* args)
+  int Task::open(void* /*args*/)
   {
     return 0;
   }
@@ -64,7 +64,7 @@ namespace coil
    * @brief Task close
    * @endif
    */
-  int Task::close(unsigned long flags)
+  int Task::close(unsigned long /*flags*/)
   {
     return 0;
   }
@@ -115,6 +115,14 @@ namespace coil
     if (m_count > 0)
       {
         DWORD retval = ::WaitForSingleObject(m_thread, INFINITE);
+        if (retval == WAIT_OBJECT_0)
+          {
+            return 0;
+          }
+        else
+          {
+            return -1;
+          }
       }
     return 0;
   }

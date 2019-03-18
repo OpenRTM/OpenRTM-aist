@@ -606,7 +606,7 @@ namespace coil
     std::stringstream str_stream;
     str_stream << n;
     return str_stream.str();
-  };
+  }
 
   /*!
    * @if jp
@@ -727,7 +727,7 @@ namespace coil
     ss << reinterpret_cast<uintptr_t>(n);
     return ss.str();
 #endif
-  };
+  }
 
   /*!
    * @if jp

@@ -50,7 +50,7 @@ namespace RTC
   {
   }
 
-  void InPortDirectProvider::init(coil::Properties& prop)
+  void InPortDirectProvider::init(coil::Properties& /*prop*/)
   {
   }
 

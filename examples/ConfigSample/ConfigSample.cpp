@@ -134,8 +134,8 @@ RTC::ReturnCode_t ConfigSample::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ConfigSample::onExecute(RTC::UniqueId  /*ec_id*/)
 {
-  static int  maxlen(0);
-  int curlen(0);
+  static size_t maxlen(0);
+  size_t curlen(0);
   const char* c = "                    ";
   {
       std::cout << "---------------------------------------" << std::endl;
@@ -156,16 +156,16 @@ RTC::ReturnCode_t ConfigSample::onExecute(RTC::UniqueId  /*ec_id*/)
 	  }
       std::cout << "---------------------------------------" << std::endl;
 
-      curlen = static_cast<int>(m_vector_param0.size());
+      curlen = m_vector_param0.size();
       maxlen = maxlen > curlen ? maxlen : curlen;
-      for (int i(0), len(maxlen - curlen); i < len; ++i)
+      for (size_t i(0), len(maxlen - curlen); i < len; ++i)
 	  {
 	      std::cout << c << c << std::endl;
 	  }
 
       std::cout << "Updating.... " << ticktack() << c << std::endl;
 
-      for (int i(0), len(11 + maxlen); i < len; ++i)
+      for (size_t i(0), len(11 + maxlen); i < len; ++i)
 	  {
 	    std::cout << "[A\r";
 	  }

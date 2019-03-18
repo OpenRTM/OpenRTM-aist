@@ -361,13 +361,13 @@ namespace RTM
         size_t pos0 = module_name.find("&" + param_name + "=");
         size_t pos1 = module_name.find("?" + param_name + "=");
 
-        if (pos0 == -1 && pos1 == -1)
+        if (pos0 == std::string::npos && pos1 == std::string::npos)
           {
             return "";
           }
 
         size_t pos = 0;
-        if (pos0 == -1)
+        if (pos0 == std::string::npos)
           {
             pos = pos1;
           }
@@ -380,11 +380,11 @@ namespace RTM
         size_t endpos = module_name.find('&', pos + 1);
 
 
-        if (endpos == -1)
+        if (endpos == std::string::npos)
           {
             endpos = module_name.find('?', pos + 1);
 
-            if (endpos == -1)
+            if (endpos == std::string::npos)
               {
                 paramstr = module_name.substr((pos + 1));
                 
@@ -407,7 +407,7 @@ namespace RTM
 
         RTC_DEBUG(("%s is %s", param_name.c_str(), paramstr.c_str()));
 
-        if (endpos == -1)
+        if (endpos == std::string::npos)
           {
             module_name = module_name.substr(0, pos);
           }
@@ -475,15 +475,14 @@ namespace RTM
                   {
                     RTM::NVList* prof = m_slaves[i]->get_configuration();
                     coil::Properties prop;
-                    RTC::RTObject_var rtobj;
                     NVUtil::copyToProperties(prop, (*prof));
                     std::string slave_lang = prop["manager.language"];
 
                     if (slave_lang == comp_param.language())
                       {
-                        rtobj = m_slaves[i]->create_component(create_arg.c_str());
+                        RTC::RTObject_var comp = m_slaves[i]->create_component(create_arg.c_str());
                         RTC_DEBUG(("Component created %s", create_arg.c_str()));
-                        if (!CORBA::is_nil(rtobj)) { return rtobj._retn(); }
+                        if (!CORBA::is_nil(comp)) { return comp._retn(); }
                       }
 
 
@@ -1236,10 +1235,10 @@ namespace RTM
   {
     RTC_TRACE(("createComponentByManagerName(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
-    for (coil::mapstring::iterator it(param.begin()); it != param.end(); ++it)
+    for(auto & p : param)
       {
         RTC_DEBUG(("create_arg[%s] = %s",
-                   it->first.c_str(), it->second.c_str()));
+                   p.first.c_str(), p.second.c_str()));
       }
 
     std::string mgrstr = param["manager_name"];
@@ -1292,9 +1291,9 @@ namespace RTM
                 try
                   {
                     RTM::NVList_var nvlist = m_slaves[i]->get_configuration();
-                    coil::Properties prop;
-                    NVUtil::copyToProperties(prop, nvlist);
-                    std::string name = prop["manager.instance_name"];
+                    coil::Properties sleave_prop;
+                    NVUtil::copyToProperties(sleave_prop, nvlist);
+                    std::string name = sleave_prop["manager.instance_name"];
                     if (isProcessIDManager(name))
                       {
                         slaves_names.push_back(name);
@@ -1327,9 +1326,9 @@ namespace RTM
                 for (CORBA::ULong j(0); j < m_slaves.length(); ++j)
                   {
                     RTM::NVList_var nvlist = m_slaves[j]->get_configuration();
-                    coil::Properties prop; 
-                    NVUtil::copyToProperties(prop, nvlist);
-                    std::string name = prop["manager.instance_name"];
+                    coil::Properties sleave_prop;
+                    NVUtil::copyToProperties(sleave_prop, nvlist);
+                    std::string name = sleave_prop["manager.instance_name"];
 
                     if (isProcessIDManager(name))
                       {
@@ -1393,10 +1392,10 @@ namespace RTM
   {
     RTC_TRACE(("createComponentByAddress(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
-    for (coil::mapstring::iterator it(param.begin()); it != param.end(); ++it)
+    for(auto & p : param)
       {
         RTC_DEBUG(("create_arg[%s] = %s",
-                   it->first.c_str(), it->second.c_str()));
+                   p.first.c_str(), p.second.c_str()));
       }
 
     std::string mgrstr = param["manager_address"];
@@ -1556,13 +1555,11 @@ namespace RTM
   bool ManagerServant::isProcessIDManager(std::string mgrname)
     {
       size_t pos = mgrname.find("manager_");
-      if (pos != -1)
+      if (pos != std::string::npos)
         {
           std::string id = mgrname;
           coil::replaceString(id, "manager_", "");
-           
-          bool ret = true;
-
+          
           int val = 0;
           if (coil::stringTo<int>(val, id.c_str()))
             {

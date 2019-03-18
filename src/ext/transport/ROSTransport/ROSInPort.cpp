@@ -68,8 +68,9 @@ namespace RTC
   {
     RTC_PARANOID(("~ROSInPort()"));
 
-    for(std::map<std::string, ros::ConnectionPtr>::iterator itr = m_tcp_connecters.begin(); itr != m_tcp_connecters.end(); ++itr) {
-      itr->second->drop(ros::Connection::Destructing);
+    for(auto & con : m_tcp_connecters)
+    {
+      con.second->drop(ros::Connection::Destructing);
     }
 
     RosTopicManager& topicmgr = RosTopicManager::instance();

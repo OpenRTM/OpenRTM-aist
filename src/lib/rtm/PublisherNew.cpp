@@ -532,7 +532,6 @@ namespace RTC
         // no callback
         return DataPortStatus::PORT_ERROR;
       }
-    return DataPortStatus::PORT_ERROR;
   }
 
   /*!

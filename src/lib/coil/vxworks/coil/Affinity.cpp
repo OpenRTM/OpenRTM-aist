@@ -84,10 +84,10 @@ namespace coil
   {
     coil::vstring tmp = coil::split(cpu_mask, ",", true);
     CpuMask mask;
-    for (size_t i(0); i < tmp.size(); ++i)
+    for(auto & m: tmp)
       {
         int num;
-        if (coil::stringTo(num, tmp[i].c_str()))
+        if (coil::stringTo(num, m.c_str()))
           {
             mask.push_back(num);
           }

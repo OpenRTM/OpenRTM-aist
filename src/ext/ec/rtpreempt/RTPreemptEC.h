@@ -780,7 +780,7 @@ namespace RTC_exp
      */
     struct WorkerThreadCtrl
     {
-      WorkerThreadCtrl() : cond_(mutex_), running_(false) {};
+      WorkerThreadCtrl() : cond_(mutex_), running_(false) {}
       coil::Mutex mutex_;
       coil::Condition<coil::Mutex> cond_;
       bool running_;

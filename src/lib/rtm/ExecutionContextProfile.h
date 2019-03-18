@@ -303,7 +303,7 @@ namespace RTC_impl
      * @return a reference of the owner RT-Component
      * @endif
      */
-    const RTC::RTObject_ptr getOwner() const;
+    RTC::RTObject_ptr getOwner() const;
 
     /*!
      * @if jp

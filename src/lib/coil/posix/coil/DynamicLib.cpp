@@ -107,7 +107,7 @@ namespace coil
    */
   int DynamicLib::open(const char* dll_name,
                    int open_mode,
-                   int  /*close_handle_on_destruction*/)
+                   int  close_handle_on_destruction)
   {
     void* handle = ::dlopen(dll_name, open_mode);
     if (handle == nullptr)
@@ -116,6 +116,7 @@ namespace coil
       }
     m_handle = handle;
     m_name = dll_name;
+    m_closeflag = close_handle_on_destruction;
     return 0;
   }
 

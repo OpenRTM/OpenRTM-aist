@@ -266,9 +266,6 @@ namespace RTC
         onSenderError();
         return UNKNOWN_ERROR;
       }
-
-    onSenderError();
-    return UNKNOWN_ERROR;
   }
 
 

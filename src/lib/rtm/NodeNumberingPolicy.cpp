@@ -66,7 +66,7 @@ namespace RTM
    * @brief Delete the name when deleting objects
    * @endif
    */
-	void NodeNumberingPolicy::onDelete(void* obj)
+	void NodeNumberingPolicy::onDelete(void* /*obj*/)
   {
   }
   

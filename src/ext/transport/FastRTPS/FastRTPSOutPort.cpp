@@ -178,7 +178,7 @@ namespace RTC
    * @endif
    */
   void FastRTPSOutPort::
-  publishInterfaceProfile(SDOPackage::NVList& properties)
+  publishInterfaceProfile(SDOPackage::NVList& /*properties*/)
   {
     return;
   }

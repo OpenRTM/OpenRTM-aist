@@ -302,7 +302,7 @@ namespace RTC
 	  if (m_shmem.created())
 	  {
           CORBA_CdrMemoryStream data_size_cdr;
-          CORBA::ULongLong data_size;
+          CORBA::ULongLong data_size = 0;
           data.isLittleEndian(m_endian);
           data_size_cdr.setEndian(m_endian);
           data_size_cdr.writeCdrData(reinterpret_cast<unsigned char*>(&(m_shmem.get_data()[0])), sizeof(CORBA::ULongLong));
@@ -316,7 +316,7 @@ namespace RTC
               	 
               data.put_octet_array(&(shm_data[0]), (int)data_size);
           }*/
-          data.writeData((unsigned char*)(m_shmem.get_data()[sizeof(CORBA::ULongLong)]), static_cast<unsigned long>(data_size));
+          data.writeData((unsigned char*)(&m_shmem.get_data()[sizeof(CORBA::ULongLong)]), static_cast<unsigned long>(data_size));
           //delete shm_data;
 	  }
 

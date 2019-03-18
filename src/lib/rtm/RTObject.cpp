@@ -426,7 +426,7 @@ namespace RTC
     // owned EC will be finalised later in finalizeContext().
 
     // detach myself from other EC
-    for (CORBA::ULong ic(0), len(m_ecOther.length()); ic < len; ++ic)
+    for (CORBA::ULong ic(0), size(m_ecOther.length()); ic < size; ++ic)
       {
         //        m_ecOther[ic]->stop();
         RTC::LightweightRTObject_var comp(this->_this());
@@ -1381,7 +1381,6 @@ namespace RTC
   {
     RTC_TRACE(("get_monitoring()"));
     throw SDOPackage::InterfaceNotImplemented();
-    return SDOPackage::Monitoring::_nil();
   }
 
   /*!
@@ -2048,21 +2047,18 @@ namespace RTC
   bool RTObject_impl::readAll()
   {
     RTC_TRACE(("readAll()"));
-    std::vector<InPortBase*>::iterator it     = m_inports.begin();
-    std::vector<InPortBase*>::iterator it_end = m_inports.end();
     bool ret(true);
 
-    while ( it != it_end )
+    for(auto & inport : m_inports)
       {
 
-        if (!((*it)->read()))
+        if (!(inport->read()))
           {
             RTC_DEBUG(("The error occurred in readAll()."));
             ret = false;
             if (!m_readAllCompletion)
               return false;
           }
-        ++it;
       }
 
     return ret;
@@ -2080,21 +2076,17 @@ namespace RTC
   bool RTObject_impl::writeAll()
   {
     RTC_TRACE(("writeAll()"));
-    std::vector<OutPortBase*>::iterator it     = m_outports.begin();
-    std::vector<OutPortBase*>::iterator it_end = m_outports.end();
-
     bool ret(true);
 
-    while ( it != it_end )
+    for(auto & outport : m_outports)
       {
-        if (!((*it)->write()))
+        if (!(outport->write()))
           {
             RTC_DEBUG(("The error occurred in writeAll()."));
             ret = false;
             if (!m_writeAllCompletion)
               return false;
           }
-        ++it;
       }
     return ret;
   }
@@ -2801,19 +2793,19 @@ namespace RTC
 
     coil::Properties default_opts;
     getInheritedECOptions(default_opts);
-    for (coil::vstring::const_iterator ec_itr = ecs_tmp.begin(); ec_itr != ecs_tmp.end(); ++ec_itr)
+    for(auto & ec_ : ecs_tmp)
       {
-        std::string ec_tmp = *ec_itr;
+        std::string ec_tmp = ec_;
         if (coil::normalize(ec_tmp) == "none")
           {
             RTC_INFO(("EC none. EC will not be bound to the RTC."));
             ec_args.clear();
             return RTC::RTC_OK;
           }
-        coil::vstring type_and_name = coil::split(*ec_itr, "(", true);
+        coil::vstring type_and_name = coil::split(ec_, "(", true);
         if (type_and_name.size() > 2)
           {
-            RTC_DEBUG(("Invalid EC type specified: %s", (*ec_itr).c_str()));
+            RTC_DEBUG(("Invalid EC type specified: %s", ec_.c_str()));
             continue;
           }
         coil::Properties p = default_opts;

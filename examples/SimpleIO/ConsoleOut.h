@@ -55,7 +55,7 @@ public:
     std::cout << "Data:          " << data.data    << std::endl;
     std::cout << "------------------------------"   << std::endl;
     return NO_CHANGE;
-  };
+  }
   std::string m_name;
 };
 
@@ -81,7 +81,7 @@ public:
     std::cout                                       << std::endl;
     std::cout << "------------------------------"   << std::endl;
     return NO_CHANGE;
-  };
+  }
   std::string m_name;
 };
 

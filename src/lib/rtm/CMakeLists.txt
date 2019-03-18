@@ -190,39 +190,15 @@ else(VXWORKS)
 	link_directories(${ORB_LINK_DIR})
 endif(VXWORKS)
 
-include_directories(${ORB_INCLUDE_DIR})
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
 
-
-set(RTM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/lib/coil/common
-		${PROJECT_BINARY_DIR}/idl
-		${CMAKE_SOURCE_DIR}/src/lib/coil/${COIL_OS_DIR}
-		${PROJECT_BINARY_DIR}/..
-		${CMAKE_CURRENT_SOURCE_DIR}/..
-		)
-
-
-
-include_directories(
-		${RTM_INCLUDE_DIR}
-		)
-
-
 if(${CMAKE_SYSTEM_NAME}test MATCHES QNXtest)
-	include_directories(/usr/local/include)
+	include_directories(SYSTEM /usr/local/include)
 	link_directories(/usr/qnx650/target/qnx6/x86/lib/gcc/4.4.2/ /usr/qnx650/target/qnx6/x86/lib/ /usr/local/lib)
 endif()
 
-
-
-set(RTM_INCLUDE_DIR ${RTM_INCLUDE_DIR}  PARENT_SCOPE)
-
-
-
 add_subdirectory(idl)
-
 add_subdirectory(ext)
 
 
@@ -452,25 +428,17 @@ if(VXWORKS)
 	endif(RTP)
 endif(VXWORKS)
 
-
-if(OBSERVER_ENABLE)
-	add_definitions(-DENABLE_OBSERVER)
-	include_directories(${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/src/ext/sdo/observer/)
-endif(OBSERVER_ENABLE)
-
-
-set(rtm_srcs ${rtm_srcs} ${SKEL_IDL_SRCS})
-set_source_files_properties(${SKEL_IDL_SRCS} PROPERTIES GENERATED 1)
-
-
-
-
 if(VXWORKS)
-	add_library(${RTM_PROJECT_NAME} STATIC ${rtm_srcs})
+	add_library(${PROJECT_NAME} STATIC ${rtm_srcs})
+	openrtm_common_set_compile_props(${PROJECT_NAME})
+	openrtm_include_rtm(${PROJECT_NAME})
 	if(OBSERVER_ENABLE)
-		add_dependencies(${RTM_PROJECT_NAME} ComponentObserver_TGT)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_OBSERVER)
+		target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
+		target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CMAKE_BINARY_DIR}/src/ext/sdo/observer)
+		add_dependencies(${PROJECT_NAME} ComponentObserverConsumer_IDLTGT)
 	endif(OBSERVER_ENABLE)
-	install(TARGETS ${RTM_PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+	install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 					ARCHIVE DESTINATION ${INSTALL_RTM_BIN_DIR}
 					RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 					COMPONENT openrtm)
@@ -480,69 +448,68 @@ else(VXWORKS)
 		add_definitions(-DLIBRARY_EXPORTS)
 	endif(WIN32)
 
-	add_library(${RTM_PROJECT_NAME}_objlib OBJECT ${rtm_srcs})
-	set_property(TARGET ${RTM_PROJECT_NAME}_objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
-	add_dependencies(${RTM_PROJECT_NAME}_objlib ${COIL_PROJECT_NAME})
-	add_dependencies(${RTM_PROJECT_NAME}_objlib ALL_IDL_TGT)
+	add_library(${PROJECT_NAME}_objlib OBJECT ${rtm_srcs})
+	openrtm_common_set_compile_props(${PROJECT_NAME}_objlib)
+	openrtm_include_rtm(${PROJECT_NAME}_objlib)
 	if(OBSERVER_ENABLE)
-		add_dependencies(${RTM_PROJECT_NAME}_objlib ComponentObserver_TGT)
+		target_compile_definitions(${PROJECT_NAME}_objlib PRIVATE ENABLE_OBSERVER)
+		target_include_directories(${PROJECT_NAME}_objlib PRIVATE ${CMAKE_SOURCE_DIR}/src)
+		target_include_directories(${PROJECT_NAME}_objlib SYSTEM PRIVATE ${CMAKE_BINARY_DIR}/src/ext/sdo/observer)
+		add_dependencies(${PROJECT_NAME}_objlib ComponentObserverConsumer_IDLTGT)
 	endif(OBSERVER_ENABLE)
 
-	add_library(${RTM_PROJECT_NAME}-static STATIC $<TARGET_OBJECTS:${RTM_PROJECT_NAME}_objlib>)
-	add_dependencies(${RTM_PROJECT_NAME}-static ${COIL_PROJECT_NAME})
-	add_dependencies(${RTM_PROJECT_NAME}-static ALL_IDL_TGT)
-	add_dependencies(${RTM_PROJECT_NAME}-static ${RTM_PROJECT_NAME}_objlib)
+	add_library(${PROJECT_NAME}-static STATIC
+		$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
+		$<TARGET_OBJECTS:IDL_OBJLIB>)
 
 	if(WIN32)
-		set(DEF_FILE_NAME ${RTM_PROJECT_NAME}.def)
+		set(DEF_FILE_NAME ${PROJECT_NAME}.def)
 
-		add_custom_command(TARGET ${RTM_PROJECT_NAME}-static 
+		add_custom_command(TARGET ${PROJECT_NAME}-static
 			POST_BUILD
-			COMMAND python -B ${MAKE_DEF_COMMAND} $<TARGET_FILE:${RTM_PROJECT_NAME}-static> ${RTM_PROJECT_NAME} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}
+			COMMAND python -B ${MAKE_DEF_COMMAND} $<TARGET_FILE:${PROJECT_NAME}-static> ${PROJECT_NAME} ${RTM_SHORT_VERSION} ${DEF_FILE_NAME}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
-	
 	endif(WIN32)
 
-	add_library(${RTM_PROJECT_NAME} SHARED $<TARGET_OBJECTS:${RTM_PROJECT_NAME}_objlib> ${CMAKE_CURRENT_BINARY_DIR}/${DEF_FILE_NAME})
-	set_target_properties(${RTM_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
-	add_dependencies(${RTM_PROJECT_NAME} ${RTM_PROJECT_NAME}_objlib)
-
+	add_library(${PROJECT_NAME} SHARED
+	  $<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
+	  $<TARGET_OBJECTS:IDL_OBJLIB>
+	  ${CMAKE_CURRENT_BINARY_DIR}/${DEF_FILE_NAME})
+	set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
 
 	if(OBSERVER_ENABLE)
-		add_dependencies(${RTM_PROJECT_NAME} ComponentObserverConsumer)
-		target_link_libraries(${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION} ComponentObserverConsumer)
+		target_link_libraries(${PROJECT_NAME} PRIVATE
+			${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION} ComponentObserverConsumer)
 	else(OBSERVER_ENABLE)
-		target_link_libraries(${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION})
+		target_link_libraries(${PROJECT_NAME} PRIVATE
+			${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION})
 	endif(OBSERVER_ENABLE)
 
 	if(UNIX)
-		install(TARGETS ${RTM_PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 						COMPONENT openrtm)
 
-		set_target_properties(${RTM_PROJECT_NAME} PROPERTIES VERSION ${RTM_VERSION} SOVERSION ${RTM_SO_VERSION})
-
-
-		
-		set_target_properties(${RTM_PROJECT_NAME}-static PROPERTIES DEBUG_POSTFIX d)
-		set_target_properties(${RTM_PROJECT_NAME}-static PROPERTIES OUTPUT_NAME ${RTM_PROJECT_NAME} CLEAN_DIRECT_OUTPUT 1)
-		install(TARGETS ${RTM_PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${RTM_VERSION} SOVERSION ${RTM_SO_VERSION})
+		set_target_properties(${PROJECT_NAME}-static PROPERTIES DEBUG_POSTFIX d)
+		set_target_properties(${PROJECT_NAME}-static PROPERTIES OUTPUT_NAME ${PROJECT_NAME} CLEAN_DIRECT_OUTPUT 1)
+		install(TARGETS ${PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 						COMPONENT openrtm)
 
 	elseif(WIN32)
-		add_dependencies(${RTM_PROJECT_NAME} ALL_IDL_TGT)
+		add_dependencies(${PROJECT_NAME} ${RTCSKEL_PROJECT_NAME}_IDLTGT)
 		set_source_files_properties(${DEF_FILE_NAME} PROPERTIES GENERATED 1)
-		add_dependencies(${RTM_PROJECT_NAME} ${RTM_PROJECT_NAME}-static)
-		install(TARGETS ${RTM_PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-static)
+		install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
 						COMPONENT openrtm)
 
-		install(TARGETS ${RTM_PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
+		install(TARGETS ${PROJECT_NAME}-static LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 						ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 						RUNTIME DESTINATION ${INSTALL_RTM_LIB_DIR}
 						COMPONENT openrtm)
@@ -553,9 +520,10 @@ else(VXWORKS)
 			set(DT_TARGET ${data_type}Factory_${RTM_VC_VER})
 			configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SerializerFactory.cpp.in ${filename} @ONLY)
 			add_library(${DT_TARGET} SHARED ${filename})
-			target_link_libraries(${DT_TARGET} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION} ${RTM_PROJECT_NAME})
+			target_link_libraries(${DT_TARGET} PRIVATE
+				${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION} ${PROJECT_NAME})
 			set_target_properties(${DT_TARGET} PROPERTIES DEBUG_POSTFIX d)
-			add_dependencies(${DT_TARGET} ${RTM_PROJECT_NAME})
+			add_dependencies(${DT_TARGET} ${PROJECT_NAME})
 			set(DATATYPE_FACTORIES ${DATATYPE_FACTORIES} ${DT_TARGET})
 			install(TARGETS ${DT_TARGET} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 							ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
@@ -568,14 +536,3 @@ else(VXWORKS)
 endif(VXWORKS)
 
 install(FILES  ${rtm_headers} DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm COMPONENT headers)
-
-
-
-add_dependencies(${RTM_PROJECT_NAME} ${COIL_PROJECT_NAME})
-
-
-
-
-add_dependencies(${RTM_PROJECT_NAME} ${RTCSKEL_PROJECT_NAME})
-
-

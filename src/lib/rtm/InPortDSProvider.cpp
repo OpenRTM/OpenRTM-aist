@@ -97,7 +97,7 @@ namespace RTC
       }
   }
 
-  void InPortDSProvider::init(coil::Properties& prop)
+  void InPortDSProvider::init(coil::Properties& /*prop*/)
   {
   }
 

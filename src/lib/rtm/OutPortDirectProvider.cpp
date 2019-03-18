@@ -57,7 +57,7 @@ namespace RTC
    * @brief Initializing configuration
    * @endif
    */
-  void OutPortDirectProvider::init(coil::Properties& prop)
+  void OutPortDirectProvider::init(coil::Properties& /*prop*/)
   {
   }
 

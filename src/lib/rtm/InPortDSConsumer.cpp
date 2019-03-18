@@ -342,7 +342,6 @@ namespace RTC
         return InPortConsumer::UNKNOWN_ERROR;
         break;
       }
-    return InPortConsumer::UNKNOWN_ERROR;
   }
 
 } // namespace RTC

@@ -105,11 +105,11 @@ namespace RTC
 
     for (; it != m_listeners.end(); ++it)
       {
-        if ((*it).first == listener)
+        if (it->first == listener)
           {
-            if ((*it).second)
+            if (it->second)
               {
-                delete (*it).first;
+                delete it->first;
               }
             m_listeners.erase(it);
             return;

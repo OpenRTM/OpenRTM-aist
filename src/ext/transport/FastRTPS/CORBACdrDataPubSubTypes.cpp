@@ -135,7 +135,7 @@ namespace RTC
         {
             endian = eprosima::fastcdr::Cdr::BIG_ENDIANNESS;
         }
-        eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
+        eprosima::fastcdr::Cdr deser(fastbuffer, endian,
                                       eprosima::fastcdr::Cdr::DDS_CDR); // Object that deserializes the data.
                                               // Deserialize encapsulation.
         try
@@ -186,11 +186,10 @@ namespace RTC
 #if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR == 6)
     bool CORBACdrDataPubSubType::getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t* handle) {
 #else
-    bool CORBACdrDataPubSubType::getKey(void *data, InstanceHandle_t* handle, bool force_md5) {
+    bool CORBACdrDataPubSubType::getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t* handle, bool force_md5) {
 #endif
         if(!m_isGetKeyDefined)
             return false;
-        RTC::ByteData* p_type = (RTC::ByteData*) data;
         if (m_keyBuffer == nullptr)
         {
             return false;

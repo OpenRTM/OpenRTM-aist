@@ -89,15 +89,13 @@
     {                                                                   \
       typedef ::__SameType< ::RTC::Link<S, SUPER>, LINK>::Check         \
         MustDeriveFromLink;                                             \
+      static_assert(static_cast<MustDeriveFromLink*>(nullptr)==nullptr, \
+                    "dummy assert for suppress warning");               \
     }                                                                   \
     ~S() override {}                                                    \
     static const char * _state_name() { return #S; }                    \
     Box & box() { return *static_cast<Box *>(_box()); }                 \
-    friend class ::_VS8_Bug_101615;
-
-
-using namespace Macho;
-
+    friend class ::_VS8_Bug_101615
 
 namespace RTC
 {
@@ -166,7 +164,7 @@ namespace RTC
     : public Macho::Link<C, P>
   {
   protected:
-    Link(_StateInstance & instance)
+    Link(Macho::_StateInstance & instance)
       : Macho::Link<C, P>(instance), rtComponent(nullptr)
     {
     }

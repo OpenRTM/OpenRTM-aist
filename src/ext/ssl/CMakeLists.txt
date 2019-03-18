@@ -22,19 +22,7 @@ else(OPENSSL_ROOT)
 	set(SSL_LIBRARIES ${OPENSSL_LIBRARIES})
 endif(OPENSSL_ROOT)
 
-
-
-
-
-
 link_directories(${ORB_LINK_DIR} ${SSL_LINK_DIR})
-include_directories(
-		${RTM_INCLUDE_DIR}
-		${ORB_INCLUDE_DIR}
-		${${idl_name}_DIR}
-		${SSL_INCLUDE_DIR}
-		)
-
 add_definitions(${ORB_C_FLAGS_LIST})
 add_definitions(${COIL_C_FLAGS_LIST})
 
@@ -48,8 +36,11 @@ set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${COIL_PROJECT_NAME} ${SSL_LIBRARI
 
 
 add_library(${target} SHARED ${srcs})
-target_link_libraries(${target} ${libs} ${RTM_LINKER_OPTION})
-add_dependencies(${target} ${RTM_PROJECT_NAME})
+openrtm_common_set_compile_props(${target})
+openrtm_include_rtm(${target})
+target_include_directories(${target} SYSTEM
+	PRIVATE ${SSL_INCLUDE_DIR})
+target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION})
 set_target_properties(${target} PROPERTIES PREFIX "")
 
 

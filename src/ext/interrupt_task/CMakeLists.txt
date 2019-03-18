@@ -9,5 +9,6 @@ project (${target}
 	LANGUAGES CXX)
 
 add_executable(${target} ${target}.cpp)
+openrtm_common_set_compile_props(${target})
 
 set_target_properties(${target} PROPERTIES SUFFIX ".out")

@@ -363,7 +363,7 @@ namespace NVUtil
    *
    * @endif
    */
-  const CORBA::Long find_index(const SDOPackage::NVList& nv, const char* name);
+  CORBA::Long find_index(const SDOPackage::NVList& nv, const char* name);
 
   /*!
    * @if jp

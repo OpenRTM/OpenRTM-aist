@@ -4,35 +4,20 @@ project (SimpleService
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)
 
+set(${PROJECT_NAME}_IDLS MyService.idl)
 
+openrtm_idl_compile_all(MyService
+	"${${PROJECT_NAME}_IDLS}"
+	"-I${CMAKE_CURRENT_SOURCE_DIR};-I${CMAKE_SOURCE_DIR}/src/lib/rtm/idl")
 
-set(idl_name MyService)
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 
+set(srcs MyServiceConsumer.cpp
+	${MyService_IDLSTUB})
+ComponentBuild(MyServiceConsumer "${srcs}" MyServiceConsumerComp.cpp "MyService_IDLTGT" "")
 
-set(${idl_name}_DIR ${CMAKE_CURRENT_BINARY_DIR})
-set(${idl_name}_SKEL ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Skel.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Skel.h)
-set(${idl_name}_STUB ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Stub.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_name}Stub.h)
-
-
-add_custom_command(
-		OUTPUT ${idl_name}Skel.cpp ${idl_name}Stub.cpp
-		COMMAND ${IDL_COMPILE_COMMAND} ${IDLCOMMAND_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR} -I${CMAKE_SOURCE_DIR}/src/lib/rtm/idl ${CMAKE_CURRENT_SOURCE_DIR}/${idl_name}.idl
-		COMMAND python -B ${SKELWRAPPER_COMMAND} --include-dir="" --skel-suffix=Skel --stub-suffix=Stub --idl-file=${idl_name}.idl
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
-add_custom_target(${idl_name}_TGT DEPENDS ${idl_name}Skel.cpp ${idl_name}Stub.cpp)
-
-set_source_files_properties(${${idl_name}_STUB} PROPERTIES GENERATED 1)
-set_source_files_properties(${${idl_name}_SKEL} PROPERTIES GENERATED 1)
-
-include_directories(${${idl_name}_DIR})
-
-
-
-set(srcs MyServiceConsumer.cpp MyServiceConsumer.h ${${idl_name}_STUB})
-ComponentBuild(MyServiceConsumer "${srcs}" MyServiceConsumerComp.cpp ${idl_name}_TGT "")
-
-
-
-set(srcs MyServiceProvider.cpp MyServiceProvider.h MyServiceSVC_impl.cpp MyServiceSVC_impl.h ${${idl_name}_SKEL})
-ComponentBuild(MyServiceProvider "${srcs}" MyServiceProviderComp.cpp ${idl_name}_TGT "")
+set(srcs
+	MyServiceProvider.cpp
+	MyServiceSVC_impl.cpp
+	${MyService_IDLSKEL})
+ComponentBuild(MyServiceProvider "${srcs}" MyServiceProviderComp.cpp "MyService_IDLTGT" "")

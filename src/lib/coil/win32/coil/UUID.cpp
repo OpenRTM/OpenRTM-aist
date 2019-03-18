@@ -124,7 +124,7 @@ namespace coil
    * @brief Generate UUID value
    * @endif
    */
-  UUID* UUID_Generator::generateUUID(int n, int h)
+  UUID* UUID_Generator::generateUUID(int /*n*/, int /*h*/)
   {
     uuid_t uuid;
     if (::UuidCreate(&uuid) != RPC_S_OK)

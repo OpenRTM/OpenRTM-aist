@@ -173,20 +173,20 @@ namespace CORBA_IORUtil
         v = v >> 4;
         if (v < 10)
           {
-            result[j] = '0' + v;
+            result[j] = '0' + static_cast<char>(v);
           }
         else
           {
-            result[j] = 'a' + (v - 10);
+            result[j] = 'a' + (static_cast<char>(v) - 10);
           }
         v = ((data[i] & 0xf));
         if (v < 10)
           {
-            result[j+1] = '0' + v;
+            result[j+1] = '0' + static_cast<char>(v);
           }
         else
           {
-            result[j+1] = 'a' + (v - 10);
+            result[j+1] = 'a' + (static_cast<char>(v) - 10);
           }
       }
     iorstr = std::string(result);
@@ -522,12 +522,14 @@ namespace CORBA_IORUtil
                 p = q;
               } while (q);
           }
-        catch (CORBA::MARSHAL& ex)
+        catch (CORBA::MARSHAL&)
           {
             sstr << "       Broken component" << std::endl;
           }
       }
 #endif  // defined(RTM_OMNIORB_40) || defined(RTM_OMNIORB_41)
+    (void)sstr;
+    (void)components;
   }
 #endif  // ORB_IS_RTORB
 } // namespace CORBA_IORUtil

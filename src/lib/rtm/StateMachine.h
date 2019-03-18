@@ -296,11 +296,11 @@ namespace RTC_Utils
         m_transit(NULL),
         m_selftrans(false)
     {
-    };
+    }
 
     virtual ~StateMachine()
     {
-    };
+    }
 
     StateMachine(const StateMachine& other)
       : m_num(other.m_num),

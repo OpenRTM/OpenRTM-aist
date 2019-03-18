@@ -474,7 +474,7 @@ namespace RTC
      *
      * @endif
      */
-	 ~NamingOnManager() override{};
+	 ~NamingOnManager() override{}
     
     /*!
      * @if jp

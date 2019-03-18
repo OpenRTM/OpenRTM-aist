@@ -161,7 +161,7 @@ namespace NVUtil
     to_prop()
       : m_prop(coil::Properties())
     {
-    };
+    }
     void operator()(const SDOPackage::NameValue& nv)
     {
       const char* value(nullptr);
@@ -227,7 +227,7 @@ namespace NVUtil
    * @brief Return the index of element specified by name from NVList
    * @endif
    */
-  const CORBA::Long find_index(const SDOPackage::NVList& nv, const char* name)
+  CORBA::Long find_index(const SDOPackage::NVList& nv, const char* name)
   {
     return  CORBA_SeqUtil::find(nv, NVUtil::nv_find(name));
   }

@@ -110,7 +110,7 @@ namespace RTC
    * @brief Initializing configuration
    * @endif
    */
-  void OutPortDSProvider::init(coil::Properties& prop)
+  void OutPortDSProvider::init(coil::Properties& /*prop*/)
   {
   }
 
@@ -247,9 +247,6 @@ namespace RTC
       default:
         return ::RTC::UNKNOWN_ERROR;
       }
-
-    onSenderError();
-    return ::RTC::UNKNOWN_ERROR;
   }
 
 } // namespace RTC

@@ -116,7 +116,7 @@ namespace RTC
    * @endif
    */
   void OutPortDirectConsumer::
-  unsubscribeInterface(const SDOPackage::NVList& properties)
+  unsubscribeInterface(const SDOPackage::NVList& /*properties*/)
   {
   }
 

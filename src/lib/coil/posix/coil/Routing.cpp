@@ -113,7 +113,7 @@ namespace coil
           }
 #endif  // COIL_OS_FREEBSD || COIL_OS_DARWIN || COIL_OS_CYGWIN || COIL_OS_QNX
 #if defined(COIL_OS_LINUX)
-        for (int i(0); i < vs.size(); ++i)
+        for (size_t i(0); i < vs.size(); ++i)
           {
             if (vs[i] == "dev")
               {

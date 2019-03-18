@@ -112,7 +112,7 @@ namespace RTC
    * @brief Initializing configuration
    * @endif
    */
-  void OutPortCorbaCdrProvider::init(coil::Properties& prop)
+  void OutPortCorbaCdrProvider::init(coil::Properties& /*prop*/)
   {
   }
 
@@ -249,9 +249,6 @@ namespace RTC
       default:
         return ::OpenRTM::UNKNOWN_ERROR;
       }
-
-    onSenderError();
-    return ::OpenRTM::UNKNOWN_ERROR;
   }
 
 } // namespace RTC

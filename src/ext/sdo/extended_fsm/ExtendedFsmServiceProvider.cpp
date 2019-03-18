@@ -198,7 +198,7 @@ namespace RTC
    * @brief Connectiong listeners to RTObject
    * @endif
    */
-  void ExtendedFsmServiceProvider::setListeners(coil::Properties& prop)
+  void ExtendedFsmServiceProvider::setListeners(coil::Properties& /*prop*/)
   {
   }
 

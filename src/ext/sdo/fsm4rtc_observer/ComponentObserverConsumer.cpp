@@ -174,42 +174,42 @@ namespace RTC
       {
         flags[i] = false;
       }
-    for (size_t i(0); i < observed.size(); ++i)
+    for(auto & o : observed)
       {
-        coil::toUpper(observed[i]);
-        if (observed[i] == "COMPONENT_PROFILE")
+        coil::toUpper(o);
+        if (o == "COMPONENT_PROFILE")
           {
             flags[RTC::COMPONENT_PROFILE] = true;
           }
-        else if (observed[i] == "RTC_STATUS")
+        else if (o == "RTC_STATUS")
           {
             flags[RTC::RTC_STATUS] = true;
           }
-        else if (observed[i] == "EC_STATUS")
+        else if (o == "EC_STATUS")
           {
             flags[RTC::EC_STATUS] = true;
           }
-        else if (observed[i] == "PORT_PROFILE")
+        else if (o == "PORT_PROFILE")
           {
             flags[RTC::PORT_PROFILE] = true;
           }
-        else if (observed[i] == "CONFIGURATION")
+        else if (o == "CONFIGURATION")
           {
             flags[RTC::CONFIGURATION] = true;
           }
-        else if (observed[i] == "FSM_PROFILE")
+        else if (o == "FSM_PROFILE")
           {
             flags[RTC::FSM_PROFILE] = true;
           }
-        else if (observed[i] == "FSM_STATUS")
+        else if (o == "FSM_STATUS")
           {
             flags[RTC::FSM_STATUS] = true;
           }
-        else if (observed[i] == "FSM_STRUCTURE")
+        else if (o == "FSM_STRUCTURE")
           {
             flags[RTC::FSM_STRUCTURE] = true;
           }
-        else if (observed[i] == "ALL")
+        else if (o == "ALL")
           {
             for (int j(0); j < RTC::STATUS_KIND_NUM; ++j)
               {

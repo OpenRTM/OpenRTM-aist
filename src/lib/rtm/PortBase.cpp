@@ -692,14 +692,14 @@ namespace RTC
    */
   ReturnCode_t PortBase::disconnectNext(ConnectorProfile& cprof)
   {
-    CORBA::ULong index;
+    CORBA::Long index;
     index = CORBA_SeqUtil::find(cprof.ports,
                                 find_port_ref(m_profile.port_ref));
     if (index < 0)
       {
         return RTC::BAD_PARAMETER;
       }
-    if (index == cprof.ports.length() - 1)
+    if (static_cast<CORBA::ULong>(index) == cprof.ports.length() - 1)
       {
         return RTC::RTC_OK;
       }
@@ -707,7 +707,7 @@ namespace RTC
     CORBA::ULong len = cprof.ports.length();
 
     ++index;
-    for (CORBA::ULong i(index); i < len; ++i)
+    for (CORBA::ULong i(static_cast<CORBA::ULong>(index)); i < len; ++i)
       {
         RTC::PortService_var p;
         p = cprof.ports[i];

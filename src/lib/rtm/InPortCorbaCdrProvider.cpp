@@ -99,7 +99,7 @@ namespace RTC
       }
   }
 
-  void InPortCorbaCdrProvider::init(coil::Properties& prop)
+  void InPortCorbaCdrProvider::init(coil::Properties& /*prop*/)
   {
   }
 

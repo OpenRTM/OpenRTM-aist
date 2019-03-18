@@ -38,7 +38,7 @@ namespace coil
    * @brief Constructor
    * @endif
    */
-  TimeMeasure::TimeMeasure(int buflen)
+  TimeMeasure::TimeMeasure(unsigned long buflen)
     : m_begin(0.0), m_interval(0.0),
       m_count(0), m_countMax(buflen + 1),
       m_recurred(false)

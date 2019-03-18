@@ -121,9 +121,9 @@ namespace RTC
     ::coil::vstring activeProviderTypes;
     for (auto & enabledProviderType : enabledProviderTypes)
       {
-        std::string tmp(enabledProviderType);
-        coil::toLower(tmp);
-        if (tmp == "all")
+        std::string provtype(enabledProviderType);
+        coil::toLower(provtype);
+        if (provtype == "all")
           {
             activeProviderTypes = availableProviderTypes;
             RTC_DEBUG(("sdo.service.provider.enabled_services: ALL"));
@@ -149,9 +149,9 @@ namespace RTC
         prof.interface_type = CORBA::string_dup(activeProviderType.c_str());
         prof.service        = svc->_this();
         std::string propkey = ifrToKey(activeProviderType);
-        coil::Properties tmp;
-        tmp = const_cast<coil::Properties*>(&prop)->getNode(propkey);
-        NVUtil::copyFromProperties(prof.properties, tmp);
+        coil::Properties proptmp;
+        proptmp = const_cast<coil::Properties*>(&prop)->getNode(propkey);
+        NVUtil::copyFromProperties(prof.properties, proptmp);
         // TODO: return value must be concerned
         if (!svc->init(m_rtobj, prof))
           {
@@ -267,9 +267,9 @@ namespace RTC
     Guard guard(m_provider_mutex);
 
     std::string id(static_cast<const char*>(prof.id));
-    for (auto & provider : m_providers)
+    for (auto & prov : m_providers)
       {
-        if (id == static_cast<const char*>(provider->getProfile().id))
+        if (id == static_cast<const char*>(prov->getProfile().id))
           {
             RTC_ERROR(("SDO service(id=%s, ifr=%s) already exists",
                        static_cast<const char*>(prof.id),
@@ -420,7 +420,7 @@ namespace RTC
             SdoServiceConsumerFactory&
               factory(SdoServiceConsumerFactory::instance());
             factory.deleteObject(*it);
-            it = m_consumers.erase(it);
+            m_consumers.erase(it);
             RTC_INFO(("SDO service has been deleted: %s", id));
             return true;
           }

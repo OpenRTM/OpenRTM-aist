@@ -79,7 +79,7 @@ namespace RTM
      *
      * @endif
      */
-	  ~NodeNumberingPolicy() override{};
+	  ~NodeNumberingPolicy() override{}
     
     /*!
      * @if jp

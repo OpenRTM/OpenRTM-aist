@@ -258,9 +258,9 @@ namespace RTC
         void tcprosAcceptConnection(const ros::TransportTCPPtr& transport)
         {
             //RTC_PARANOID(("tcprosAcceptConnection()"));
-            for(std::vector<ROSOutPort*>::iterator itr=m_publishers.begin();itr != m_publishers.end();++itr)
+            for(auto & publisher : m_publishers) 
             {
-                (*itr)->connectTCP(transport);
+                publisher->connectTCP(transport);
             }
         };
 

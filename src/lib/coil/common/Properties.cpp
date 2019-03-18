@@ -183,9 +183,9 @@ namespace coil
   const std::string& Properties::getProperty(const std::string& key,
                                              const std::string& def) const
   {
-    const std::string& value((*this)[key]);
+    const std::string& invalue((*this)[key]);
 
-    return value.empty() ? def : value;
+    return invalue.empty() ? def : invalue;
   }
 
   /*!
@@ -242,25 +242,25 @@ namespace coil
    * @endif
    */
   std::string Properties::setProperty(const std::string& key,
-                                      const std::string& value)
+                                      const std::string& invalue)
   {
     std::vector<std::string> keys;
     split(key, '.', keys);
 
     Properties* curr(this);
-    for (auto & key : keys)
+    for (auto & k : keys)
       {
-        Properties* next(curr->hasKey(key.c_str()));
+        Properties* next(curr->hasKey(k.c_str()));
         if (next == nullptr)
           {
-            next = new Properties(key.c_str());
+            next = new Properties(k.c_str());
             next->root = curr;
             curr->leaf.push_back(next);
           }
         curr = next;
       }
     std::string retval(curr->value);
-    curr->value = value;
+    curr->value = invalue;
     return retval;
   }
 
@@ -272,25 +272,25 @@ namespace coil
    * @endif
    */
   std::string Properties::setDefault(const std::string& key,
-                                     const std::string& value)
+                                     const std::string& invalue)
   {
     std::vector<std::string> keys;
     split(key, '.', keys);
 
     Properties* curr(this);
-    for (auto & key : keys)
+    for (auto & k : keys)
       {
-        Properties* next(curr->hasKey(key.c_str()));
+        Properties* next(curr->hasKey(k.c_str()));
         if (next == nullptr)
           {
-            next = new Properties(key.c_str());
+            next = new Properties(k.c_str());
             next->root = curr;
             curr->leaf.push_back(next);
           }
         curr = next;
       }
-    curr->default_value = value;
-    return value;
+    curr->default_value = invalue;
+    return invalue;
   }
 
   /*!
@@ -305,15 +305,15 @@ namespace coil
     for (long i = 0; i < num && defaults[i][0] != '\0' ; i += 2)
       {
         std::string key(defaults[i]);
-        std::string value(defaults[i + 1]);
+        std::string invalue(defaults[i + 1]);
 
         coil::eraseHeadBlank(key);
         coil::eraseTailBlank(key);
 
-        coil::eraseHeadBlank(value);
-        coil::eraseTailBlank(value);
+        coil::eraseHeadBlank(invalue);
+        coil::eraseTailBlank(invalue);
 
-        setDefault(key, value);
+        setDefault(key, invalue);
       }
   }
 
@@ -375,17 +375,17 @@ namespace coil
             continue;
           }
 
-        std::string key, value;
-        splitKeyValue(pline, key, value);
+        std::string key, invalue;
+        splitKeyValue(pline, key, invalue);
         key = coil::unescape(key);
         coil::eraseHeadBlank(key);
         coil::eraseTailBlank(key);
 
-        value = coil::unescape(value);
-        coil::eraseHeadBlank(value);
-        coil::eraseTailBlank(value);
+        invalue = coil::unescape(invalue);
+        coil::eraseHeadBlank(invalue);
+        coil::eraseTailBlank(invalue);
 
-        setProperty(key, value);
+        setProperty(key, invalue);
         pline.clear();
       }
   }
@@ -455,7 +455,7 @@ namespace coil
    * @brief Find node of properties
    * @endif
    */
-  Properties* const Properties::findNode(const std::string& key) const
+  Properties* Properties::findNode(const std::string& key) const
   {
     if (key.empty())
       {
@@ -480,10 +480,10 @@ namespace coil
       {
         return *this;
       }
-    Properties* const leaf(findNode(key));
-    if (leaf != nullptr)
+    Properties* const leafptr(findNode(key));
+    if (leafptr != nullptr)
       {
-        return *leaf;
+        return *leafptr;
       }
     this->createNode(key);
     return *findNode(key);
@@ -581,7 +581,7 @@ namespace coil
   {
     std::vector<std::string> keys;
     keys = prop.propertyNames();
-    for (size_t i(0), len(prop.size()); i < len; ++i)
+    for (size_t i(0), len(static_cast<size_t>(prop.size())); i < len; ++i)
       {
         (*this)[keys[i]] = prop[keys[i]];
       }

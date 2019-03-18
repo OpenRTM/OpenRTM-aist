@@ -37,6 +37,6 @@ extern "C"
     ROS2SerializerInit(manager);
   }
   
-};
+}
 
 

@@ -127,19 +127,7 @@ set(coil_srcs
 	${COIL_OS_DIR}/coil/SharedMemory.cpp
 	${COIL_OS_DIR}/coil/Affinity.cpp
 	${coil_headers}
-
 )
-
-
-
-
-
-
-include_directories(
-		${PROJECT_SOURCE_DIR}/common 
-		${PROJECT_SOURCE_DIR}/${COIL_OS_DIR}
-		${PROJECT_BINARY_DIR}/..
-		)
 
 add_definitions(${COIL_C_FLAGS_LIST})
 
@@ -148,7 +136,7 @@ if(UNIX)
 	if(${CMAKE_SYSTEM_NAME}test MATCHES QNXtest)
 		if(QNX7)
 		else()
-		include_directories(/usr/local/include)
+		include_directories(SYSTEM /usr/local/include)
 		link_directories(/usr/qnx650/target/qnx6/x86/lib/gcc/4.4.2/ /usr/qnx650/target/qnx6/x86/lib/ /usr/local/lib)
 		endif()
 	endif()
@@ -156,7 +144,6 @@ if(UNIX)
 	include(FindPkgConfig)
 	pkg_check_modules(UUID REQUIRED uuid)
 
-	include_directories(${UUID_INCLUDE_DIRS})
 	link_directories(${UUID_LIBRARY_DIRS})
 	add_definitions(${UUID_CFLAGS})
 endif(UNIX)
@@ -164,16 +151,26 @@ endif(UNIX)
 
 if(VXWORKS)
 	add_library(${COIL_PROJECT_NAME} STATIC ${coil_srcs} )
+	openrtm_common_set_compile_props(${COIL_PROJECT_NAME})
+	target_include_directories(${COIL_PROJECT_NAME}
+		PUBLIC ${PROJECT_SOURCE_DIR}/common
+		PUBLIC ${PROJECT_SOURCE_DIR}/${COIL_OS_DIR})
+	target_include_directories(${COIL_PROJECT_NAME} SYSTEM
+		PUBLIC ${CMAKE_BINARY_DIR}/src/lib)
 	install(TARGETS ${COIL_PROJECT_NAME} LIBRARY DESTINATION ${INSTALL_RTM_LIB_DIR}
 					ARCHIVE DESTINATION ${INSTALL_RTM_BIN_DIR}
 					RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 					COMPONENT coil)
 else(VXWORKS)
 	add_library(${COIL_PROJECT_NAME}_objlib OBJECT ${coil_srcs})
-	set_property(TARGET ${COIL_PROJECT_NAME}_objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
-
+	openrtm_common_set_compile_props(${COIL_PROJECT_NAME}_objlib)
+	target_include_directories(${COIL_PROJECT_NAME}_objlib
+		PUBLIC ${PROJECT_SOURCE_DIR}/common
+		PUBLIC ${PROJECT_SOURCE_DIR}/${COIL_OS_DIR})
+	target_include_directories(${COIL_PROJECT_NAME}_objlib SYSTEM
+		PUBLIC ${CMAKE_BINARY_DIR}/src/lib
+		PRIVATE ${UUID_INCLUDE_DIRS})
 	add_library(${COIL_PROJECT_NAME}-static STATIC $<TARGET_OBJECTS:${COIL_PROJECT_NAME}_objlib>)
-	add_dependencies(${COIL_PROJECT_NAME}-static ${COIL_PROJECT_NAME}_objlib)
 
 	if(WIN32)
 		set(DEF_FILE_NAME  ${COIL_PROJECT_NAME}.def)
@@ -188,8 +185,7 @@ else(VXWORKS)
 
 	add_library(${COIL_PROJECT_NAME} SHARED $<TARGET_OBJECTS:${COIL_PROJECT_NAME}_objlib> ${CMAKE_CURRENT_BINARY_DIR}/${DEF_FILE_NAME})
 	set_target_properties(${COIL_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
-	target_link_libraries(${COIL_PROJECT_NAME} ${RTM_LINKER_OPTION}  ${UUID_LIBRARIES})
-	add_dependencies(${COIL_PROJECT_NAME} ${COIL_PROJECT_NAME}_objlib)
+	target_link_libraries(${COIL_PROJECT_NAME} PRIVATE ${RTM_LINKER_OPTION}  ${UUID_LIBRARIES})
 
 	if(UNIX)
 		set_target_properties(${COIL_PROJECT_NAME} PROPERTIES VERSION ${RTM_VERSION} SOVERSION ${COIL_SO_VERSION})

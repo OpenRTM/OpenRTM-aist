@@ -235,28 +235,28 @@ namespace RTC
     for (int i = 0; i < params[2].size(); i++)
     {
       std::string xmlrpc_uri = params[2][i];
-      for(std::vector<ROSInPort*>::iterator itr=m_subscribers.begin();itr != m_subscribers.end();++itr)
+      for(auto & subscriber : m_subscribers)
       {
         //RTC_VERBOSE(("Connect TCP"));
         //RTC_VERBOSE(("Caller ID:%s",caller_id.c_str()));
         //RTC_VERBOSE(("Topic Name:%s",topic.c_str()));
         //RTC_VERBOSE(("URI:%s",xmlrpc_uri.c_str()));
-        (*itr)->connectTCP(caller_id, topic, xmlrpc_uri);
+        subscriber->connectTCP(caller_id, topic, xmlrpc_uri);
       }
       new_.push_back(xmlrpc_uri);
     }
 
-    for(std::vector<std::string>::iterator old_uri=old_.begin();old_uri != old_.end();++old_uri)
+    for(auto & old_uri : old_)
     {
-      std::vector<std::string>::iterator itr_uri = std::find(new_.begin(), new_.end(), *old_uri);
+      std::vector<std::string>::iterator itr_uri = std::find(new_.begin(), new_.end(), old_uri);
       size_t index = std::distance( new_.begin(), itr_uri );
 
       if (index == new_.size()) 
       {
         //RTC_INFO(("Delete Connector:%s %s %s", caller_id.c_str(), topic.c_str(), old_uri->c_str()));
-        for(std::vector<ROSInPort*>::iterator itr=m_subscribers.begin();itr != m_subscribers.end();++itr)
+        for(auto & subscriber : m_subscribers)
         {
-          (*itr)->deleteTCPConnector(caller_id, topic, *old_uri);
+          subscriber->deleteTCPConnector(caller_id, topic, old_uri);
         }
       }
     }

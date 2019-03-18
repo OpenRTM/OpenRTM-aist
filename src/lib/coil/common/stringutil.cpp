@@ -81,6 +81,19 @@ namespace coil
     return str;
   }
 
+
+  /*!
+   * @if jp
+   * @brief std::toupperをchar型引数、char型戻り値でラップした関数
+   * @else
+   * @brief
+   * @endif
+   */
+  char toupper_(char c)
+  {
+      return static_cast<char>(std::toupper(static_cast<int>(c)));
+  }
+
   /*!
    * @if jp
    * @brief 大文字への変換
@@ -91,7 +104,19 @@ namespace coil
   void toUpper(std::string& str)
   {
     std::transform(str.begin(), str.end(), str.begin(),
-                   static_cast<int (*)(int)>(std::toupper));
+                   toupper_);
+  }
+
+  /*!
+   * @if jp
+   * @brief std::tolowerをchar型引数、char型戻り値でラップした関数
+   * @else
+   * @brief 
+   * @endif
+   */
+  char tolower_(char c)
+  {
+      return static_cast<char>(std::tolower(static_cast<int>(c)));
   }
 
   /*!
@@ -104,7 +129,7 @@ namespace coil
   void toLower(std::string& str)
   {
     std::transform(str.begin(), str.end(), str.begin(),
-                   static_cast<int (*)(int)>(std::tolower));
+                   tolower_);
   }
 
   /*!
@@ -154,7 +179,7 @@ namespace coil
     if (pos == 0) { return false; }
     --pos;
     size_t i = 0;
-    for ( ; (pos >= 0) && str[pos] == '\\'; ++i)
+    for ( ; str[pos] == '\\'; ++i)
       {
         if (pos == 0) { break; }
         --pos;
@@ -409,7 +434,7 @@ namespace coil
           }
         */
         substr_size = found_pos - pre_pos;
-        if (substr_size >= 0)
+        if (substr_size > 0)
           {
             std::string substr(input.substr(pre_pos, substr_size));
             eraseHeadBlank(substr);
@@ -436,7 +461,7 @@ namespace coil
   {
     void operator()(char &c)
     {
-      c = toupper(c);
+      c = static_cast<char>(toupper(static_cast<int>(c)));
     }
   };
 
@@ -546,7 +571,7 @@ namespace coil
       {
         unsigned short int dec;
         if (!coil::stringTo(dec, c.c_str())) { return false; }
-        if (dec < 0 || dec > 255) { return false; }
+        if (dec > 255) { return false; }
       }
     return true;
   }
@@ -824,30 +849,30 @@ namespace coil
           return str;
       }
       vstring ret;
-      for (auto & str : str_list)
+      for (auto & s : str_list)
       {
-          vstring tmp2 = split(str, "}");
-          if (tmp2.size() == 2)
+          vstring tmp = split(s, "}");
+          if (tmp.size() == 2)
           {
-              char s[100];
+              char c[100];
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-              strcpy_s(s, sizeof(s), coil::getenv(tmp2[0].c_str()));
+              strcpy_s(c, sizeof(c), coil::getenv(tmp[0].c_str()));
 #else
-              strcpy(s, coil::getenv(tmp2[0].c_str()));
+              strcpy(c, coil::getenv(tmp[0].c_str()));
 #endif
-              ret.push_back(std::string(s));
-              ret.push_back(tmp2[1]);
+              ret.push_back(std::string(c));
+              ret.push_back(tmp[1]);
           }
           else
           {
-              ret.push_back(str);
+              ret.push_back(s);
           }
       }
 
       std::string ret_str;
-      for (auto & str : ret)
+      for (auto & s : ret)
       {
-          ret_str = ret_str + str;
+          ret_str.append(s);
       }
       return ret_str;
   }

@@ -76,7 +76,7 @@ namespace RTM
      *
      * @endif
      */
-    virtual ~NumberingPolicyBase() {};
+    virtual ~NumberingPolicyBase() {}
     
     /*!
      * @if jp

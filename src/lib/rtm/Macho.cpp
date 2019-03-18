@@ -48,7 +48,7 @@ void * Macho::_createBox<_EmptyBox>(void * &  /*place*/) {
 }
 
 template<>
-void Macho::_deleteBox<_EmptyBox>(void * & box, void * & place) {
+void Macho::_deleteBox<_EmptyBox>(void * & /* box */, void * & /* place */) {
 }
 
 #ifdef MACHO_SNAPSHOTS

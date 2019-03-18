@@ -72,7 +72,7 @@ namespace RTC
 
   }
 
-  void InPortSHMProvider::init(coil::Properties& prop)
+  void InPortSHMProvider::init(coil::Properties& /*prop*/)
   {
   }
 

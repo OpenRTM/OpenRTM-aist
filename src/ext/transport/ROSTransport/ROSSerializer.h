@@ -427,9 +427,9 @@ namespace RTC
 
       data.data.length(msg.data.size());
       int count = 0;
-      for(auto itr=msg.data.begin();itr != msg.data.end();++itr)
+      for(auto & d : msg.data)
       {
-        data.data[count] = *itr;
+        data.data[count] = d;
         count++;
       }
 

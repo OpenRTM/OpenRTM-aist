@@ -208,7 +208,7 @@ namespace coil
    * @brief Task execute time measurement period
    * @endif
    */
-  void PeriodicTask::executionMeasureCount(int n)
+  void PeriodicTask::executionMeasureCount(unsigned int n)
   {
     m_execCountMax = n;
   }
@@ -232,7 +232,7 @@ namespace coil
    * @brief Task period time measurement count
    * @endif
    */
-  void PeriodicTask::periodicMeasureCount(int n)
+  void PeriodicTask::periodicMeasureCount(unsigned int n)
   {
     m_periodCountMax = n;
   }

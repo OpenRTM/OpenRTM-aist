@@ -50,22 +50,6 @@ namespace RTC
 	  typedef coil::Guard<coil::Mutex> Guard;
   public:
 	/*!
-     * @if jp
-     * @brief コンストラクタ
-     *
-     * @param value
-     *
-     * @else
-     * @brief Constructor
-     *
-     * @param value
-     *
-     * @endif
-     */
-	DirectOutPortBase(DataType& value)
-	{
-	}
-	/*!
 	* @if jp
 	* @brief デストラクタ
 	*
@@ -92,9 +76,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	virtual void read(DataType& data)
-	{
-	}
+    virtual void read(DataType& data) = 0;
 	/*!
 	* @if jp
 	* @brief 新規データの存在確認
@@ -108,10 +90,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	virtual bool isNew()
-	{
-		return false;
-	}
+    virtual bool isNew() = 0;
 	/*!
 	* @if jp
 	* @brief 新規データが無いことを確認
@@ -125,10 +104,7 @@ namespace RTC
 	*
 	* @endif
 	*/
-	virtual bool isEmpty()
-	{
-		return true;
-	}
+    virtual bool isEmpty() = 0;
     
   protected:
   };

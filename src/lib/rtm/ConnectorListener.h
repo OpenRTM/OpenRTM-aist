@@ -106,7 +106,7 @@ namespace RTC
   using ::RTC::ConnectorListenerStatus::NO_CHANGE;          \
   using ::RTC::ConnectorListenerStatus::INFO_CHANGED;       \
   using ::RTC::ConnectorListenerStatus::DATA_CHANGED;       \
-  using ::RTC::ConnectorListenerStatus::BOTH_CHANGED;
+  using ::RTC::ConnectorListenerStatus::BOTH_CHANGED
 
   /*!
    * @if jp
@@ -602,7 +602,7 @@ namespace RTC
       coil::GlobalFactory < ::RTC::ByteDataStream<DataType> >::instance().deleteObject(cdr);
   
       return ret;
-    };
+    }
 
     /*!
      * @if jp

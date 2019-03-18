@@ -13,7 +13,7 @@
 template <class T>
 struct seq_print
 {
-  seq_print() : m_cnt(0) {};
+  seq_print() : m_cnt(0) {}
   void operator()(T val)
   {
     std::cout << m_cnt << ": " << val << std::endl;

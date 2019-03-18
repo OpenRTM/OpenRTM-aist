@@ -1,14 +1,6 @@
 ﻿#ifndef __MACHO_HPP__
 #define __MACHO_HPP__
 
-//#if defined(_MSC_VER)
-//#pragma warning(push)
-//#pragma warning(disable:4512 4251)
-//#elif defined(__GNUC__) && (__GNUC_MINOR__ >= 6)
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-//#endif
-
 // Macho - C++ Machine Objects
 //
 // The Machine Objects class library (in short Macho) allows the creation of
@@ -266,7 +258,8 @@ protected: \
 	/* Substates may use _setHistorySuper to bubble up history */ \
 	void _setHistorySuper(::Macho::_StateInstance & self, ::Macho::_StateInstance & deep) override\
 	{ self.setHistorySuper(deep); } \
-public:
+public:\
+	static_assert(true, "dummy for extra semicolon warning")
 
 // Use this macro to select shallow history strategy.
 #define HISTORY() \
@@ -278,7 +271,8 @@ protected: \
 	/* Substates may use _setHistorySuper to bubble up history */ \
 	virtual void _setHistorySuper(::Macho::_StateInstance & self, ::Macho::_StateInstance & deep) \
 	{ self.setHistorySuper(deep); } \
-public:
+public:\
+	static_assert(true, "dummy for extra semicolon warning")
 
 // Use this macro to have boxes survive state transitions
 #define PERSISTENT() \
@@ -315,7 +309,6 @@ namespace Macho {
 	////////////////////////////////////////////////////////////////////////////////
 	// Box for states which don't declare own Box class.
 	class _EmptyBox {
-		_EmptyBox() {}
 	public:
 		static _EmptyBox theEmptyBox;
 	};
@@ -462,7 +455,7 @@ namespace Macho {
 
 		// This is the method to bubble up history information
 		// for states whose superstates have no history (so does nothing).
-		virtual void _setHistorySuper(_StateInstance & self, _StateInstance & deep) {}
+		virtual void _setHistorySuper(_StateInstance & /* self */, _StateInstance & /* deep*/ ) {}
 
 	private:
 		// State exit. Not allowed to initiate state change.
@@ -497,10 +490,10 @@ namespace Macho {
 		// Create StateInstance object of state.
 		static _StateInstance & _getInstance(_MachineBase & machine);
 
-		virtual void _deleteBox(_StateInstance & instance) {}
+		virtual void _deleteBox(_StateInstance & /* instance */) {}
 
 		// Default history strategy (no history).
-		virtual void _saveHistory(_StateInstance & self, _StateInstance & shallow, _StateInstance & deep) {}
+		virtual void _saveHistory(_StateInstance & /* self */, _StateInstance & /* shallow */, _StateInstance & /* deep */) {}
 
 	private:
 		_StateInstance & _myStateInstance;
@@ -1675,6 +1668,8 @@ namespace Macho {
 		Machine() {
 			// Compile time check: TOP must directly derive from TopBase<TOP>
 			typedef typename __SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
+			// suppress unused-typdefs warnig
+			static_assert(static_cast<MustDeriveFromTopBase*>(nullptr)==nullptr, "dummy");
 
 			allocate(theStateCount);
 			start(TOP::_getInstance(*this));
@@ -1685,6 +1680,8 @@ namespace Macho {
 		Machine(const Alias & state) {
 			// Compile time check: TOP must directly derive from TopBase<TOP>
 			typedef typename __SameType<TopBase<TOP>, typename TOP::SUPER>::Check MustDeriveFromTopBase;
+			// suppress unused-typdefs warnig
+			static_assert(static_cast<MustDeriveFromTopBase*>(nullptr)==nullptr, "dummy");
 
 			allocate(theStateCount);
 			start(state);

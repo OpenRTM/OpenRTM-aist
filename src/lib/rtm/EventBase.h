@@ -25,23 +25,23 @@ namespace RTC
   class EventBinderBase0
   {
   public:
-      EventBinderBase0(){};
-      virtual ~EventBinderBase0() {};
+      EventBinderBase0(){}
+      virtual ~EventBinderBase0() {}
       virtual void run() = 0;
   };
   template <class P0>class EventBinderBase1
   {
   public:
-      EventBinderBase1(){};
-      virtual ~EventBinderBase1() {};
+      EventBinderBase1(){}
+      virtual ~EventBinderBase1() {}
       virtual void run(P0& data) = 0;
   };
 
   class EventBase
   {
   public:
-      EventBase(){};
-      virtual ~EventBase(){};
+      EventBase(){}
+      virtual ~EventBase(){}
       virtual void operator()()=0;
   };
 
@@ -51,12 +51,12 @@ namespace RTC
       Event0(EventBinderBase0 *eb):
           m_eb(eb)
       {
-      };
-      ~Event0() override {};
+      }
+      ~Event0() override {}
       void operator()() override
       {
           m_eb->run();
-      };
+      }
   private:
       EventBinderBase0 *m_eb;
   };
@@ -68,12 +68,12 @@ namespace RTC
       Event1(EventBinderBase1<P0> *eb, P0 &data):
           m_eb(eb), m_data(data)
       {
-      };
-      ~Event1() override {};
+      }
+      ~Event1() override {}
       void operator()() override
       {
           m_eb->run(m_data);
-      };
+      }
   private:
       EventBinderBase1<P0> *m_eb;
       P0 m_data;

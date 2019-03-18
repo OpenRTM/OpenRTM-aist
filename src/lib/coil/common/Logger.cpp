@@ -149,10 +149,9 @@ namespace coil
     std::vector<LogStreamBuffer*> LogStreamBuffer::getBuffers()
     {
         std::vector<LogStreamBuffer*> buffs;
-        std::vector<Stream>::iterator it;
-        for (it = m_streams.begin(); it != m_streams.end(); ++it)
+        for(auto & s : m_streams)
         {
-            buffs.push_back((*it).stream_);
+            buffs.push_back(s.stream_);
         }
         return buffs;
     }
@@ -185,11 +184,10 @@ namespace coil
      */
     void LogStreamBuffer::write(int level, const std::string &name, const std::string &date, const std::string &mes)
     {
-        std::vector<Stream>::iterator it;
-        for (it = m_streams.begin(); it != m_streams.end(); ++it)
+        for(auto & s : m_streams) 
         {
-            Guard gaurd((*it).mutex_);
-            (*it).stream_->write(level, name, date, mes);
+            Guard gaurd(s.mutex_);
+            s.stream_->write(level, name, date, mes);
         }
 
     }
