@@ -57,7 +57,7 @@ else()
 	add_library(${target} SHARED ${srcs})
 	openrtm_common_set_compile_props(${target})
 	openrtm_include_rtm(${target})
-	target_include_directories(SYSTEM
+	target_include_directories(${target} SYSTEM
 	PRIVATE ${FLUENTBIT_ROOT}/include
 	PRIVATE ${FLUENTBIT_ROOT}/lib/monkey/include
 	PRIVATE ${FLUENTBIT_ROOT}/lib/mbedtls-2.14.1/include
