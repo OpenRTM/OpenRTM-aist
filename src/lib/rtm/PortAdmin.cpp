@@ -58,7 +58,6 @@ namespace RTC
         {
           return false;
         }
-      return false;
     }
     const std::string m_name;
   };

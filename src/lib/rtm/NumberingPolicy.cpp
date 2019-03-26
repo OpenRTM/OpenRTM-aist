@@ -86,7 +86,6 @@ namespace RTM
         if (m_objects[i] == obj) return static_cast<int>(i);
       }
     throw ObjectNotFound();
-    return static_cast<int>(i);
   }
 } //namespace RTM 
 

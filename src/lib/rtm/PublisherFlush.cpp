@@ -178,7 +178,6 @@ namespace RTC
         onReceiverError(data_);
         return ret;
       }
-    return ret;
   }
 
   /*!

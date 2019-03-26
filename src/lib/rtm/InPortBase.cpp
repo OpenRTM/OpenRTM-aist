@@ -965,8 +965,6 @@ namespace RTC
         RTC_ERROR(("InPortPushConnector creation failed"));
         return nullptr;
       }
-    RTC_FATAL(("never comes here: createConnector()"));
-    return nullptr;
   }
 
   /*!
@@ -1045,8 +1043,6 @@ namespace RTC
         RTC_ERROR(("InPortPullConnector creation failed"));
         return nullptr;
       }
-    RTC_FATAL(("never comes here: createConnector()"));
-    return nullptr;
   }
 
   ConnectorListeners& InPortBase::getListeners()

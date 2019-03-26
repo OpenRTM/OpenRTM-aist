@@ -94,9 +94,9 @@ RTC::ReturnCode_t Inputbutton::onExecute(RTC::UniqueId  /*ec_id*/)
   if (cmds.size() > 1)
     {
       std::cout << "  [args]: ";
-      for(auto & cmd : cmds)
+      for(auto & c : cmds)
         {
-          std::cout << cmd << " ";
+          std::cout << c << " ";
         }
    }
   std::cout << std::endl;

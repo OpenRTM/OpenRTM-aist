@@ -240,8 +240,9 @@ namespace CORBA_IORUtil
       {
         return false;
       }
-#endif  // ORB_IS_RTORB
+#else
     return false;
+#endif  // ORB_IS_RTORB
   }
 
   /*!

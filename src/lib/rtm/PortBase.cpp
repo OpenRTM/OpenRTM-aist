@@ -222,7 +222,6 @@ namespace RTC
       {
         return RTC::BAD_PARAMETER;
       }
-    return RTC::RTC_ERROR;
   }
 
   /*!

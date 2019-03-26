@@ -91,12 +91,6 @@ namespace RTC
         return INVALID_ARGS;
       }
     return PORT_OK;
-
-
-
-
-
-    return PORT_OK;
   }
 
   /*!

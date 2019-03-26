@@ -32,6 +32,17 @@
 #include <vector>
 
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#   ifdef COIL_LIBRARY_EXPORTS
+#      define COIL_DLL_PLUGIN __declspec(dllexport)
+#   else
+#      define COIL_DLL_PLUGIN __declspec(dllimport)
+#   endif
+#else
+#   define COIL_DLL_PLUGIN
+#endif /* Windows */
+
+
 
 namespace coil
 {
@@ -603,8 +614,8 @@ namespace coil
 
       
   public:
-      static bool m_lockEnable;
-      static Mutex m_mutex;
+      static COIL_DLL_PLUGIN bool m_lockEnable;
+      static COIL_DLL_PLUGIN Mutex m_mutex;
 
   };
 

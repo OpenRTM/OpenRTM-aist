@@ -705,7 +705,6 @@ namespace coil
       {
         return next;
       }
-    return nullptr;
   }
 
   /*!

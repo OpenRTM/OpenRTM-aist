@@ -1009,8 +1009,6 @@ namespace RTC
         RTC_ERROR(("OutPortPushConnector creation failed"));
         return nullptr;
       }
-    RTC_FATAL(("never comes here: createConnector()"));
-    return nullptr;
   }
 
   /*!
@@ -1067,8 +1065,6 @@ namespace RTC
         RTC_ERROR(("OutPortPullConnector creation failed"));
         return nullptr;
       }
-    RTC_FATAL(("never comes here: createConnector()"));
-    return nullptr;
   }
 
   /*!

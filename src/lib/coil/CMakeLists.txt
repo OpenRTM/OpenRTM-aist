@@ -115,7 +115,6 @@ set(coil_srcs
 	common/coil/crc.cpp
 	common/coil/stringutil.cpp
 	common/coil/Logger.cpp
-	${COIL_OS_DIR}/coil/Condition.cpp
 	${COIL_OS_DIR}/coil/DynamicLib.cpp
 	${COIL_OS_DIR}/coil/Mutex.cpp
 	${COIL_OS_DIR}/coil/Routing.cpp

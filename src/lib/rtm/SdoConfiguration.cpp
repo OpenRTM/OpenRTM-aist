@@ -172,7 +172,6 @@ namespace SDOPackage
       {
         throw InternalError("Configuration::set_service_profile");
       }
-    return false;
   }
 
   /*!
@@ -219,7 +218,6 @@ namespace SDOPackage
       {
         throw InternalError("Configuration::remove_service_profile");
       }
-    return false;
   }
 
   /*!
@@ -273,8 +271,6 @@ namespace SDOPackage
         throw InternalError("Configuration::get_configuration_parameters()");
         // never reach here
       }
-    // never reach here
-    return new ParameterList(0);
   }
 
   /*!
@@ -408,8 +404,6 @@ namespace SDOPackage
         RTC_ERROR(("Unknown exception cought."));
         throw InternalError("Configuration::get_configuration_sets()");
       }
-    // never reach here
-    return new ConfigurationSetList(0);
   }
 
   /*!
@@ -457,10 +451,6 @@ namespace SDOPackage
       {
         throw InternalError("Configuration::get_configuration_set()");
       }
-
-    // never reach here
-    RTC_FATAL(("never reach here"));
-    return new ConfigurationSet();
   }
 
   /*!
@@ -548,8 +538,6 @@ namespace SDOPackage
       {
         throw InternalError("Configuration::get_active_configuration_set()");
       }
-    // never reach here
-    return new ConfigurationSet();
   }
 
   /*!
@@ -577,7 +565,6 @@ namespace SDOPackage
         throw InternalError("Configuration::add_configuration_set()");
         return false;
       }
-    return true;
   }
 
   /*!
@@ -604,7 +591,6 @@ namespace SDOPackage
         throw InternalError("Configuration::remove_configuration_set()");
         return false;
       }
-    return false;
   }
 
   /*!
@@ -640,7 +626,6 @@ namespace SDOPackage
         return false;
       }
 */
-    return false;
   }
 
   //============================================================

@@ -1125,7 +1125,6 @@ namespace RTC
       {
         throw SDOPackage::NotAvailable();
       }
-    return new SDOPackage::OrganizationList();
   }
 
   // SDOPackage::SDO
@@ -1171,8 +1170,6 @@ namespace RTC
       {
         throw SDOPackage::InternalError("get_sdo_type()");
       }
-    sdo_type = "";
-    return sdo_type._retn();
   }
 
   /*!
@@ -1196,7 +1193,6 @@ namespace RTC
       {
         throw SDOPackage::InternalError("get_device_profile()");
       }
-    return new SDOPackage::DeviceProfile();
   }
 
   //------------------------------------------------------------
@@ -1358,7 +1354,6 @@ namespace RTC
       {
         throw SDOPackage::InternalError("get_organizations()");
       }
-    return new SDOPackage::OrganizationList(0);
   }
 
   /*!
@@ -1408,7 +1403,6 @@ namespace RTC
       {
         throw SDOPackage::InternalError("get_status()");
       }
-    return new CORBA::Any();
   }
 
   //============================================================

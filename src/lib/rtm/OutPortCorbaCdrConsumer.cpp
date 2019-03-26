@@ -138,8 +138,6 @@ namespace RTC
         RTC_WARN(("Exception caought from OutPort::get()."));
         return CONNECTION_LOST;
       }
-    RTC_ERROR(("OutPortCorbaCdrConsumer::get(): Never comes here."));
-    return UNKNOWN_ERROR;
   }
 
   /*!

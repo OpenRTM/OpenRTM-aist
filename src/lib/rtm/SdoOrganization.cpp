@@ -132,8 +132,6 @@ namespace SDOPackage
       {
         throw InternalError("get_organization_property_value()");
       }
-    // never reach here
-    return new CORBA::Any();
   }
 
   /*!
@@ -158,7 +156,6 @@ namespace SDOPackage
       {
         throw InternalError("set_organization_property()");
       }
-    return false;
   }
 
   /*!
@@ -223,7 +220,6 @@ namespace SDOPackage
       {
         throw InternalError("remove_organization_property()");
       }
-    return false;
   }
 
   /*!
@@ -260,7 +256,6 @@ namespace SDOPackage
       {
         throw InternalError("set_owner()");
       }
-    return true;
   }
 
   /*!
@@ -304,7 +299,6 @@ namespace SDOPackage
       {
         throw InternalError("set_members()");
       }
-    return true;
   }
 
   /*!
@@ -329,7 +323,6 @@ namespace SDOPackage
       {
         throw InternalError("add_members()");
       }
-    return false;
   }
 
   /*!
@@ -368,7 +361,6 @@ namespace SDOPackage
         RTC_ERROR(("unknown exception"));
         throw InternalError("remove_member(): Not found.");
       }
-    return false;
   }
 
   /*!
@@ -403,6 +395,5 @@ namespace SDOPackage
       {
         throw InternalError("set_dependency(): Unknown.");
       }
-    return false;
   }
 } // namespace SDOPackage

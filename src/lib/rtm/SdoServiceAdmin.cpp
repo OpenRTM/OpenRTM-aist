@@ -232,7 +232,6 @@ namespace RTC
           }
       }
     throw SDOPackage::InvalidParameter();
-    return new SDOPackage::ServiceProfile();
   }
 
   /*!

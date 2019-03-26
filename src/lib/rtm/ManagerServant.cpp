@@ -1376,8 +1376,6 @@ namespace RTM
         RTC_ERROR(("Unknown non-CORBA exception cought."));
         return RTC::RTObject::_nil();
       }
-      
-    return RTC::RTObject::_nil();
   }
   
   /*

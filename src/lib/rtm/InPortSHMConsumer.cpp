@@ -137,7 +137,6 @@ namespace RTC
 		{
 			return CONNECTION_LOST;
 		}
-		return UNKNOWN_ERROR;
 	}
 
   
