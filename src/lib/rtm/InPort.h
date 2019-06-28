@@ -116,11 +116,7 @@ namespace RTC
      * @endif
      */
     InPort(const char* name, DataType& value)
-#if defined(__GNUC__) && (__GNUC__ <= 3 && __GNUC_MINOR__ <= 3)
-      : InPortBase(name, ::CORBA_Util::toRepositoryIdOfStruct<DataType>()),
-#else
       : InPortBase(name, ::CORBA_Util::toRepositoryId<DataType>()),
-#endif
         m_name(name), m_value(value),
         m_OnRead(nullptr),  m_OnReadConvert(nullptr),
         m_status(1), m_directNewData(false)

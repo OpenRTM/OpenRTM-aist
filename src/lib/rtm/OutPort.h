@@ -102,11 +102,7 @@ namespace RTC
      * @endif
      */
     OutPort(const char* name, DataType& value)
-#if defined(__GNUC__) && (__GNUC__ <= 3 && __GNUC_MINOR__ <= 3)
-      : OutPortBase(name, ::CORBA_Util::toRepositoryIdOfStruct<DataType>()),
-#else
       : OutPortBase(name, ::CORBA_Util::toRepositoryId<DataType>()),
-#endif
 	  m_value(value), m_onWrite(nullptr), m_onWriteConvert(nullptr),
 	  m_directNewData(false), m_directValue(value)
     {
