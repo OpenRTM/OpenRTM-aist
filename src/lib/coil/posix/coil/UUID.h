@@ -49,7 +49,7 @@ namespace coil
   };
 } // namespace coil
 #endif
-#if defined(COIL_OS_LINUX) || defined(COIL_OS_DARWIN) || defined(COIL_OS_CYGWIN) || defined(COIL_OS_QNX)
+#if defined(COIL_OS_LINUX) || defined(COIL_OS_DARWIN) || defined(COIL_OS_QNX)
 #include <uuid/uuid.h>
 namespace coil
 {

@@ -9,23 +9,11 @@
 /* OS is FreeBSD */
 #cmakedefine COIL_OS_FREEBSD TRUE
 
-/* OS is HP-UX */
-#cmakedefine COIL_OS_HPUX TRUE
-
-/* OS is IRIX */
-#cmakedefine COIL_OS_IRIX TRUE
-
 /* OS is Linux */
 #cmakedefine COIL_OS_LINUX TRUE
 
-/* OS is OSF1 */
-#cmakedefine COIL_OS_OSF1 TRUE
-
 /* OS is QNX */
 #cmakedefine COIL_OS_QNX TRUE
-
-/* OS is SunOS */
-#cmakedefine COIL_OS_SUNOS TRUE
 
 /* OS is Windows */
 #cmakedefine COIL_OS_VXWORKS TRUE

@@ -33,13 +33,6 @@
 #else
 #include <cstdint>
 #endif
-// Cygwin's gcc does not provide wstring type
-#if defined(Cygwin) && ( __GNUC__ < 4 )
-namespace std
-{
-  typedef basic_string<wchar_t> wstring;
-} // namespace std
-#endif
 
 namespace coil
 {

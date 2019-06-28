@@ -70,26 +70,14 @@
 /* OS is FreeBSD */
 #cmakedefine RTM_OS_FREEBSD TRUE
 
-/* OS is HP-UX */
-#cmakedefine RTM_OS_HPUX TRUE
-
-/* OS is IRIX */
-#cmakedefine RTM_OS_IRIX TRUE
-
 /* OS is Linux */
 #cmakedefine RTM_OS_LINUX TRUE
 
 /* OS is VxWorks */
 #cmakedefine RTM_OS_VXWORKS TRUE
 
-/* OS is OSF1 */
-#cmakedefine RTM_OS_OSF1 TRUE
-
 /* OS is QNX */
 #cmakedefine RTM_OS_QNX TRUE
-
-/* OS is SunOS */
-#cmakedefine RTM_OS_SUNOS TRUE
 
 /* OS is Windows */
 #cmakedefine RTM_OS_WIN32 TRUE
