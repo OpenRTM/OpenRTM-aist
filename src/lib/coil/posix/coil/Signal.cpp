@@ -21,10 +21,6 @@
 #include <coil/Signal.h>
 #include <cstring>
 
-#ifdef COIL_OS_FREEBSD
-#define _SIGSET_NWORDS _SIG_WORDS
-#endif
-
 namespace coil
 {
   /*!

@@ -6,9 +6,6 @@
 /* OS is Max OS X */
 #cmakedefine COIL_OS_DARWIN TRUE
 
-/* OS is FreeBSD */
-#cmakedefine COIL_OS_FREEBSD TRUE
-
 /* OS is Linux */
 #cmakedefine COIL_OS_LINUX TRUE
 

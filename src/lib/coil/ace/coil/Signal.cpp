@@ -20,10 +20,6 @@
 #include <coil/config_coil.h>
 #include <coil/Signal.h>
 
-#ifdef COIL_OS_FREEBSD
-#define _SIGSET_NWORDS _SIG_WORDS
-#endif
-
 namespace coil
 {
   // no implementation

@@ -21,35 +21,6 @@
 #define COIL_UUID_H
 
 #include <coil/config_coil.h>
-#ifdef COIL_OS_FREEBSD
-#include <uuid.h>
-
-namespace coil
-{
-  class UUID
-  {
-  public:
-    UUID();
-    explicit UUID(const uuid_t& uuid);
-    ~UUID();
-    const char* to_string();
-  private:
-    uuid_t m_uuid;
-    char* m_uuidstr;
-  };
-
-
-  class UUID_Generator
-  {
-  public:
-    UUID_Generator();
-    ~UUID_Generator();
-    void init();
-    coil::UUID* generateUUID(int n, int h);
-  };
-} // namespace coil
-#endif
-#if defined(COIL_OS_LINUX) || defined(COIL_OS_DARWIN) || defined(COIL_OS_QNX)
 #include <uuid/uuid.h>
 namespace coil
 {
@@ -72,6 +43,5 @@ namespace coil
     UUID* generateUUID(int n, int h);
   };
 } // namespace coil
-#endif
 
 #endif  // COIL_UUID_H

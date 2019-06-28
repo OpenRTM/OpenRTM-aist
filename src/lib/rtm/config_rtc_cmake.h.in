@@ -67,9 +67,6 @@
 /* OS is Max OS X */
 #cmakedefine RTM_OS_DARWIN TRUE
 
-/* OS is FreeBSD */
-#cmakedefine RTM_OS_FREEBSD TRUE
-
 /* OS is Linux */
 #cmakedefine RTM_OS_LINUX TRUE
 

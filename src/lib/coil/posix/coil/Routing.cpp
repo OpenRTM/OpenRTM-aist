@@ -65,8 +65,7 @@ namespace coil
     addr.sin_addr.s_addr = **reinterpret_cast<unsigned int **>(hostent->h_addr_list);
     dest_addr = inet_ntoa(addr.sin_addr);
 
-#if defined(COIL_OS_FREEBSD) || defined(COIL_OS_DARWIN) \
-                             || defined(COIL_OS_QNX)
+#if defined(COIL_OS_DARWIN) || defined(COIL_OS_QNX)
     std::string cmd("PATH=/bin:/sbin:/usr/bin:/usr/sbin "
                     "route get ");
     const char* match_str = "interface";
@@ -74,7 +73,7 @@ namespace coil
     size_t ifname_pos(1);
     cmd += dest_addr;
     cmd += " 2> /dev/null";
-#endif  // COIL_OS_IS_FREEBSD || COIL_OS_DARWIN || COIL_OS_QNX
+#endif  // COIL_OS_DARWIN || COIL_OS_QNX
 #if defined(COIL_OS_LINUX)
     std::string cmd("PATH=/bin:/sbin:/usr/bin:/usr/sbin "
                     "ip route get ");
@@ -101,8 +100,7 @@ namespace coil
         line.erase(line.end() - 1);
         coil::vstring vs(coil::split(line, delimiter));
 
-#if defined(COIL_OS_FREEBSD) || defined(COIL_OS_DARWIN) \
-                             || defined(COIL_OS_QNX)
+#if defined(COIL_OS_DARWIN) || defined(COIL_OS_QNX)
         if (vs.size() > ifname_pos)
           {
             dest_if = vs[ifname_pos];
@@ -110,7 +108,7 @@ namespace coil
             wait(NULL);
             return true;
           }
-#endif  // COIL_OS_FREEBSD || COIL_OS_DARWIN || COIL_OS_QNX
+#endif  // COIL_OS_DARWIN || COIL_OS_QNX
 #if defined(COIL_OS_LINUX)
         for (size_t i(0); i < vs.size(); ++i)
           {
