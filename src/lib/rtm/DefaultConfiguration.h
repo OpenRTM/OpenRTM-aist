@@ -104,11 +104,7 @@ static const char* default_config[] =
 #ifdef WIN32
     "manager.modules.C++.suffixes",           "dll",
 #else
-#ifdef RTM_OS_DARWIN
-    "manager.modules.C++.suffixes",           "dylib",
-#else
     "manager.modules.C++.suffixes",           "so",
-#endif
 #endif
     "manager.modules.C++.load_paths",        "",
     "manager.modules.Python.manager_cmd",    "rtcd_python",

@@ -3,9 +3,6 @@
 #ifndef CONFIG_COIL_H
 #define CONFIG_COIL_H
 
-/* OS is Max OS X */
-#cmakedefine COIL_OS_DARWIN TRUE
-
 /* OS is Linux */
 #cmakedefine COIL_OS_LINUX TRUE
 
