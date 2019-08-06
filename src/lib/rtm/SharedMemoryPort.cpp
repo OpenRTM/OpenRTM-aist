@@ -33,7 +33,7 @@ namespace RTC
    */
 	SharedMemoryPort::SharedMemoryPort()
    : m_smInterface(OpenRTM::PortSharedMemory::_nil()),
-     m_endian(true)//,
+     m_endian(true), m_created_count(0)
      //rtclog("SharedMemoryPort")
   {
 
@@ -163,11 +163,12 @@ namespace RTC
   {
 	  if (!m_shmem.created())
 	  {
-		  
-		  m_shmem.create(shm_address, memory_size);
+		  std::string address = shm_address + coil::otos(m_created_count);
+		  m_created_count++;
+		  m_shmem.create(address, memory_size);
 		  try
 		  {
-			  m_smInterface->open_memory(memory_size, CORBA::string_dup(shm_address));
+			  m_smInterface->open_memory(memory_size, CORBA::string_dup(address.c_str()));
 		  }
 		  catch (...)
 		  {
@@ -215,7 +216,7 @@ namespace RTC
 	void SharedMemoryPort::close_memory(::CORBA::Boolean unlink)
     throw (CORBA::SystemException)
   {
-	  if (!m_shmem.created())
+	  if (m_shmem.created())
 	  {
 		  m_shmem.close();
 		  if (unlink)

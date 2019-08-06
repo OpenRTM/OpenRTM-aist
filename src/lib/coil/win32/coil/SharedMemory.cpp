@@ -115,7 +115,7 @@ namespace coil
     m_shm_address = shm_address;
     m_memory_size = memory_size;
     m_handle = CreateFileMapping(
-		(HANDLE)-1,
+		(HANDLE)INVALID_HANDLE_VALUE,
 		NULL,
 		PAGE_READWRITE | SEC_COMMIT,
 		0, m_memory_size, 
@@ -189,14 +189,19 @@ namespace coil
    */
   int SharedMemory::write(const char *data, const int pos, const int size)
   {
-	  if (!created())
-	  {
-		  return -1;
-	  }
+      if (!created())
+        {
+          return -1;
+        }
 
-	  memcpy(&m_shm[pos],&data[0],size);
+      if (m_memory_size < size + pos)
+        {
+          return -1;
+        }
+
+      memcpy(&m_shm[pos],&data[0],size);
     
-	  return 0;
+      return 0;
   }
 
   /*!
@@ -269,7 +274,9 @@ namespace coil
     	}
 	else
 	{
-		return 0;
+             m_handle = nullptr;
+             m_file_create = false;
+             return 0;
 	}
     }
     return 0;
