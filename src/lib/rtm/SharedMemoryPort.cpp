@@ -29,7 +29,7 @@ namespace RTC
    */
 	SharedMemoryPort::SharedMemoryPort()
    : m_smInterface(OpenRTM::PortSharedMemory::_nil()),
-     m_endian(true)
+     m_endian(true), m_created_count(0)
   {
 
   }
@@ -153,11 +153,12 @@ namespace RTC
   {
 	  if (!m_shmem.created())
 	  {
-		  
-		  m_shmem.create(shm_address, memory_size);
+          std::string address = shm_address + coil::otos(m_created_count);
+          m_created_count++;
+		  m_shmem.create(address, memory_size);
 		  try
 		  {
-			  m_smInterface->open_memory(memory_size, CORBA::string_dup(shm_address));
+			  m_smInterface->open_memory(memory_size, CORBA::string_dup(address.c_str()));
 		  }
 		  catch (...)
 		  {
@@ -203,7 +204,7 @@ namespace RTC
   */
 	void SharedMemoryPort::close_memory(::CORBA::Boolean unlink)
   {
-	  if (!m_shmem.created())
+	  if (m_shmem.created())
 	  {
 		  m_shmem.close();
 		  if (unlink)
@@ -241,7 +242,7 @@ namespace RTC
       CORBA::ULongLong data_size = static_cast<CORBA::ULongLong>(data.getDataLength());
 	  if (data_size + sizeof(CORBA::ULongLong) > m_shmem.get_size())
 	  {
-		  int memory_size = static_cast<int>(data_size) + static_cast<int>(sizeof(CORBA::ULongLong));
+          CORBA::ULongLong memory_size = data_size + static_cast<CORBA::ULongLong>(sizeof(CORBA::ULongLong));
 		  if (!CORBA::is_nil(m_smInterface))
 		  {
 			  try
@@ -258,7 +259,10 @@ namespace RTC
       CORBA_CdrMemoryStream data_size_cdr;
 
       data_size_cdr.setEndian(m_endian);
-      data_size_cdr.serializeCDR(data_size);
+      if (!data_size_cdr.serializeCDR(data_size))
+      {
+          return;
+      }
       int ret = m_shmem.write((char*)data_size_cdr.getBuffer(), 0, sizeof(CORBA::ULongLong));
 
 	  if (ret == 0)

@@ -111,11 +111,10 @@ namespace coil
   int SharedMemory::create(std::string shm_address,
                     unsigned long long memory_size)
   {
-
     m_shm_address = shm_address;
     m_memory_size = memory_size;
     m_handle = CreateFileMapping(
-		(HANDLE)-1,
+		(HANDLE)INVALID_HANDLE_VALUE,
 		nullptr,
 		PAGE_READWRITE | SEC_COMMIT,
 		0, static_cast<DWORD>(m_memory_size),
@@ -185,7 +184,11 @@ namespace coil
 		  return -1;
 	  }
 
-	  memcpy(&m_shm[pos],&data[0], static_cast<size_t>(size));
+      if (m_memory_size < size + pos)
+      {
+          return -1;
+      }
+      memcpy(&m_shm[pos],&data[0], static_cast<size_t>(size));
     
 	  return 0;
   }
@@ -243,7 +246,6 @@ namespace coil
    */
   int SharedMemory::close()
   {
-    
     if (created())
     {
         UnmapViewOfFile(m_shm);
@@ -258,10 +260,12 @@ namespace coil
     	{
     		return -1;
     	}
-	else
-	{
-		return 0;
-	}
+	    else
+	    {
+            m_handle = nullptr;
+            m_file_create = false;
+		    return 0;
+	    }
     }
     return 0;
 
