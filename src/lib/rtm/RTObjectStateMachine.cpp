@@ -473,4 +473,17 @@ namespace RTC_impl
   {
     return m_sm.worker_post();
   }
+
+  bool RTObjectStateMachine::activate()
+  {
+      return m_sm.goTo(RTC::INACTIVE_STATE, RTC::ACTIVE_STATE);
+  }
+  bool RTObjectStateMachine::deactivate()
+  {
+      return m_sm.goTo(RTC::ACTIVE_STATE, RTC::INACTIVE_STATE);
+  }
+  bool RTObjectStateMachine::reset()
+  {
+      return m_sm.goTo(RTC::ERROR_STATE, RTC::INACTIVE_STATE);
+  }
 }; // namespace RTC_impl

@@ -176,14 +176,12 @@ namespace RTC_impl
         return RTC::BAD_PARAMETER;
       }
     RTC_DEBUG(("Component found in the EC."));
-    Guard stateguard(m_statemutex);
-    if (!(obj->isCurrentState(RTC::INACTIVE_STATE)))
+    if (!(obj->activate()))
       {
         RTC_ERROR(("State of the RTC is not INACTIVE_STATE."));
         return RTC::PRECONDITION_NOT_MET;
       }
     RTC_DEBUG(("Component is in INACTIVE state. Going to ACTIVE state."));
-    obj->goTo(RTC::ACTIVE_STATE);
     rtobj = obj;
     RTC_DEBUG(("activateComponent() done."));
     return RTC::RTC_OK;
@@ -208,13 +206,11 @@ namespace RTC_impl
         RTC_ERROR(("Given RTC is not participant of this EC."));
         return RTC::BAD_PARAMETER;
       }
-    Guard stateguard(m_statemutex);
-    if (!(rtobj->isCurrentState(RTC::ACTIVE_STATE)))
+    if (!(rtobj->deactivate()))
       {
         RTC_ERROR(("State of the RTC is not ACTIVE_STATE."));
         return RTC::PRECONDITION_NOT_MET;
       }
-    rtobj->goTo(RTC::INACTIVE_STATE);
     return RTC::RTC_OK;
   }
 
@@ -237,13 +233,11 @@ namespace RTC_impl
         RTC_ERROR(("Given RTC is not participant of this EC."));
         return RTC::BAD_PARAMETER;
       }
-    Guard stateguard(m_statemutex);
-    if (!(rtobj->isCurrentState(RTC::ERROR_STATE)))
+    if (!(rtobj->reset()))
       {
         RTC_ERROR(("State of the RTC is not ERROR_STATE."));
         return RTC::PRECONDITION_NOT_MET;
       }
-    rtobj->goTo(RTC::INACTIVE_STATE);
     return RTC::RTC_OK;
   }
 
@@ -432,7 +426,6 @@ namespace RTC_impl
     Guard gurad(m_mutex);
     for (size_t i(0); i < m_comps.size(); ++i)
       {
-        Guard stateguard(m_statemutex);
         if (!m_comps[i]->isCurrentState(state)) { return false; }
       }
     return true; 
@@ -444,7 +437,6 @@ namespace RTC_impl
     Guard gurad(m_mutex);
     for (size_t i(0); i < m_comps.size(); ++i)
       {
-        Guard stateguard(m_statemutex);
         if (!m_comps[i]->isNextState(state)) { return false; }
       }
     return true;
@@ -456,7 +448,6 @@ namespace RTC_impl
     Guard gurad(m_mutex);
     for (size_t i(0); i < m_comps.size(); ++i)
       {
-        Guard stateguard(m_statemutex);
         if (m_comps[i]->isCurrentState(state)) { return true; }
       }
     return false; 
@@ -468,7 +459,6 @@ namespace RTC_impl
     Guard gurad(m_mutex);
     for (size_t i(0); i < m_comps.size(); ++i)
       {
-        Guard stateguard(m_statemutex);
         if (m_comps[i]->isNextState(state)) { return true; }
       }
     return false;
@@ -480,15 +470,12 @@ namespace RTC_impl
     // m_comps never changes its size here
     size_t len(m_comps.size());
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerPreDo();
       }
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerDo();
       }
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerPostDo();
       }
     Guard guard(m_mutex);
@@ -501,7 +488,6 @@ namespace RTC_impl
     // m_comps never changes its size here
     size_t len(m_comps.size());
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerPreDo();
       }
   }
@@ -512,7 +498,6 @@ namespace RTC_impl
     // m_comps never changes its size here
     size_t len(m_comps.size());
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerDo();
      }
   }
@@ -523,7 +508,6 @@ namespace RTC_impl
     // m_comps never changes its size here
     size_t len(m_comps.size());
     for (size_t i(0); i < len; ++i) {
-        Guard stateguard(m_statemutex);
         m_comps[i]->workerPostDo();
     }
     // m_comps might be changed here

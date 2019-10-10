@@ -734,6 +734,43 @@ namespace RTC_Utils
         }
     }
 
+    /*!
+     * @if jp
+     * @brief 状態を遷移
+     *
+     * 遷移前の状態と遷移先の状態を指定する。
+     * 現在の状態が指定の状態ではない場合は遷移しない。
+     * 現在の状態が指定の状態の場合のみ状態遷移する。
+     *
+     * @param nowstate 遷移元状態
+     * @param nextstate 遷移先状態
+     * @return 現在の状態が指定の状態の場合はtrueを返す
+     *
+     * @else
+     * @brief Transit State
+     *
+     *
+     * @param nowstate 
+     * @param nextstate 
+     * @return 
+     *
+     * @endif
+     */
+    bool goTo(State nowstate, State nextstate)
+    {
+        if (nowstate == nextstate)
+        {
+            return false;
+        }
+        Guard guard(m_mutex);
+        if (m_states.curr == nowstate)
+        {
+            m_states.next = nextstate;
+            return true;
+        }
+        return false;
+    }
+
     
     /*!
      * @if jp
