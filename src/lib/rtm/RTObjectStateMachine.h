@@ -85,6 +85,10 @@ namespace RTC_impl
     void workerDo();
     void workerPostDo();
 
+    bool activate();
+    bool deactivate();
+    bool reset();
+
   protected:
     void setComponentAction(RTC::LightweightRTObject_ptr comp);
     void setDataFlowComponentAction(RTC::LightweightRTObject_ptr comp);
