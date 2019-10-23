@@ -78,7 +78,6 @@ namespace RTC
    *
    * - 第1引数: プロバイダの名前, "corba_cdr" など
    * - 第2引数: ファクトリ関数 coil::Creator<B, T>
-   * - 第3引数: 削除関数 coil::Destructor<B, T>
    *
    * を与えて呼び出す必要がある。以下は、ファクトリへの登録と、それを初
    * 期化関数とした例である。
@@ -92,9 +91,7 @@ namespace RTC
    *                         factory(RTC::OutPortProviderFactory::instance());
    *     factory.addFactory("corba_cdr",
    *                        ::coil::Creator<::RTC::OutPortProvider,
-   *                                        ::RTC::OutPortCorbaCdrProvider>,
-   *                        ::coil::Destructor<::RTC::OutPortProvider,
-   *                                           ::RTC::OutPortCorbaCdrProvider>);
+   *                                        ::RTC::OutPortCorbaCdrProvider>);
    *   }
    * };
    * </pre>
@@ -155,7 +152,6 @@ namespace RTC
    *
    * 1st arg: The name of provider. ex. "corba_cdr"
    * 2nd arg: Factory function. coil::Creator<B, T>
-   * 3rd arg: Destruction function. coil::Destructor<B, T>
    *
    * The following example shows how to register factory function.
    * And it is also declared as a initialization function.
@@ -169,9 +165,7 @@ namespace RTC
    *                         factory(RTC::OutPortProviderFactory::instance());
    *     factory.addFactory("corba_cdr",
    *                        ::coil::Creator<::RTC::OutPortProvider,
-   *                                        ::RTC::OutPortCorbaCdrProvider>,
-   *                        ::coil::Destructor<::RTC::OutPortProvider,
-   *                                           ::RTC::OutPortCorbaCdrProvider>);
+   *                                        ::RTC::OutPortCorbaCdrProvider>);
    *   }
    * };
    * </pre>

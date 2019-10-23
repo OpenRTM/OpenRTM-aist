@@ -59,7 +59,7 @@ namespace RTC
         m_task->resume();
         m_task->finalize();
 
-        RTC::PeriodicTaskFactory::instance().deleteObject(m_task);
+        delete m_task;
         RTC_PARANOID(("task deleted."));
       }
 
@@ -591,17 +591,13 @@ extern "C"
     ::RTC::PublisherFactory::
       instance().addFactory("new",
                             ::coil::Creator< ::RTC::PublisherBase,
-                                             ::RTC::PublisherNew>,
-                            ::coil::Destructor< ::RTC::PublisherBase,
-                                                ::RTC::PublisherNew>);
+                                             ::RTC::PublisherNew>);
     // FSM4RTC formal/16-04-01 p.25
     // In the FSM4RTC specification, publisher type is defined as "io_mode"
     // Publisher "new" is functionally equals to "io_mode: nonblock".
     ::RTC::PublisherFactory::
       instance().addFactory("nonblock",
                             ::coil::Creator< ::RTC::PublisherBase,
-                                             ::RTC::PublisherNew>,
-                            ::coil::Destructor< ::RTC::PublisherBase,
-                                                ::RTC::PublisherNew>);
+                                             ::RTC::PublisherNew>);
   }
 }

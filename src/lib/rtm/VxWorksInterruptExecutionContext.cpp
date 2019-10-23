@@ -674,8 +674,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("VxWorksInterruptExecutionContext",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC::VxWorksInterruptExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC::VxWorksInterruptExecutionContext>);
   }
 };

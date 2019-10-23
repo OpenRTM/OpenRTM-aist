@@ -438,9 +438,7 @@ extern "C"
     ::RTC::LogstreamFactory::
       instance().addFactory("file",
                             ::coil::Creator< ::RTC::LogstreamBase,
-                                             ::RTC::LogstreamFile>,
-                            ::coil::Destructor< ::RTC::LogstreamBase,
-                                                ::RTC::LogstreamFile>);
+                                             ::RTC::LogstreamFile>);
   }
 }
 

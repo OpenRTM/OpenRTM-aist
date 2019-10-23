@@ -630,14 +630,10 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("RTPreemptEC",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC_exp::RTPreemptEC>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC_exp::RTPreemptEC>);
     RTC::ExecutionContextFactory::
       instance().addFactory("rtpreempt_ec",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC_exp::RTPreemptEC>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC_exp::RTPreemptEC>);
   }
 }

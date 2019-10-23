@@ -470,8 +470,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("ExtTrigExecutionContext",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC::ExtTrigExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC::ExtTrigExecutionContext>);
   }
 }

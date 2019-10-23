@@ -114,9 +114,7 @@ extern "C"
     ::RTM::NumberingPolicyFactory::
       instance().addFactory("node_unique",
                             ::coil::Creator< ::RTM::NumberingPolicyBase,
-							::RTM::NodeNumberingPolicy>,
-                            ::coil::Destructor< ::RTM::NumberingPolicyBase,
-							::RTM::NodeNumberingPolicy>);
+                                             ::RTM::NodeNumberingPolicy>);
   }
 }
 

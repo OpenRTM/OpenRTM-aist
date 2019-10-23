@@ -69,18 +69,14 @@ extern "C"
       RTC::InPortProviderFactory& factory(RTC::InPortProviderFactory::instance());
       factory.addFactory("ros",
                         ::coil::Creator< ::RTC::InPortProvider,
-                                          ::RTC::ROSInPort>,
-                        ::coil::Destructor< ::RTC::InPortProvider,
-                                            ::RTC::ROSInPort>);
+                                          ::RTC::ROSInPort>);
     }
 
     {
       RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
       factory.addFactory("ros",
                         ::coil::Creator< ::RTC::InPortConsumer,
-                                          ::RTC::ROSOutPort>,
-                        ::coil::Destructor< ::RTC::InPortConsumer,
-                                            ::RTC::ROSOutPort>);
+                                          ::RTC::ROSOutPort>);
     }
     ROSSerializerInit(manager);
 

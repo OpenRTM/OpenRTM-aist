@@ -96,15 +96,11 @@ extern "C"
     ::RTM::NumberingPolicyFactory::
       instance().addFactory("default",
                             ::coil::Creator< ::RTM::NumberingPolicyBase,
-                                             ::RTM::ProcessUniquePolicy>,
-                            ::coil::Destructor< ::RTM::NumberingPolicyBase,
-                                                ::RTM::ProcessUniquePolicy>);
+                                             ::RTM::ProcessUniquePolicy>);
     ::RTM::NumberingPolicyFactory::
       instance().addFactory("process_unique",
                             ::coil::Creator< ::RTM::NumberingPolicyBase,
-                                             ::RTM::ProcessUniquePolicy>,
-                            ::coil::Destructor< ::RTM::NumberingPolicyBase,
-                                                ::RTM::ProcessUniquePolicy>);
+                                             ::RTM::ProcessUniquePolicy>);
   }
 }
 

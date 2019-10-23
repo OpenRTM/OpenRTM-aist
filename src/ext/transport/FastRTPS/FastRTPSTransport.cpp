@@ -66,18 +66,14 @@ extern "C"
       RTC::InPortProviderFactory& factory(RTC::InPortProviderFactory::instance());
       factory.addFactory("fast-rtps",
                         ::coil::Creator< ::RTC::InPortProvider,
-                                          ::RTC::FastRTPSInPort>,
-                        ::coil::Destructor< ::RTC::InPortProvider,
-                                            ::RTC::FastRTPSInPort>);
+                                          ::RTC::FastRTPSInPort>);
     }
 
     {
       RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
       factory.addFactory("fast-rtps",
                         ::coil::Creator< ::RTC::InPortConsumer,
-                                          ::RTC::FastRTPSOutPort>,
-                        ::coil::Destructor< ::RTC::InPortConsumer,
-                                            ::RTC::FastRTPSOutPort>);
+                                          ::RTC::FastRTPSOutPort>);
     }
 
     ManagerActionListener *listener = new ManagerActionListener();

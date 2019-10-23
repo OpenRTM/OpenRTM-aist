@@ -177,16 +177,14 @@ namespace RTC
     // delete provider
     if (m_provider != nullptr)
       {
-        InPortProviderFactory& cfactory(InPortProviderFactory::instance());
-        cfactory.deleteObject(m_provider);
+        delete m_provider;
       }
     m_provider = nullptr;
 
     // delete buffer
     if (m_buffer != nullptr && m_deleteBuffer)
       {
-        CdrBufferFactory& bfactory(CdrBufferFactory::instance());
-        bfactory.deleteObject(m_buffer);
+        delete m_buffer;
       }
     m_buffer = nullptr;
 

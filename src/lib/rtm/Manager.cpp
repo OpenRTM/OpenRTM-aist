@@ -1321,7 +1321,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         if (!logstream->init(logprop))
           {
             std::cerr << "\"file\" logger initialization failed" << std::endl;
-            LogstreamFactory::instance().deleteObject("file", logstream);
+            delete logstream;
             continue;
           }
         m_logStreamBuf.addStream(logstream->getStreamBuffer());
@@ -1377,7 +1377,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         if (!logstream->init(*i))
           {
             RTC_WARN(("Logstream %s init failed.", lstype.c_str()));
-            factory.deleteObject(lstype, logstream);
+            delete logstream;
             RTC_WARN(("Logstream %s deleted.", lstype.c_str()));
           }
         RTC_INFO(("Logstream %s added.", lstype.c_str()));
@@ -2972,6 +2972,78 @@ std::vector<coil::Properties> Manager::getLoadableModules()
             RTC_ERROR(("Connection error in topic connection."));
           }
       }
+  }
+
+  /*!
+   * @if jp
+   * @brief 作成した実行コンテキストをリストに追加する
+   *
+   * @param ec execution context
+   * @return 既に追加済みの場合はfalseを返す
+   *
+   * @else
+   *
+   * @brief add execution context
+   *
+   * @param ec
+   * @return false
+   *
+   * @endif
+   */
+  bool Manager::addExecutionContext(RTC::ExecutionContextBase* ec)
+  {
+      if (std::find(m_eclist.begin(), m_eclist.end(), ec) != m_eclist.end())
+      {
+          return false;
+      }
+      m_eclist.push_back(ec);
+      return true;
+  }
+
+  /*!
+   * @if jp
+   * @brief 作成した実行コンテキストをリストから削除する
+   *
+   * @param ec execution context
+   * @return true：削除成功、false：指定のECがリストにない
+   *
+   * @else
+   *
+   * @brief remove execution context
+   *
+   * @param ec
+   * @return
+   *
+   * @endif
+   */
+  bool Manager::removeExecutionContext(RTC::ExecutionContextBase* ec)
+  {
+      auto ec_itr = std::find(m_eclist.begin(), m_eclist.end(), ec);
+      if (ec_itr != m_eclist.end())
+      {
+          m_eclist.erase(ec_itr);
+          return true;
+      }
+      return false;
+  }
+
+  /*!
+   * @if jp
+   * @brief 作成した実行コンテキストのリスト取得する
+   *
+   * @return ECのリスト
+   *
+   * @else
+   *
+   * @brief get execution contexts
+   *
+   * @return
+   *
+   * @endif
+   */
+  std::vector<RTC::ExecutionContextBase*>& Manager::createdExecutionContexts()
+  {
+      return m_eclist;
   }
 
 } // namespace RTC

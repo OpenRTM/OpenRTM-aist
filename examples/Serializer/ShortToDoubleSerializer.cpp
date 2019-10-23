@@ -41,8 +41,6 @@ extern "C"
         coil::GlobalFactory <::RTC::ByteDataStream<RTC::TimedDouble>>::
             instance().addFactory("corba:RTC/TimedShort:RTC/TimedDouble",  //addFactory関数の第1引数で登録名を設定。以下で独自シリアライザを利用するときはこの名前を使用する。
                 ::coil::Creator< ::RTC::ByteDataStream<RTC::TimedDouble>,
-                ShortToDoubleSerializer>,
-                ::coil::Destructor< ::RTC::ByteDataStream<RTC::TimedDouble>,
                 ShortToDoubleSerializer>);
     }
 }

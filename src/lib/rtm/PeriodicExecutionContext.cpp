@@ -631,8 +631,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("PeriodicExecutionContext",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC_exp::PeriodicExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC_exp::PeriodicExecutionContext>);
 
     coil::vstring ecs;

@@ -69,16 +69,12 @@ extern "C"
           RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
           factory.addFactory("opensplice",
               ::coil::Creator< ::RTC::InPortConsumer,
-              ::RTC::OpenSpliceOutPort>,
-              ::coil::Destructor< ::RTC::InPortConsumer,
               ::RTC::OpenSpliceOutPort>);
       }
       {
           RTC::InPortProviderFactory& factory(RTC::InPortProviderFactory::instance());
           factory.addFactory("opensplice",
               ::coil::Creator< ::RTC::InPortProvider,
-              ::RTC::OpenSpliceInPort>,
-              ::coil::Destructor< ::RTC::InPortProvider,
               ::RTC::OpenSpliceInPort>);
       }
       

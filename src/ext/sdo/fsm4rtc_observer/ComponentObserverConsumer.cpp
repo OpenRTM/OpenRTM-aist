@@ -910,9 +910,6 @@ extern "C"
                        toRepositoryIdOfObject<RTC::ComponentObserver>(),
 #endif
                        ::coil::Creator< ::RTC::SdoServiceConsumerBase,
-                       ::RTC::ComponentObserverConsumer>,
-                       ::coil::Destructor< ::RTC::SdoServiceConsumerBase,
                        ::RTC::ComponentObserverConsumer>);
-                       std::cout << "Init()" << std::endl;
   }
 }

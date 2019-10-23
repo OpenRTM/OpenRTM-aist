@@ -357,8 +357,6 @@ extern "C"
     RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
     factory.addFactory("data_service",
                        ::coil::Creator< ::RTC::InPortConsumer,
-                                        ::RTC::InPortDSConsumer>,
-                       ::coil::Destructor< ::RTC::InPortConsumer,
-                                           ::RTC::InPortDSConsumer>);
+                                        ::RTC::InPortDSConsumer>);
   }
 }

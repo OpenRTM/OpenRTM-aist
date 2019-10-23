@@ -122,11 +122,10 @@ namespace RTM
    */
   void LocalServiceAdmin::finalize()
   {
-    RTM::LocalServiceFactory& factory(RTM::LocalServiceFactory::instance());
     for (auto & service : m_services)
       {
         service->finalize();
-        factory.deleteObject(service);
+        delete service;
       }
     m_services.clear();
   }
@@ -231,9 +230,7 @@ namespace RTM
         if (name == (*it)->getProfile().name)
           {
             (*it)->finalize();
-            LocalServiceFactory&
-              factory(LocalServiceFactory::instance());
-            factory.deleteObject(*it);
+            delete *it;
             m_services.erase(it);
             RTC_INFO(("SDO service  has been deleted: %s", name.c_str()));
             return true;

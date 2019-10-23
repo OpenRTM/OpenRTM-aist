@@ -191,8 +191,6 @@ extern "C"
     ::RTC::LogstreamFactory::
       instance().addFactory("fluentd",
                             ::coil::Creator< ::RTC::LogstreamBase,
-                                             ::RTC::FluentBit>,
-                            ::coil::Destructor< ::RTC::LogstreamBase,
-                                                ::RTC::FluentBit>);
+                                             ::RTC::FluentBit>);
   }
 }

@@ -453,8 +453,6 @@ extern "C"
       = RTM::LocalServiceFactory::instance();
     factory.addFactory(service_name,
                        ::coil::Creator< ::RTM::LocalServiceBase,
-                       ::RTM::LocalService::FileNameservice>,
-                       ::coil::Destructor< ::RTM::LocalServiceBase,
                        ::RTM::LocalService::FileNameservice>);
   }
 }

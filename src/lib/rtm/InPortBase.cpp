@@ -84,7 +84,7 @@ namespace RTC
 
     if (m_thebuffer != nullptr)
       {
-        CdrBufferFactory::instance().deleteObject(m_thebuffer);
+        delete m_thebuffer;
         if (!m_singlebuffer)
           {
             RTC_ERROR(("Although singlebuffer flag is true, the buffer != 0"));
@@ -847,7 +847,7 @@ namespace RTC
         if (!provider->publishInterface(cprof.properties))
           {
             RTC_ERROR(("publishing interface information error"));
-            InPortProviderFactory::instance().deleteObject(provider);
+            delete provider;
             return nullptr;
           }
 #else  // ORB_IS_RTORB
@@ -901,7 +901,7 @@ namespace RTC
         if (!consumer->subscribeInterface(cprof.properties))
           {
             RTC_ERROR(("interface subscription failed."));
-            OutPortConsumerFactory::instance().deleteObject(consumer);
+            delete consumer;
             return nullptr;
           }
 

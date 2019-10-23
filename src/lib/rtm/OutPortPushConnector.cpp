@@ -109,8 +109,7 @@ namespace RTC
     if (m_publisher != nullptr)
       {
         RTC_DEBUG(("delete publisher"));
-        PublisherFactory& pfactory(PublisherFactory::instance());
-        pfactory.deleteObject(m_publisher);
+        delete m_publisher;
       }
     m_publisher = nullptr;
 
@@ -118,8 +117,7 @@ namespace RTC
     if (m_consumer != nullptr)
       {
         RTC_DEBUG(("delete consumer"));
-        InPortConsumerFactory& cfactory(InPortConsumerFactory::instance());
-        cfactory.deleteObject(m_consumer);
+        delete m_consumer;
       }
     m_consumer = nullptr;
 
@@ -127,8 +125,7 @@ namespace RTC
     if (m_buffer != nullptr)
       {
         RTC_DEBUG(("delete buffer"));
-        CdrBufferFactory& bfactory(CdrBufferFactory::instance());
-        bfactory.deleteObject(m_buffer);
+        delete m_buffer;
       }
     m_buffer = nullptr;
     RTC_TRACE(("disconnect() done"));

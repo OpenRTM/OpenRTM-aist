@@ -29,7 +29,6 @@ extern "C"
   {
     RTC::CdrBufferFactory::instance().
       addFactory("ring_buffer",
-                 coil::Creator<RTC::CdrBufferBase, RTC::CdrRingBuffer>,
-                 coil::Destructor<RTC::CdrBufferBase, RTC::CdrRingBuffer>);
+                 coil::Creator<RTC::CdrBufferBase, RTC::CdrRingBuffer>);
   }
 }

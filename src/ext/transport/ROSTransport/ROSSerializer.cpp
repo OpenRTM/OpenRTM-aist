@@ -77,15 +77,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<DataType> >::
             instance().addFactory(name,
             ::coil::Creator< ::RTC::ByteDataStream<DataType>,
-            RTC::ROSSimpleData<DataType, MessageType, originalType, convertedType> >,
-            ::coil::Destructor< ::RTC::ByteDataStream<DataType>,
             RTC::ROSSimpleData<DataType, MessageType, originalType, convertedType> >);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory(name,
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<MessageType> >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<MessageType> >);
   }
 
@@ -138,15 +134,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<DataType> >::
             instance().addFactory(name,
             ::coil::Creator< ::RTC::ByteDataStream<DataType>,
-            RTC::ROSSequenceData<DataType, MessageType, originalType, convertedType> >,
-            ::coil::Destructor< ::RTC::ByteDataStream<DataType>,
             RTC::ROSSequenceData<DataType, MessageType, originalType, convertedType> >);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory(name,
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<MessageType> >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<MessageType> >);
   }
 
@@ -307,15 +299,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<RTC::TimedString> >::
             instance().addFactory("ros:std_msgs/String",
             ::coil::Creator< ::RTC::ByteDataStream<RTC::TimedString>,
-            RTC::ROSStringData>,
-            ::coil::Destructor< ::RTC::ByteDataStream<RTC::TimedString>,
             RTC::ROSStringData>);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory("ros:std_msgs/String",
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<std_msgs::String> >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<std_msgs::String> >);
   }
 
@@ -458,15 +446,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<RTC::TimedPoint3D> >::
             instance().addFactory("ros:geometry_msgs/PointStamped",
             ::coil::Creator< ::RTC::ByteDataStream<RTC::TimedPoint3D>,
-            RTC::ROSPoint3DData>,
-            ::coil::Destructor< ::RTC::ByteDataStream<RTC::TimedPoint3D>,
             RTC::ROSPoint3DData>);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory("ros:geometry_msgs/PointStamped",
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<geometry_msgs::PointStamped> >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<geometry_msgs::PointStamped> >);
   }
 
@@ -612,15 +596,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<RTC::TimedQuaternion> >::
             instance().addFactory("ros:geometry_msgs/QuaternionStamped",
             ::coil::Creator< ::RTC::ByteDataStream<RTC::TimedQuaternion>,
-            RTC::ROSQuaternionData>,
-            ::coil::Destructor< ::RTC::ByteDataStream<RTC::TimedQuaternion>,
             RTC::ROSQuaternionData>);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory("ros:geometry_msgs/QuaternionStamped",
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<geometry_msgs::QuaternionStamped > >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<geometry_msgs::QuaternionStamped > >);
   }
 
@@ -764,15 +744,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<RTC::TimedVector3D> >::
             instance().addFactory("ros:geometry_msgs/Vector3Stamped",
             ::coil::Creator< ::RTC::ByteDataStream<RTC::TimedVector3D>,
-            RTC::ROSVector3DData>,
-            ::coil::Destructor< ::RTC::ByteDataStream<RTC::TimedVector3D>,
             RTC::ROSVector3DData>);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory("ros:geometry_msgs/Vector3Stamped",
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<geometry_msgs::Vector3Stamped > >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<geometry_msgs::Vector3Stamped > >);
   }
 
@@ -936,15 +912,11 @@ namespace RTC
     coil::GlobalFactory < ::RTC::ByteDataStream<RTC::CameraImage> >::
             instance().addFactory("ros:sensor_msgs/Image",
             ::coil::Creator< ::RTC::ByteDataStream<RTC::CameraImage>,
-            RTC::ROSCameraImageData>,
-            ::coil::Destructor< ::RTC::ByteDataStream<RTC::CameraImage>,
             RTC::ROSCameraImageData>);
 
     RTC::ROSMessageInfoFactory::
             instance().addFactory("ros:sensor_msgs/Image",
             ::coil::Creator< ::RTC::ROSMessageInfoBase,
-            RTC::ROSMessageInfo<sensor_msgs::Image > >,
-            ::coil::Destructor< ::RTC::ROSMessageInfoBase,
             RTC::ROSMessageInfo<sensor_msgs::Image > >);
   }
 

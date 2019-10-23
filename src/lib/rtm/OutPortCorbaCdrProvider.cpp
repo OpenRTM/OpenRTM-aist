@@ -262,8 +262,6 @@ extern "C"
       factory(RTC::OutPortProviderFactory::instance());
     factory.addFactory("corba_cdr",
                        ::coil::Creator< ::RTC::OutPortProvider,
-                                        ::RTC::OutPortCorbaCdrProvider>,
-                       ::coil::Destructor< ::RTC::OutPortProvider,
-                                           ::RTC::OutPortCorbaCdrProvider>);
+                                        ::RTC::OutPortCorbaCdrProvider>);
   }
 }

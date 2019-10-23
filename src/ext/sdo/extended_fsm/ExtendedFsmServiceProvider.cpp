@@ -312,9 +312,6 @@ extern "C"
                        toRepositoryIdOfObject<RTC::ExtendedFsmService>(),
 #endif
                        ::coil::Creator< ::RTC::SdoServiceProviderBase,
-                       ::RTC::ExtendedFsmServiceProvider>,
-                       ::coil::Destructor< ::RTC::SdoServiceProviderBase,
                        ::RTC::ExtendedFsmServiceProvider>);
-                       std::cout << "Init()" << std::endl;
   }
 }

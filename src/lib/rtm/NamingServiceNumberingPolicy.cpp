@@ -112,8 +112,6 @@ extern "C"
     ::RTM::NumberingPolicyFactory::
       instance().addFactory("ns_unique",
                             ::coil::Creator< ::RTM::NumberingPolicyBase,
-							::RTM::NamingServiceNumberingPolicy>,
-                            ::coil::Destructor< ::RTM::NumberingPolicyBase,
 							::RTM::NamingServiceNumberingPolicy>);
   }
 }

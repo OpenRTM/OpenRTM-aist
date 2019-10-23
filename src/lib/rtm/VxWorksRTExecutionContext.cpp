@@ -329,8 +329,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("VxWorksRTExecutionContext",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC_exp::VxWorksRTExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC_exp::VxWorksRTExecutionContext>);
 
     coil::vstring ecs;

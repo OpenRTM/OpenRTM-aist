@@ -225,8 +225,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("SimulatorExecutionContext",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC::SimulatorExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC::SimulatorExecutionContext>);
   }
 }

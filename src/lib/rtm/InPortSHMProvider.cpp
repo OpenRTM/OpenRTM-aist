@@ -205,8 +205,6 @@ extern "C"
     RTC::InPortProviderFactory& factory(RTC::InPortProviderFactory::instance());
     factory.addFactory("shared_memory",
                        ::coil::Creator< ::RTC::InPortProvider,
-                                        ::RTC::InPortSHMProvider>,
-                       ::coil::Destructor< ::RTC::InPortProvider,
-                                           ::RTC::InPortSHMProvider>);
+                                        ::RTC::InPortSHMProvider>);
   }
 }

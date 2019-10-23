@@ -43,14 +43,12 @@ namespace RTC
   struct OutPortBase::provider_cleanup
   {
     provider_cleanup()
-      : m_factory(OutPortProviderFactory::instance())
     {
     }
     void operator()(OutPortProvider* p)
     {
-      m_factory.deleteObject(p);
+      delete p;
     }
-    OutPortProviderFactory& m_factory;
   };
 
   /*!
@@ -879,7 +877,7 @@ namespace RTC
         if (!provider->publishInterface(cprof.properties))
           {
             RTC_ERROR(("publishing interface information error"));
-            OutPortProviderFactory::instance().deleteObject(provider);
+            delete provider;
             return nullptr;
           }
 #else  // ORB_IS_RTORB
@@ -932,7 +930,7 @@ namespace RTC
         if (!consumer->subscribeInterface(cprof.properties))
           {
             RTC_ERROR(("interface subscription failed."));
-            InPortConsumerFactory::instance().deleteObject(consumer);
+            delete consumer;
             return nullptr;
           }
 

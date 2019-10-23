@@ -58,7 +58,7 @@ namespace RTC
         m_task->finalize();
         RTC_PARANOID(("task finalized."));
 
-        RTC::PeriodicTaskFactory::instance().deleteObject(m_task);
+        delete m_task;
         RTC_PARANOID(("task deleted."));
       }
 
@@ -610,8 +610,6 @@ extern "C"
     ::RTC::PublisherFactory::
       instance().addFactory("periodic",
                             ::coil::Creator< ::RTC::PublisherBase,
-                                             ::RTC::PublisherPeriodic>,
-                            ::coil::Destructor< ::RTC::PublisherBase,
-                                                ::RTC::PublisherPeriodic>);
+                                             ::RTC::PublisherPeriodic>);
   }
 }

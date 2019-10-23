@@ -319,8 +319,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("SynchExtTriggerEC",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC::OpenHRPExecutionContext>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC::OpenHRPExecutionContext>);
   }
 }

@@ -360,8 +360,6 @@ extern "C"
     RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
     factory.addFactory("corba_cdr_udp",
                        ::coil::Creator< ::RTC::InPortConsumer,
-                                        ::RTC::InPortCorbaCdrUDPConsumer>,
-                       ::coil::Destructor< ::RTC::InPortConsumer,
-                                           ::RTC::InPortCorbaCdrUDPConsumer>);
+                                        ::RTC::InPortCorbaCdrUDPConsumer>);
   }
 }

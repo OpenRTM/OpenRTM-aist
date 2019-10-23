@@ -109,8 +109,6 @@ extern "C"
       factory(RTC::OutPortProviderFactory::instance());
     factory.addFactory("direct",
                        ::coil::Creator< ::RTC::OutPortProvider,
-                                        ::RTC::OutPortDirectProvider>,
-                       ::coil::Destructor< ::RTC::OutPortProvider,
-                                           ::RTC::OutPortDirectProvider>);
+                                        ::RTC::OutPortDirectProvider>);
   }
 }

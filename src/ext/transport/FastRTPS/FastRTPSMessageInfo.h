@@ -24,13 +24,17 @@
 #include <coil/Factory.h>
 
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning( push )
+#pragma warning( disable : 4251 )
+#endif
 
 namespace RTC
 {
   /*!
    * @if jp
    *
-   * @class FastRTPSMessageInfo
+   * @class FastRTPSMessageInfoBase
    *
    * @brief FastRTPSのメッセージ型に関する情報を格納する基底クラス
    *
@@ -39,7 +43,7 @@ namespace RTC
    *
    * @else
    *
-   * @class FastRTPSessageInfo
+   * @class FastRTPSMessageInfoBase
    *
    * @brief 
    *
@@ -105,22 +109,140 @@ namespace RTC
      */
     virtual std::string data_type() = 0;
   };
-
-
-  using FastRTPSMessageInfoFactory = coil::GlobalFactory<FastRTPSMessageInfoBase>;
-}
-
-
+  /*!
+   * @if jp
+   *
+   * @class FastRTPSMessageInfoList
+   *
+   * @brief FastRTPSのメッセージ型に関する情報のリストを名前とセットで保持するクラス
+   *
+   *
+   * @since 2.0.0
+   *
+   * @else
+   *
+   * @class FastRTPSMessageInfoList
+   *
+   * @brief 
+   *
+   *
+   * @endif
+   */
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#ifdef TRANSPORT_PLUGIN
+    class __declspec(dllexport) FastRTPSMessageInfoList
+#else
+    class __declspec(dllimport) FastRTPSMessageInfoList
+#endif
+#else
+    class FastRTPSMessageInfoList
+#endif
+  {
+  public:
+    /*!
+     * @if jp
+     *
+     * @brief コンストラクタ
+     *
+     * @else
+     *
+     * @brief Constructor
+     *
+     * @endif
+     */
+    FastRTPSMessageInfoList();
+    /*!
+     * @if jp
+     *
+     * @brief デストラクタ
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @endif
+     */
+    ~FastRTPSMessageInfoList();
+    /*!
+     * @if jp
+     *
+     * @brief FastRTPSMessageInfoを追加
+     * 
+     * @param id 名前
+     * @param info FastRTPSMessageInfo
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @param id 
+     * @param info 
+     *
+     * @endif
+     */
+    void addInfo(const std::string &id, FastRTPSMessageInfoBase* info);
+    /*!
+     * @if jp
+     *
+     * @brief FastRTPSMessageInfoを削除
+     *
+     * @param id 名前
+     * @return 削除に成功した場合はtrue
+     *
+     * @else
+     *
+     * @brief 
+     *
+     * @param id 名前
+     * @return
+     *
+     * @endif
+     */
+    bool removeInfo(const std::string& id);
+    /*!
+     * @if jp
+     *
+     * @brief 指定名のFastRTPSMessageInfoを取得
+     *
+     * @param id 名前
+     * @return FastRTPSMessageInfo
+     *
+     * @else
+     *
+     * @brief 
+     *
+     * @param id 
+     * @return
+     *
+     * @endif
+     */
+    FastRTPSMessageInfoBase* getInfo(const std::string& id);
+  private:
+      std::map<std::string, FastRTPSMessageInfoBase*> m_data;
+  };
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #ifdef TRANSPORT_PLUGIN
-  template class __declspec(dllexport) coil::GlobalFactory<RTC::FastRTPSMessageInfoBase>;
+  class __declspec(dllexport) GlobalFastRTPSMessageInfoList
 #else
-  extern template class __declspec(dllimport) coil::GlobalFactory<RTC::FastRTPSMessageInfoBase>;
+  class __declspec(dllimport) GlobalFastRTPSMessageInfoList
 #endif
+#else
+  class GlobalFastRTPSMessageInfo
 #endif
+      : public FastRTPSMessageInfoList,
+      public coil::Singleton<GlobalFastRTPSMessageInfoList >
+  {
+  public:
+  private:
+      friend class coil::Singleton<GlobalFastRTPSMessageInfoList>;
+  };
 
+}
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning( pop )
+#endif
 
 
 #endif // RTC_FASTRTPSMESSAGEINFO_H

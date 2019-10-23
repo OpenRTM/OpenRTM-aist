@@ -121,8 +121,6 @@ namespace RTC
    *       = RTC::SdoServiceConsumerFactory::instance();
    *     factory.addFactory(CORBA_Util::toRepositoryId<OpenRTM::MySdoService>(),
    *                        ::coil::Creator< ::RTC::SdoServiceConsumerBase,
-   *                        ::RTC::MySdoServiceConsumer>,
-   *                        ::coil::Destructor< ::RTC::SdoServiceConsumerBase,
    *                        ::RTC::MySdoServiceConsumer>);
    *   }
    * };

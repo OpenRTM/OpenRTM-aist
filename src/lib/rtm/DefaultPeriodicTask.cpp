@@ -28,9 +28,7 @@ extern "C"
     ::RTC::PeriodicTaskFactory::
       instance().addFactory("default",
                             ::coil::Creator< ::coil::PeriodicTaskBase,
-                                             ::RTC::DefaultPeriodicTask >,
-                            ::coil::Destructor< ::coil::PeriodicTaskBase,
-                                                ::RTC::DefaultPeriodicTask >);
+                                             ::RTC::DefaultPeriodicTask >);
   }
 }
 

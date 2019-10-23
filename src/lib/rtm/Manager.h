@@ -1224,6 +1224,58 @@ namespace RTC
      * @endif
      */
     NamingManager* getNaming();
+
+    /*!
+     * @if jp
+     * @brief 作成した実行コンテキストをリストに追加する
+     *
+     * @param ec Execution Context
+     * @return 既に追加済みの場合はfalseを返す
+     *
+     * @else
+     *
+     * @brief add execution context
+     *
+     * @param ec
+     * @return
+     *
+     * @endif
+     */
+    bool addExecutionContext(RTC::ExecutionContextBase* ec);
+
+    /*!
+     * @if jp
+     * @brief 作成した実行コンテキストをリストから削除する
+     *
+     * @param ec Execution Context
+     * @return true：削除成功、false：指定のECがリストにない
+     *
+     * @else
+     *
+     * @brief remove execution context
+     *
+     * @param ec
+     * @return
+     *
+     * @endif
+     */
+    bool removeExecutionContext(RTC::ExecutionContextBase* ec);
+
+    /*!
+     * @if jp
+     * @brief 作成した実行コンテキストのリスト取得する
+     *
+     * @return ECのリスト
+     *
+     * @else
+     *
+     * @brief get execution contexts
+     *
+     * @return ECのリスト
+     *
+     * @endif
+     */
+    std::vector<RTC::ExecutionContextBase*>& createdExecutionContexts();
     
     //============================================================
     // Protected functions
@@ -2363,6 +2415,8 @@ namespace RTC
     Finalized m_finalized;
 
     ::RTM::ManagerActionListeners m_listeners;
+
+    std::vector<ExecutionContextBase*> m_eclist;
   };  // class Manager
 } // namespace RTC
 

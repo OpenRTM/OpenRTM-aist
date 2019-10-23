@@ -233,17 +233,13 @@ extern "C"
     ::RTC::PublisherFactory::
       instance().addFactory("flush",
                             ::coil::Creator< ::RTC::PublisherBase,
-                                             ::RTC::PublisherFlush>,
-                            ::coil::Destructor< ::RTC::PublisherBase,
-                                                ::RTC::PublisherFlush>);
+                                             ::RTC::PublisherFlush>);
     // FSM4RTC formal/16-04-01 p.25
     // In the FSM4RTC specification, publisher type is defined as "io_mode"
     // Publisher "flush" is functionally equals to "io_mode: block".
     ::RTC::PublisherFactory::
       instance().addFactory("block",
                             ::coil::Creator< ::RTC::PublisherBase,
-                                             ::RTC::PublisherFlush>,
-                            ::coil::Destructor< ::RTC::PublisherBase,
-                                                ::RTC::PublisherFlush>);
+                                             ::RTC::PublisherFlush>);
   }
 }

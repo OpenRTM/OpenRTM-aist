@@ -128,8 +128,6 @@ extern "C"
     RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
     factory.addFactory("direct",
                        ::coil::Creator< ::RTC::InPortConsumer,
-                                        ::RTC::InPortDirectConsumer>,
-                       ::coil::Destructor< ::RTC::InPortConsumer,
-                                           ::RTC::InPortDirectConsumer>);
+                                        ::RTC::InPortDirectConsumer>);
   }
 }

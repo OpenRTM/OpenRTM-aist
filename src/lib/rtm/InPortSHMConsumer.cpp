@@ -325,8 +325,6 @@ extern "C"
     RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
     factory.addFactory("shared_memory",
                        ::coil::Creator< ::RTC::InPortConsumer,
-                       ::RTC::InPortSHMConsumer>,
-                       ::coil::Destructor< ::RTC::InPortConsumer,
-                                           ::RTC::InPortSHMConsumer>);
+                       ::RTC::InPortSHMConsumer>);
   }
 }

@@ -404,7 +404,7 @@ namespace RTC_exp
       m_task->resume();
       m_task->finalize();
 
-      RTC::PeriodicTaskFactory::instance().deleteObject(m_task);
+      delete m_task;
   }
 
 } // namespace RTC_exp
@@ -424,8 +424,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("MultilayerCompositeEC",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC_exp::MultilayerCompositeEC>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC_exp::MultilayerCompositeEC>);
 
     coil::vstring ecs;

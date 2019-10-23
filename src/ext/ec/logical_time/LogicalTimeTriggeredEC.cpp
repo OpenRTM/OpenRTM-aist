@@ -540,8 +540,6 @@ extern "C"
     RTC::ExecutionContextFactory::
       instance().addFactory("ltt_ec",
                             ::coil::Creator< ::RTC::ExecutionContextBase,
-                            ::RTC::LogicalTimeTriggeredEC>,
-                            ::coil::Destructor< ::RTC::ExecutionContextBase,
                             ::RTC::LogicalTimeTriggeredEC>);
   }
 }

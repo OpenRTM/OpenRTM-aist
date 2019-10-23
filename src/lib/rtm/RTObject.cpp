@@ -2166,7 +2166,8 @@ namespace RTC
             // never throws exception
             RTC_ERROR(("Unknown exception caught."));
           }
-        RTC::ExecutionContextFactory::instance().deleteObject(ec);
+        RTC::Manager::instance().removeExecutionContext(ec);
+        delete ec;
       }
     if (!m_eclist.empty())
       {
@@ -2846,7 +2847,7 @@ namespace RTC
                  RTC::ExecutionContextBase*& ec)
   {
     std::vector<RTC::ExecutionContextBase*> eclist;
-    eclist = RTC::ExecutionContextFactory::instance().createdObjects();
+    eclist = RTC::Manager::instance().createdExecutionContexts();
     for (auto & ec_ref : eclist)
       {
         if (ec_ref->getProperties()["type"] == ec_arg["type"] &&
@@ -2906,6 +2907,7 @@ namespace RTC
 
         ec->init(ec_arg);
         m_eclist.emplace_back(ec);
+        RTC::Manager::instance().addExecutionContext(ec);
         ec->bindComponent(this);
       }
 
@@ -2980,6 +2982,7 @@ namespace RTC
           }
         ec->init(default_opts);
         m_eclist.emplace_back(ec);
+        RTC::Manager::instance().addExecutionContext(ec);
         ec->bindComponent(this);
       }
     return ret;

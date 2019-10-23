@@ -296,9 +296,7 @@ namespace RTC
         if (strid == static_cast<const char*>((*it)->getProfile().id))
           {
             (*it)->finalize();
-            SdoServiceProviderFactory&
-              factory(SdoServiceProviderFactory::instance());
-            factory.deleteObject(*it);
+            delete *it;
             m_providers.erase(it);
             RTC_INFO(("SDO service provider has been deleted: %s", id));
             return true;
@@ -370,7 +368,7 @@ namespace RTC
                    static_cast<const char*>(sProfile.interface_type)));
         RTC_DEBUG(("properties: %s",
                    NVUtil::toString(sProfile.properties).c_str()));
-        factory.deleteObject(consumer);
+        delete consumer;
         RTC_INFO(("SDO consumer was deleted by initialization failure"));
         return false;
       }
@@ -412,9 +410,7 @@ namespace RTC
         if (strid == static_cast<const char*>((*it)->getProfile().id))
           {
             (*it)->finalize();
-            SdoServiceConsumerFactory&
-              factory(SdoServiceConsumerFactory::instance());
-            factory.deleteObject(*it);
+            delete *it;
             m_consumers.erase(it);
             RTC_INFO(("SDO service has been deleted: %s", id));
             return true;

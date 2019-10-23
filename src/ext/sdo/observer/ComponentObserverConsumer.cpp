@@ -735,8 +735,6 @@ extern "C"
                        toRepositoryIdOfObject<OpenRTM::ComponentObserver>(),
 #endif
                        ::coil::Creator< ::RTC::SdoServiceConsumerBase,
-                       ::RTC::ComponentObserverConsumer>,
-                       ::coil::Destructor< ::RTC::SdoServiceConsumerBase,
                        ::RTC::ComponentObserverConsumer>);
   }
 }

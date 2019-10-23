@@ -105,8 +105,7 @@ namespace RTC
     // delete consumer
     if (m_consumer != nullptr)
       {
-        OutPortConsumerFactory& cfactory(OutPortConsumerFactory::instance());
-        cfactory.deleteObject(m_consumer);
+        delete m_consumer;
       }
     m_consumer = nullptr;
 

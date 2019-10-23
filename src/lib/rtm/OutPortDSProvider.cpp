@@ -260,8 +260,6 @@ extern "C"
       factory(RTC::OutPortProviderFactory::instance());
     factory.addFactory("data_service",
                        ::coil::Creator< ::RTC::OutPortProvider,
-                                        ::RTC::OutPortDSProvider>,
-                       ::coil::Destructor< ::RTC::OutPortProvider,
-                                           ::RTC::OutPortDSProvider>);
+                                        ::RTC::OutPortDSProvider>);
   }
 }

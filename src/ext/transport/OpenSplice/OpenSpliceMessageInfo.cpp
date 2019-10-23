@@ -65,8 +65,6 @@ namespace RTC
         std::string data_type = ::CORBA_Util::toRepositoryIdOfStruct<DATATYPE>();
         factory.addFactory(data_type,
             ::coil::Creator < OpenSpliceMessageInfoBase,
-            ::RTC::OpenSpliceMessageInfo<DATATYPE, IDLPATH> >,
-            ::coil::Destructor< OpenSpliceMessageInfoBase,
             ::RTC::OpenSpliceMessageInfo<DATATYPE, IDLPATH> >);
         
         if (datatypes.empty())
