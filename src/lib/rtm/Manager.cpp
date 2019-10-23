@@ -854,8 +854,8 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         id_str = id_str + "." + comp->getInstanceName();
 
 #ifndef ORB_IS_TAO
-        CORBA::Object_ptr obj = theORB()->resolve_initial_references("omniINSPOA");
-        PortableServer::POA_ptr poa = PortableServer::POA::_narrow(obj);
+        CORBA::Object_var obj = theORB()->resolve_initial_references("omniINSPOA");
+        PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
         poa->the_POAManager()->activate();
 
         PortableServer::ObjectId_var id;

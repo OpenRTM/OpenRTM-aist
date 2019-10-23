@@ -6,8 +6,8 @@ set cosnames="omninames"
 set orb="omniORB"
 set port=%1
 rem set OMNIORB_USEHOSTNAME=localhost
-call set RTM_ROOT=%RTM_ROOT%
-set PATH=%RTM_ROOT%\bin;%PATH%
+call set omni_root=%OMNI_ROOT%
+set PATH=%OMNI_ROOT%\bin\x86_win32;%PATH%
 
 if NOT DEFINED port set port=2809
 

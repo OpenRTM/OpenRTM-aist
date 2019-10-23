@@ -1,4 +1,4 @@
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+﻿#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #pragma warning(push)
 #pragma warning(disable:4819)
 #endif
