@@ -140,7 +140,7 @@ namespace RTC
          *
          * @endif
          */
-        DDS::DataWriter_ptr createWriter(std::string& topic_name, DDS::DataWriterListener_ptr listener);
+        DDS::DataWriter_ptr createWriter(const std::string& topic_name, DDS::DataWriterListener_ptr listener);
         /*!
          * @if jp
          * @brief DataReader生成
@@ -154,7 +154,7 @@ namespace RTC
          *
          * @endif
          */
-        DDS::DataReader_ptr createReader(std::string& topic_name, DDS::DataReaderListener_ptr listener);
+        DDS::DataReader_ptr createReader(const std::string& topic_name, DDS::DataReaderListener_ptr listener);
         /*!
          * @if jp
          * @brief DataWriter削除
@@ -196,7 +196,7 @@ namespace RTC
          *
          * @endif
          */
-        bool createTopic(std::string& topic_name, std::string& typeName);
+        bool createTopic(const std::string& topic_name, const std::string& typeName);
         /*!
          * @if jp
          * @brief Publisher生成
@@ -240,7 +240,7 @@ namespace RTC
          *
          * @endif
          */
-        bool registerType(std::string& datatype, std::string& idlpath);
+        bool registerType(const std::string& datatype, const std::string& idlpath);
         /*!
          * @if jp
          * @brief 型の登録解除
@@ -256,7 +256,7 @@ namespace RTC
          *
          * @endif
          */
-        bool unregisterType(std::string& name);
+        bool unregisterType(const std::string& name);
         /*!
          * @if jp
          * @brief 型が登録済みかを確認
@@ -272,7 +272,7 @@ namespace RTC
          *
          * @endif
          */
-        bool registeredType(std::string& name);
+        bool registeredType(const std::string& name);
 
         /*!
          * @if jp

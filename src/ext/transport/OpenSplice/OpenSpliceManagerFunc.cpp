@@ -31,20 +31,20 @@ namespace RTC_OpenSplice
 {
     void start()
     {
-        RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
+        RTC::OpenSpliceManager::instance();
     }
     void shutdown()
     {
         RTC::OpenSpliceManager::shutdown_global();
         
     }
-    bool registerType(std::string& datatype, std::string& idlpath)
+    bool registerType(const std::string& datatype, const std::string& idlpath)
     {
         RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
         return topicmgr.registerType(datatype, idlpath);
     }
 
-    bool registeredType(std::string& datatype)
+    bool registeredType(const std::string& datatype)
     {
         RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
         return topicmgr.registeredType(datatype);

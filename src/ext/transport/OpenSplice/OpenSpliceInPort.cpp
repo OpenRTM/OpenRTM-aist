@@ -125,7 +125,7 @@ namespace RTC
     }
     
 
-    OpenSpliceMessageInfoBase* info = OpenSpliceMessageInfoFactory::instance().createObject(dataname);
+    OpenSpliceMessageInfoBase* info = GlobalOpenSpliceMessageInfoList::instance().getInfo(dataname);
 
     if (!info)
     {
@@ -136,8 +136,6 @@ namespace RTC
     std::string dataType = info->data_type();
     topic = info->topic_name(topic);
     std::string idlPath = info->idl_path();
-
-    OpenSpliceMessageInfoFactory::instance().deleteObject(info);
 
     std::string endian_type{coil::normalize(
       prop.getProperty("serializer.cdr.endian", ""))};

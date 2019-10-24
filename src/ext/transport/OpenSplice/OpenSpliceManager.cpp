@@ -341,7 +341,7 @@ namespace RTC
    *
    * @endif
    */
-  DDS::DataWriter_ptr OpenSpliceManager::createWriter(std::string& topic_name, DDS::DataWriterListener_ptr listener)
+  DDS::DataWriter_ptr OpenSpliceManager::createWriter(const std::string& topic_name, DDS::DataWriterListener_ptr listener)
   {
       DDS::Duration_t timeout = DDS::DURATION_INFINITE;
 
@@ -393,7 +393,7 @@ namespace RTC
    *
    * @endif
    */
-  DDS::DataReader_ptr OpenSpliceManager::createReader(std::string &topic_name, DDS::DataReaderListener_ptr listener)
+  DDS::DataReader_ptr OpenSpliceManager::createReader(const std::string &topic_name, DDS::DataReaderListener_ptr listener)
   {
       if (m_topics.count(topic_name) == 0)
       {
@@ -483,7 +483,7 @@ namespace RTC
    *
    * @endif
    */
-  bool OpenSpliceManager::createTopic(std::string& topic_name, std::string& typeName)
+  bool OpenSpliceManager::createTopic(const std::string& topic_name, const std::string& typeName)
   {
       DDS::ReturnCode_t result;
       DDS::TopicQos tQos;
@@ -521,7 +521,7 @@ namespace RTC
    *
    * @endif
    */
-  bool OpenSpliceManager::registerType(std::string& datatype, std::string& idlpath)
+  bool OpenSpliceManager::registerType(const std::string& datatype, const std::string& idlpath)
   {
       if (m_typesupports.count(datatype))
       {
@@ -631,7 +631,7 @@ namespace RTC
    *
    * @endif
    */
-  bool OpenSpliceManager::unregisterType(std::string& /*name*/)
+  bool OpenSpliceManager::unregisterType(const std::string& /*name*/)
   {
       return false;
   }
@@ -651,7 +651,7 @@ namespace RTC
    *
    * @endif
    */
-  bool OpenSpliceManager::registeredType(std::string& name)
+  bool OpenSpliceManager::registeredType(const std::string& name)
   {
       if (m_typesupports.count(name) == 0)
       {

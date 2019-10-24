@@ -173,7 +173,7 @@ namespace RTC
 
     XmlRpc::XmlRpcClient *master = ros::XMLRPCManager::instance()->getXMLRPCClient(m_roscorehost, m_roscoreport, "/");
 
-    ROSMessageInfoBase* info = ROSMessageInfoFactory::instance().createObject(m_messageType);
+    ROSMessageInfoBase* info = GlobalROSMessageInfoList::instance().getInfo(m_messageType);
 
     if(!info)
     {
@@ -186,8 +186,6 @@ namespace RTC
     m_datatype = info->type();
     request[2] = m_datatype;
     request[3] = std::string(ros::XMLRPCManager::instance()->getServerURI());
-
-    ROSMessageInfoFactory::instance().deleteObject(info);
 
 
     bool b = master->execute("registerSubscriber", request, response);
@@ -343,7 +341,7 @@ namespace RTC
 
       m_tcp_connecters[xmlrpc_uri] = PublisherLink(connection, m_pubnum);
       m_pubnum++;
-      ROSMessageInfoBase* info = ROSMessageInfoFactory::instance().createObject(m_messageType);
+      ROSMessageInfoBase* info = GlobalROSMessageInfoList::instance().getInfo(m_messageType);
 
       if(!info)
       {
@@ -365,8 +363,6 @@ namespace RTC
       RTC_VERBOSE(("Caller ID:%s", m_callerid.c_str()));
       RTC_VERBOSE(("Topic Name:%s", topic.c_str()));
       RTC_VERBOSE(("TCPTransPort created"));
-
-      ROSMessageInfoFactory::instance().deleteObject(info);
 
 
 

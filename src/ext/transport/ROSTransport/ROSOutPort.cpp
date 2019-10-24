@@ -119,7 +119,7 @@ namespace RTC
     
     XmlRpc::XmlRpcClient *master = ros::XMLRPCManager::instance()->getXMLRPCClient(m_roscorehost, m_roscoreport, "/");
 
-    ROSMessageInfoBase* info = ROSMessageInfoFactory::instance().createObject(m_messageType);
+    ROSMessageInfoBase* info = GlobalROSMessageInfoList::instance().getInfo(m_messageType);
 
     if(!info)
     {
@@ -133,8 +133,6 @@ namespace RTC
     m_datatype = info->type();
     request[2] = m_datatype;
     request[3] = std::string(ros::XMLRPCManager::instance()->getServerURI());
-
-    ROSMessageInfoFactory::instance().deleteObject(info);
 
     bool b = master->execute("registerPublisher", request, response);
 

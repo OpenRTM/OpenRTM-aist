@@ -22,16 +22,19 @@
 
 #include <coil/Properties.h>
 #include <coil/Factory.h>
-#include <rtm/Manager.h>
 
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning( push )
+#pragma warning( disable : 4251 )
+#endif
 
 namespace RTC
 {
   /*!
    * @if jp
    *
-   * @class OpenSpliceMessageInfo
+   * @class OpenSpliceMessageInfoBase
    *
    * @brief OpenSpliceのメッセージ型に関する情報を格納する基底クラス
    *
@@ -40,7 +43,7 @@ namespace RTC
    *
    * @else
    *
-   * @class OpenSpliceessageInfo
+   * @class OpenSpliceMessageInfoBase
    *
    * @brief 
    *
@@ -122,22 +125,142 @@ namespace RTC
      */
     virtual std::string idl_path() = 0;
   };
-
-
-  using OpenSpliceMessageInfoFactory = coil::GlobalFactory<OpenSpliceMessageInfoBase>;
-}
-
-
+  /*!
+   * @if jp
+   *
+   * @class OpenSpliceMessageInfoList
+   *
+   * @brief OpenSpliceのメッセージ型に関する情報のリストを名前とセットで保持するクラス
+   *
+   *
+   * @since 2.0.0
+   *
+   * @else
+   *
+   * @class OpenSpliceMessageInfoList
+   *
+   * @brief 
+   *
+   *
+   * @endif
+   */
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#ifdef TRANSPORT_PLUGIN
+    class __declspec(dllexport) OpenSpliceMessageInfoList
+#else
+    class __declspec(dllimport) OpenSpliceMessageInfoList
+#endif
+#else
+    class OpenSpliceMessageInfoList
+#endif
+  {
+  public:
+    /*!
+     * @if jp
+     *
+     * @brief コンストラクタ
+     *
+     * @else
+     *
+     * @brief Constructor
+     *
+     * @endif
+     */
+    OpenSpliceMessageInfoList();
+    /*!
+     * @if jp
+     *
+     * @brief デストラクタ
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @endif
+     */
+    ~OpenSpliceMessageInfoList();
+    /*!
+     * @if jp
+     *
+     * @brief OpenSpliceMessageInfoを追加
+     * 
+     * @param id 名前
+     * @param info OpenSpliceMessageInfo
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @param id 
+     * @param info 
+     *
+     * @endif
+     */
+    void addInfo(const std::string &id, OpenSpliceMessageInfoBase* info);
+    /*!
+     * @if jp
+     *
+     * @brief OpenSpliceMessageInfoを削除
+     *
+     * @param id 名前
+     * @return 削除に成功した場合はtrue
+     *
+     * @else
+     *
+     * @brief 
+     *
+     * @param id 名前
+     * @return
+     *
+     * @endif
+     */
+    bool removeInfo(const std::string& id);
+    /*!
+     * @if jp
+     *
+     * @brief 指定名のOpenSpliceMessageInfoを取得
+     *
+     * @param id 名前
+     * @return OpenSpliceMessageInfo
+     *
+     * @else
+     *
+     * @brief 
+     *
+     * @param id 
+     * @return
+     *
+     * @endif
+     */
+    OpenSpliceMessageInfoBase* getInfo(const std::string& id);
+  private:
+      std::map<std::string, OpenSpliceMessageInfoBase*> m_data;
+  };
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #ifdef TRANSPORT_PLUGIN
-  template class __declspec(dllexport) coil::GlobalFactory<RTC::OpenSpliceMessageInfoBase>;
+  class __declspec(dllexport) GlobalOpenSpliceMessageInfoList
 #else
-  extern template class __declspec(dllimport) coil::GlobalFactory<RTC::OpenSpliceMessageInfoBase>;
+  class __declspec(dllimport) GlobalOpenSpliceMessageInfoList
 #endif
+#else
+  class GlobalOpenSpliceMessageInfo
 #endif
+      : public OpenSpliceMessageInfoList,
+      public coil::Singleton<GlobalOpenSpliceMessageInfoList >
+  {
+  public:
+  private:
+      friend class coil::Singleton<GlobalOpenSpliceMessageInfoList>;
+  };
+
+}
 
 void OpenSpliceMessageInfoInit(const coil::Properties& prop);
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning( pop )
+#endif
 
 
 

@@ -303,7 +303,7 @@ namespace RTC
 
       
 
-      ROSMessageInfoBase* info = ROSMessageInfoFactory::instance().createObject(m_messageType);
+      ROSMessageInfoBase* info = GlobalROSMessageInfoList::instance().getInfo(m_messageType);
       
       if(!info)
       {
@@ -328,8 +328,6 @@ namespace RTC
       RTC_VERBOSE(("Topic Name:%s", topic.c_str()));
       RTC_VERBOSE(("TCPTransPort created"));
 
-
-      ROSMessageInfoFactory::instance().deleteObject(info);
 
       conn->writeHeader(m, boost::bind(&ROSOutPort::onHeaderWritten, this, _1));
       return true;
