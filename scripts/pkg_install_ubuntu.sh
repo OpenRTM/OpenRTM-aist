@@ -18,7 +18,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.0.0.01
+VERSION=2.0.0.02
 
 #
 #---------------------------------------
@@ -314,7 +314,11 @@ create_srclist () {
     echo $msg3
     exit
   fi
-  openrtm_repo="deb http://$reposerver/pub/Linux/ubuntu/ $code_name main"
+  if test "x$code_name" = "xxenial"; then
+    openrtm_repo="deb http://$reposerver/pub/Linux/ubuntu/ $code_name main"
+  else
+    openrtm_repo="deb [arch=amd64] http://$reposerver/pub/Linux/ubuntu/ $code_name main"
+  fi
 }
 
 #---------------------------------------
