@@ -1,16 +1,10 @@
 cmake_minimum_required (VERSION 3.5.1)
 
 if(WIN32)
-	set(target rtmManipulator${RTM_SHORT_VERSION}_${RTM_VC_VER}_${CMAKE_VS_PLATFORM_NAME})
-else()
-	set(target rtmManipulator)
-endif()
-
-if(WIN32)
 	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-project (${target}
+project (rtmManipulator
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)
 
@@ -49,12 +43,11 @@ else()
 		PUBLIC ${PROJECT_BINARY_DIR})
 
 	add_library(${PROJECT_NAME}-static STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objlib>)
-	set_target_properties(${PROJECT_NAME}-static PROPERTIES DEBUG_POSTFIX d)
 
 	add_library(${PROJECT_NAME} SHARED
 		$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>)
 	openrtm_set_link_props_shared(${PROJECT_NAME})
-	set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
+	openrtm_set_postfix(${PROJECT_NAME})
 	if(WIN32)
 		target_link_libraries(${PROJECT_NAME} PRIVATE ${ORB_LIBRARIES} ${RTM_PROJECT_NAME} ${RTCSKEL_PROJECT_NAME})
 	else()
