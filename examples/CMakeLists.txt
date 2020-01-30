@@ -39,7 +39,6 @@ function(examples_build target)
 					ARCHIVE DESTINATION ${INSTALL_RTM_EXAMPLE_DIR}
 					RUNTIME DESTINATION ${INSTALL_RTM_EXAMPLE_DIR}
 					COMPONENT examples)
-		install(FILES ${standalone_srcs} DESTINATION ${INSTALL_RTM_EXAMPLE_DIR}/src/Analyzer COMPONENT sources)
 	else()
 		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES})
 

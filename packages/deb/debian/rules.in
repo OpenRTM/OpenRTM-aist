@@ -39,6 +39,7 @@ endif
 
 TARGET = $(CURDIR)/debian/openrtm-aist/usr
 TARGET_dev = $(CURDIR)/debian/openrtm-aist-dev/usr
+TARGET_idl = $(CURDIR)/debian/openrtm-aist-idl/usr
 TARGET_example = $(CURDIR)/debian/openrtm-aist-example/usr
 TARGET_doc = $(CURDIR)/debian/openrtm-aist-doc/usr
 
@@ -104,23 +105,30 @@ install-arch:
 	(mkdir -p $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
 	(cp -R $(INSTALL_PREFIX)/lib/*.so* $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
 	(cp $(INSTALL_PREFIX)/lib/*.a $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
+	(rm $(TARGET)/lib/$(DEB_HOST_MULTIARCH)/libhrtm*)
 	(cp -r $(INSTALL_PREFIX)/lib/openrtm-$(SHORT_VER) $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
 	(rm -r $(TARGET)/lib/$(DEB_HOST_MULTIARCH)/openrtm-$(SHORT_VER)/cmake)
 	(rm -r $(TARGET)/lib/$(DEB_HOST_MULTIARCH)/openrtm-$(SHORT_VER)/py_helper)
 	(cp -r $(INSTALL_PREFIX)/lib/pkgconfig $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
-	(rm $(TARGET)/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/libcoil.pc)
 
 	# for openrtm-dev package
 	(mkdir -p $(TARGET_dev)/bin)
-	(cp $(INSTALL_PREFIX)/bin/coil-config $(TARGET_dev)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtc-template $(TARGET_dev)/bin)
 	(cp $(INSTALL_PREFIX)/bin/rtm-skelwrapper $(TARGET_dev)/bin)
 	(cp -r $(INSTALL_PREFIX)/include $(TARGET_dev))
+	(rm -r $(TARGET_dev)/include/openrtm-$(SHORT_VER)/hrtm)
 	(mkdir -p $(TARGET_dev)/lib/$(DEB_HOST_MULTIARCH)/openrtm-$(SHORT_VER))
 	(cp -r $(INSTALL_PREFIX)/lib/openrtm-$(SHORT_VER)/cmake $(TARGET_dev)/lib/$(DEB_HOST_MULTIARCH)/openrtm-$(SHORT_VER))
 	(cp -r $(INSTALL_PREFIX)/lib/openrtm-$(SHORT_VER)/py_helper $(TARGET_dev)/lib/$(DEB_HOST_MULTIARCH)/openrtm-$(SHORT_VER))
 	(cp -r $(INSTALL_PREFIX)/lib/pkgconfig $(TARGET_dev)/lib/$(DEB_HOST_MULTIARCH))
 	(rm $(TARGET_dev)/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/openrtm-aist.pc)
+
+	# for openrtm-aist-idl package
+	(mkdir -p $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
+	(mv $(CURDIR)/debian/openrtm-aist-dev/usr/include/openrtm-$(SHORT_VER)/rtm/idl/*.idl $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
+	(mkdir -p $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
+	(cp $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl/* $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
+	(mkdir -p $(CURDIR)/debian/openrtm-aist-idl/etc/profile.d)
+	(echo "export RTM_IDL_DIR=/usr/share/openrtm-$(SHORT_VER)/idl" > $(CURDIR)/debian/openrtm-aist-idl/etc/profile.d/openrtm-aist-idl.sh)
 
 	# for openrtm-aist-example package
 	(mkdir -p $(TARGET_example)/share/openrtm-$(SHORT_VER))

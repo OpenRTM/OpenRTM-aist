@@ -6,7 +6,8 @@ RUN apt-get update\
  build-essential\
  debhelper\
  devscripts\
- fakeroot
+ fakeroot\
+ python
 
 COPY OpenRTM-aist /root/OpenRTM-aist
 RUN cmake\
@@ -23,6 +24,7 @@ RUN cmake\
 
 WORKDIR /root/OpenRTM-aist/packages/deb/
 RUN mkdir -p /root/cxx-deb-pkgs\
+ && cp /tmp/rtm/build/rules debian/\
  && chmod 775 dpkg_build.sh\
  && ./dpkg_build.sh
 

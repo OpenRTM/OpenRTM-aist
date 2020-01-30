@@ -25,10 +25,18 @@ Description: OpenRTM-aist, RT-Middleware distributed by AIST
 Package: openrtm-aist-dev
 Architecture: any
 Multi-Arch: same
-Depends: openrtm-aist
+Depends: openrtm-aist, openrtm-aist-idl (>= 1.2.1-0)
 Description: OpenRTM-aist headers for development
  The header files and libraries needed for developing RT-Components
  using OpenRTM-aist.
+
+Package: openrtm-aist-idl
+Architecture: any
+Multi-Arch: same
+Replaces: openrtm-aist-dev (<< 1.2.1-0)
+Breaks: openrtm-aist-dev (<< 1.2.1-0)
+Description: OpenRTM-aist idls for development
+ The idl files needed for developing RT-Components using OpenRTM-aist.
 
 Package: openrtm-aist-example
 Architecture: any

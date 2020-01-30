@@ -6,7 +6,7 @@ configuration:
   - Release
 environment:
   omniorb: omniORB-4.2.3
-  cmake_flgas: -DOMNI_VERSION=42 -DOMNI_MINOR=3 -DOMNITHREAD_VERSION=41 -DCORBA=omniORB -DSSL_ENABLE=ON -DOBSERVER_ENABLE=ON
+  cmake_flags: -DOMNI_VERSION=42 -DOMNI_MINOR=3 -DOMNITHREAD_VERSION=41 -DCORBA=omniORB -DSSL_ENABLE=ON -DOBSERVER_ENABLE=ON
   matrix:
     - cmake_generator: Visual Studio 16 2019          # CMake -G
       cmake_archtecture: x64                          # CMake -A
@@ -24,6 +24,12 @@ environment:
       cmake_archtecture: x64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       python: 37-x64
+    - cmake_generator: Ninja
+      cmake_archtecture: x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      python: 37-x64
+      MSVC_HOME: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community"
+
 matrix:
   fast_finish: true
 
@@ -42,15 +48,16 @@ init:
         "Visual Studio 14 2015" { $vc_tool = "140" }
         "Visual Studio 15 2017" { $vc_tool = "140" }
         "Visual Studio 16 2019" { $vc_tool = "140" }
-        default {"Not Found Visual Studio tool version."}
+        default { $vc_tool = "140" }
       }
       $Env:omni = "${Env:omniorb}-${Env:cmake_archtecture}-vc${vc_tool}-py$(${Env:python}.Split("-")[0])"
       $omni_url = "http://tmp.openrtm.org/pub/omniORB/win32/${Env:omniorb}/${Env:omni}.zip"
       $Env:Path = "C:\Python${Env:python};c:\Python${Env:python}\scripts;${Env:Path}"
   - ps: $Env:omni
   - python --version
+  - cmake --version
 
-before_build:
+install:
   - ps: |
       # prepare omniORB (restored from cache if cached)
       if(-NOT (Test-Path "C:/omni/${Env:omni}")){
@@ -58,9 +65,9 @@ before_build:
         Expand-Archive -Path ${Env:TEMP}\a.zip -DestinationPath "C:/omni"
       }
 
-  - cmake --version
-  - echo cmake %cmake_flgas% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -A "%cmake_archtecture%" -S . -B../build
-  - cmake %cmake_flgas% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -A "%cmake_archtecture%" -S . -B../build
+before_build:
+  - echo cmake %cmake_flags% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -A "%cmake_archtecture%" -S . -B ../build
+  -      cmake %cmake_flags% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -A "%cmake_archtecture%" -S . -B ../build
 
 # sample: cmake build script for cmake 3.15.
 #build_script:
@@ -73,8 +80,24 @@ build:
   verbosity: minimal
   parallel: true
 
+for:
+-
+  matrix:
+    only:
+      - cmake_generator: Ninja
+
+  before_build:
+    - ninja --version
+    - call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %cmake_archtecture%
+    # clang for code analysis.
+    - echo cmake %cmake_flags% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -DCMAKE_CXX_COMPILER="clang-cl.exe" -DCMAKE_LINKER="lld-link.exe" -DCMAKE_BUILD_TYPE=Release -S . -B ../build
+    -      cmake %cmake_flags% -DORB_ROOT=C:/omni/%omni% -G "%cmake_generator%" -DCMAKE_CXX_COMPILER="clang-cl.exe" -DCMAKE_LINKER="lld-link.exe" -DCMAKE_BUILD_TYPE=Release -S . -B ../build
+
+  build_script:
+    - cmake --build ../build
+
 cache:
-  - C:/omni -> appveyor.yml
+  - C:/omni -> .appveyor.yml
 
 only_commits:
   files:

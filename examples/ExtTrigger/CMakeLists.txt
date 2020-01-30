@@ -43,8 +43,6 @@ else()
 				RUNTIME DESTINATION ${INSTALL_RTM_EXAMPLE_DIR}
 				COMPONENT examples)
 
-	install(FILES ${srcs} DESTINATION ${INSTALL_RTM_EXAMPLE_DIR}/src/ExtTrigger COMPONENT sources)
-
 endif()
 
 

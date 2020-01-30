@@ -263,7 +263,7 @@ namespace RTC
       RTC_TRACE(("connector endian: %s", isLittleEndian() ? "little":"big"));
       
       DataPortStatus ret = write((ByteDataStreamBase*)cdr);
-      //coil::GlobalFactory < ::RTC::ByteDataStream<DataType> >::instance().deleteObject(cdr);
+
       return ret;
     }
 

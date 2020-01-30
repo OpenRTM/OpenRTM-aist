@@ -13,6 +13,11 @@ else()
 	set(Python3_EXECUTABLE python3)
 endif()
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+   set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
 if(NOT ORB_ROOT)
 	if(CORBA STREQUAL "omniORB")
 		if(UNIX)
