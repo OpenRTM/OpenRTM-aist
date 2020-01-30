@@ -19,7 +19,6 @@
 
 from __future__ import print_function
 
-import skel_wrapper
 import os
 import sys
 import getopt
@@ -28,6 +27,8 @@ import subprocess
 if os.name != "nt":
     pyhelper_path = "@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_SCRIPT_DIR@py_helper"
     sys.path.append(pyhelper_path)
+
+import skel_wrapper
 
 
 opt_args_fmt = ["help",
