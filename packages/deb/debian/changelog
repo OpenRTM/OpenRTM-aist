@@ -1,3 +1,9 @@
+openrtm-aist (1.2.1-1) experimental; urgency=low
+
+  * 1.2.1-1 (1.2.1-RELEASE). Python3 support(manager.supported_languages). 
+
+ -- Noriaki Ando <n-ando@aist.go.jp>  Tue, 25 Feb 2020 11:23:28 +0900
+
 openrtm-aist (1.2.1-0) experimental; urgency=low
 
   * 1.2.1-0 (1.2.1-RELEASE). OpenRTM-aist-1.2.1-RELEASE

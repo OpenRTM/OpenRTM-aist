@@ -534,14 +534,14 @@ namespace RTC
             break;
           }
       }
-	for (size_t k(0); k < m_loadfailmods.size(); ++k)
-	{
-		if (m_loadfailmods[k] == fpath)
-		{
-			exists = true;
-			break;
-		}
-	}
+//	for (size_t k(0); k < m_loadfailmods.size(); ++k)
+//	{
+//		if (m_loadfailmods[k] == fpath)
+//		{
+//			exists = true;
+//			break;
+//		}
+//	}
     if (!exists)
       {
         RTC_DEBUG(("New module: %s", fpath.c_str()));
