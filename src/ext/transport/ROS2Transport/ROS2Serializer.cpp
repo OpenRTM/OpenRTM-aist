@@ -173,10 +173,7 @@ namespace RTC
      *
      * @endif
      */
-    ROS2StringData()
-    {
-
-    }
+    ROS2StringData() = default;
     /*!
      * @if jp
      *
@@ -188,10 +185,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2StringData() override
-    {
-
-    }
+    ~ROS2StringData() override = default;
 
     /*!
      * @if jp
@@ -305,10 +299,7 @@ namespace RTC
      *
      * @endif
      */
-    ROS2Point3DData()
-    {
-
-    }
+    ROS2Point3DData() = default;
 
     /*!
      * @if jp
@@ -321,10 +312,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2Point3DData() override
-    {
-
-    }
+    ~ROS2Point3DData() override = default;
 
     /*!
      * @if jp
@@ -447,10 +435,7 @@ namespace RTC
      *
      * @endif
      */
-    ROS2QuaternionData()
-    {
-
-    }
+    ROS2QuaternionData() = default;
     /*!
      * @if jp
      *
@@ -462,10 +447,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2QuaternionData() override
-    {
-
-    }
+    ~ROS2QuaternionData() override = default;
 
     /*!
      * @if jp
@@ -590,10 +572,8 @@ namespace RTC
      *
      * @endif
      */
-    ROS2Vector3DData()
-    {
+    ROS2Vector3DData() = default;
 
-    }
     /*!
      * @if jp
      *
@@ -605,10 +585,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2Vector3DData() override
-    {
-
-    }
+    ~ROS2Vector3DData() override = default;
 
     /*!
      * @if jp
@@ -735,10 +712,7 @@ namespace RTC
      *
      * @endif
      */
-    ROS2CameraImageData()
-    {
-
-    }
+    ROS2CameraImageData() = default;
     /*!
      * @if jp
      *
@@ -750,10 +724,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2CameraImageData() override
-    {
-
-    }
+    ~ROS2CameraImageData() override = default;
 
     /*!
      * @if jp
@@ -879,9 +850,8 @@ extern "C"
    * @brief Module initialization
    * @endif
    */
-  void ROS2SerializerInit(RTC::Manager* manager)
+  void ROS2SerializerInit(RTC::Manager* /*manager*/)
   {
-    (void)manager;
     
     RTC::ROS2SimpleDataInit<RTC::TimedState, CORBA::Short>();
     RTC::ROS2SimpleDataInit<RTC::TimedShort, CORBA::Short>();

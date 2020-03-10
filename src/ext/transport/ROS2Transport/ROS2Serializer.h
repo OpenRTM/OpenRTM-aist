@@ -106,7 +106,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROS2SerializerBase() override = default;
+    ~ROS2SerializerBase() override;
 
     /*!
      * @if jp
@@ -439,6 +439,9 @@ namespace RTC
   protected:
     eprosima::fastrtps::rtps::SerializedPayload_t m_message;
   };
+
+  template <class DataType>
+  ROS2SerializerBase<DataType>::~ROS2SerializerBase() = default;
 
   /*!
    * @if jp

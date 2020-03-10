@@ -197,10 +197,8 @@ namespace RTC
      *
      * @endif
      */
-    ROSStringData()
-    {
+    ROSStringData() = default;
 
-    }
     /*!
      * @if jp
      *
@@ -212,10 +210,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROSStringData() override
-    {
-
-    }
+    ~ROSStringData() override = default;
 
     /*!
      * @if jp
@@ -330,10 +325,7 @@ namespace RTC
      *
      * @endif
      */
-    ROSPoint3DData()
-    {
-
-    }
+    ROSPoint3DData() = default;
     /*!
      * @if jp
      *
@@ -345,10 +337,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROSPoint3DData() override
-    {
-
-    }
+    ~ROSPoint3DData() override = default;
 
     /*!
      * @if jp
@@ -474,10 +463,7 @@ namespace RTC
      *
      * @endif
      */
-    ROSQuaternionData()
-    {
-
-    }
+    ROSQuaternionData() = default;
     /*!
      * @if jp
      *
@@ -489,10 +475,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROSQuaternionData() override
-    {
-
-    }
+    ~ROSQuaternionData() override = default;
 
     /*!
      * @if jp
@@ -620,10 +603,7 @@ namespace RTC
      *
      * @endif
      */
-    ROSVector3DData()
-    {
-
-    }
+    ROSVector3DData() = default;
     /*!
      * @if jp
      *
@@ -635,10 +615,7 @@ namespace RTC
      *
      * @endif
      */
-    ~ROSVector3DData() override
-    {
-
-    }
+    ~ROSVector3DData() override = default;
 
     /*!
      * @if jp
@@ -765,10 +742,7 @@ namespace RTC
      *
      * @endif
      */
-    ROSCameraImageData()
-    {
-
-    }
+    ROSCameraImageData() = default;
     /*!
      * @if jp
      *
@@ -911,9 +885,8 @@ extern "C"
    * @brief Module initialization
    * @endif
    */
-  void ROSSerializerInit(RTC::Manager* manager)
+  void ROSSerializerInit(RTC::Manager* /*manager*/)
   {
-    (void)manager;
     RTC::ROSSimpleDataInit<RTC::TimedState, CORBA::Short>();
     RTC::ROSSimpleDataInit<RTC::TimedShort, CORBA::Short>();
     RTC::ROSSimpleDataInit<RTC::TimedLong, CORBA::Long>();
