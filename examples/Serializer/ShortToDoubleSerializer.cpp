@@ -37,7 +37,7 @@ extern "C"
     DLL_EXPORT void ShortToDoubleSerializerInit(RTC::Manager* /*manager*/)
     {
         //以下のファクトリはデータ型ごとに登録する必要がある
-        RTC::addSerializer<RTC::TimedDouble, ShortToDoubleSerializer>("corba:RTC/TimedShort:RTC/TimedDouble");
+        RTC::addSerializer<RTC::TimedDouble, ShortToDoubleSerializer>("corba:RTC/TimedDouble:RTC/TimedShort");
         //addSerializer関数の第1引数で登録名を設定。以下で独自シリアライザを利用するときはこの名前を使用する。
     }
 }
