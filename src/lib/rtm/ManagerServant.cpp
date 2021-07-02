@@ -256,6 +256,7 @@ namespace RTM
                 m_slaves[i] = RTM::Manager::_nil();
               }
             CORBA_SeqUtil::erase(m_slaves, i); --i;
+            len = m_slaves.length();
           }
       }
     return cprof._retn();
@@ -314,6 +315,7 @@ namespace RTM
                 m_slaves[i] = RTM::Manager::_nil();
               }
             CORBA_SeqUtil::erase(m_slaves, i); --i;
+            len = m_slaves.length();
           }
       }
     return cprof._retn();
@@ -561,6 +563,7 @@ namespace RTM
             m_slaves[i] = RTM::Manager::_nil();
           }
         CORBA_SeqUtil::erase(m_slaves, i); --i;
+        len = m_slaves.length();
       }
     return crtcs._retn();
   }
@@ -615,6 +618,7 @@ namespace RTM
             m_slaves[i] = RTM::Manager::_nil();
           }
         CORBA_SeqUtil::erase(m_slaves, i); --i;
+        len = m_slaves.length();
       }
     return cprofs._retn();
   }
@@ -1256,7 +1260,7 @@ namespace RTM
                 catch (...)
                   {
                      RTC_ERROR(("A slave manager thrown exception."));
-                     CORBA_SeqUtil::erase(m_slaves, i);
+                     CORBA_SeqUtil::erase(m_slaves, i); --i;
                      RTC_ERROR(("This slave manager is removed from slave list."));
                    }
                }
@@ -1461,19 +1465,19 @@ namespace RTM
               std::lock_guard<std::mutex> guardm(m_masterMutex);
               if (m_masters.length() > 0)
                 {
-                  for (CORBA::ULong i = 0; i < m_masters.length(); i++)
+                  for (CORBA::ULong i = 0; i < m_masters.length(); ++i)
                     {
                       try
                         {
                           if (m_masters[i]->_non_existent())
                             {
-                              CORBA_SeqUtil::erase(m_masters, i);
+                              CORBA_SeqUtil::erase(m_masters, i); --i;
                             }
                         }
                       catch (...)
                         {
                           RTC_ERROR(("Unknown exception cought."));
-                          CORBA_SeqUtil::erase(m_masters, i);
+                          CORBA_SeqUtil::erase(m_masters, i); --i;
                         }
                     }
                 }
