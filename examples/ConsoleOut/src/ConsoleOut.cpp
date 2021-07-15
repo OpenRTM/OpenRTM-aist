@@ -132,20 +132,21 @@ RTC::ReturnCode_t ConsoleOut::onShutdown(RTC::UniqueId ec_id)
 }
 */
 
-
+/*
 RTC::ReturnCode_t ConsoleOut::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
+*/
 
-
+/*
 RTC::ReturnCode_t ConsoleOut::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
+*/
 
-
-RTC::ReturnCode_t ConsoleOut::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t ConsoleOut::onExecute(RTC::UniqueId /*ec_id*/)
 {
   if (m_inIn.isNew())
     {
@@ -207,6 +208,6 @@ extern "C"
                              RTC::Delete<ConsoleOut>);
   }
   
-};
+}
 
 

@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+if(OpenRTM_aist_BINARY_DIR)
+  set(srcs src/ConsoleIn.cpp include/ConsoleIn/ConsoleIn.h)
+  examples_build(ConsoleIn SRCS "${srcs}" MAIN src/ConsoleInComp.cpp
+                 EXTERNAL_INCLUDE PRIVATE include/ConsoleIn)
+  install(FILES rtc.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
+  install(FILES consin.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
+else(OpenRTM_aist_BINARY_DIR)
+
 project(ConsoleIn)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 include("${PROJECT_SOURCE_DIR}/cmake/utils.cmake")
@@ -163,3 +171,5 @@ configure_file("${PROJECT_SOURCE_DIR}/cmake/cpack_options.cmake.in"
 set(CPACK_PROJECT_CONFIG_FILE ${cpack_options})
 include(${CPACK_PROJECT_CONFIG_FILE})
 include(CPack)
+
+endif(OpenRTM_aist_BINARY_DIR)

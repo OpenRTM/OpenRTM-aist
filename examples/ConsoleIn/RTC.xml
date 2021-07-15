@@ -8,8 +8,8 @@
         <rtc:OnFinalize xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
         <rtc:OnStartup xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
         <rtc:OnShutdown xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
-        <rtc:OnActivated xsi:type="rtcDoc:action_status_doc" rtc:implemented="true"/>
-        <rtc:OnDeactivated xsi:type="rtcDoc:action_status_doc" rtc:implemented="true"/>
+        <rtc:OnActivated xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
+        <rtc:OnDeactivated xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
         <rtc:OnAborting xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
         <rtc:OnError xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>
         <rtc:OnReset xsi:type="rtcDoc:action_status_doc" rtc:implemented="false"/>

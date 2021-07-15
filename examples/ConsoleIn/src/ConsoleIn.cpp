@@ -132,20 +132,21 @@ RTC::ReturnCode_t ConsoleIn::onShutdown(RTC::UniqueId ec_id)
 }
 */
 
-
+/*
 RTC::ReturnCode_t ConsoleIn::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
+*/
 
-
+/*
 RTC::ReturnCode_t ConsoleIn::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
+*/
 
-
-RTC::ReturnCode_t ConsoleIn::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t ConsoleIn::onExecute(RTC::UniqueId /*ec_id*/)
 {
   std::cout << "Please input number: ";
 #if defined(RTM_OS_VXWORKS)
@@ -215,6 +216,6 @@ extern "C"
                              RTC::Delete<ConsoleIn>);
   }
   
-};
+}
 
 
