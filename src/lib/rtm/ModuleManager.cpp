@@ -119,7 +119,12 @@ namespace RTC
       }
     else
       {
-        file_path = findFile(file_name, m_loadPath);
+        StringVector paths;
+        for(size_t i=0;i < m_loadPath.size();i++)
+        {
+          paths.emplace_back(coil::replaceEnv(m_loadPath[i]));
+        }
+        file_path = findFile(file_name, paths);
       }
 
     // Now file_name is valid full path to moduleW
@@ -482,6 +487,7 @@ namespace RTC
             continue;
           }
         
+        path = coil::replaceEnv(path);
         RTC_DEBUG(("Module load path: %s", path.c_str()));
 
         // get file list for each suffixes
