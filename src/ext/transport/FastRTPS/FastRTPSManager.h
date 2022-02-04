@@ -23,7 +23,14 @@
 #include "FastRTPSOutPort.h"
 #include <map>
 #include <vector>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
 #include <fastrtps/fastrtps_fwd.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
 
 namespace RTC
 {
@@ -63,7 +70,7 @@ namespace RTC
          *
          * @endif
          */
-        FastRTPSManager(std::string& xml_profile_file);
+        FastRTPSManager();
         /*!
          * @if jp
          * @brief コピーコンストラクタ
@@ -104,7 +111,7 @@ namespace RTC
          *
          * @endif
          */
-        void start();
+        void start(coil::Properties& prop);
         /*!
          * @if jp
          * @brief マネージャ終了
@@ -197,7 +204,7 @@ namespace RTC
          *
          * @endif
          */
-        static FastRTPSManager* init(std::string xml_profile_file="");
+        static FastRTPSManager* init(coil::Properties &prop);
         /*!
          * @if jp
          * @brief インスタンス取得
@@ -212,7 +219,7 @@ namespace RTC
          *
          * @endif
          */
-        static FastRTPSManager& instance(std::string xml_profile_file = "");
+        static FastRTPSManager& instance();
         /*!
          * @if jp
          * @brief FastRTPSManagerが初期化されている場合に終了処理を呼び出す
@@ -232,6 +239,7 @@ namespace RTC
         static std::mutex mutex;
         eprosima::fastrtps::Participant *m_participant;
         std::string m_xml_profile_file;
+        static std::once_flag m_once;
     protected:
     };
 }

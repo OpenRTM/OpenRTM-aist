@@ -18,11 +18,18 @@
 
 #include <rtm/NVUtil.h>
 #include <coil/UUID.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
 #include <fastrtps/participant/Participant.h>
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/publisher/Publisher.h>
 #include <fastrtps/attributes/PublisherAttributes.h>
 #include <fastrtps/xmlparser/XMLProfileManager.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
 #include "FastRTPSOutPort.h"
 #include "FastRTPSManager.h"
 #include "FastRTPSMessageInfo.h"
@@ -77,8 +84,7 @@ namespace RTC
       return;
     }
 
-    std::string profile_xml = prop.getProperty("fastrtps.QoSXML", "");
-    FastRTPSManager& topicmgr = FastRTPSManager::instance(profile_xml);
+    FastRTPSManager& topicmgr = FastRTPSManager::instance();
     eprosima::fastrtps::Participant* participant = topicmgr.getParticipant();
 
     if (participant == nullptr)
@@ -88,7 +94,8 @@ namespace RTC
     }
 
     std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
-    m_topic = prop.getProperty("fastrtps.topic", "chatter");
+    coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
+    m_topic = fastrtps_prop.getProperty("topic", "chatter");
 
 
     const std::string str_corba = "corba";
@@ -151,40 +158,243 @@ namespace RTC
         topicmgr.registerType(type);
     }
 
-    std::string publisher_name = prop.getProperty("fastrtps.publisher.name");
+    eprosima::fastrtps::PublisherAttributes Wparam;
+
+    std::string publisher_name = fastrtps_prop.getProperty("publisher.name");
     if(publisher_name.empty())
     {
-      eprosima::fastrtps::PublisherAttributes *Wparam = new eprosima::fastrtps::PublisherAttributes();
-      Wparam->topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
-      Wparam->topic.topicDataType = m_dataType;
-      Wparam->topic.topicName = m_topic;
-      Wparam->historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_WITH_REALLOC_MEMORY_MODE;
-      Wparam->qos.m_publishMode.kind = eprosima::fastrtps::ASYNCHRONOUS_PUBLISH_MODE;
-      Wparam->qos.m_reliability.kind = eprosima::fastrtps::BEST_EFFORT_RELIABILITY_QOS;
-      m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, *Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
-      delete Wparam;
+      Wparam.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
+      Wparam.topic.topicDataType = m_dataType;
+      Wparam.topic.topicName = m_topic;
+      
+      
+      setDuration(fastrtps_prop.getNode("publisher.qos.deadline.period"), Wparam.qos.m_deadline.period);
+
+      std::string destinationOrder_kind = fastrtps_prop.getProperty("publisher.qos.destinationOrder.kind", "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
+      
+      if (destinationOrder_kind == "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")
+      {
+        Wparam.qos.m_destinationOrder.kind = eprosima::fastdds::dds::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+      }
+      else if (destinationOrder_kind == "BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")
+      {
+        Wparam.qos.m_destinationOrder.kind = eprosima::fastdds::dds::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+      }
+
+      Wparam.qos.m_disablePositiveACKs.enabled = coil::toBool(fastrtps_prop["publisher.qos.disablePositiveACKs.enabled"], "YES", "NO", Wparam.qos.m_disablePositiveACKs.enabled);
+      
+      setDuration(fastrtps_prop.getNode("publisher.qos.disablePositiveACKs.duration"), Wparam.qos.m_disablePositiveACKs.duration);
+
+
+      std::string durability_kind = fastrtps_prop.getProperty("publisher.qos.durability.kind", "VOLATILE_DURABILITY_QOS");
+
+      if (durability_kind == "VOLATILE_DURABILITY_QOS")
+      {
+        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::VOLATILE_DURABILITY_QOS;
+      }
+      else if (durability_kind == "TRANSIENT_LOCAL_DURABILITY_QOS")
+      {
+        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+      }
+      else if (durability_kind == "TRANSIENT_DURABILITY_QOS")
+      {
+        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::TRANSIENT_DURABILITY_QOS;
+      }
+      else if (durability_kind == "PERSISTENT_DURABILITY_QOS")
+      {
+        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::PERSISTENT_DURABILITY_QOS;
+      }
+
+      coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.history_depth, fastrtps_prop["publisher.qos.durabilityService.history_depth"].c_str());
+
+
+      std::string durabilityService_history_kind = fastrtps_prop.getProperty("publisher.qos.durabilityService.history_kind", "KEEP_LAST_HISTORY_QOS");
+
+      if (durabilityService_history_kind == "KEEP_LAST_HISTORY_QOS")
+      {
+        Wparam.qos.m_durabilityService.history_kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+      }
+      else if (durabilityService_history_kind == "KEEP_ALL_HISTORY_QOS")
+      {
+        Wparam.qos.m_durabilityService.history_kind = eprosima::fastdds::dds::KEEP_ALL_HISTORY_QOS;
+      }
+      
+      coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.max_instances, fastrtps_prop["publisher.qos.durabilityService.max_instances"].c_str());
+      coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.max_samples, fastrtps_prop["publisher.qos.durabilityService.max_samples"].c_str());
+      coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.max_samples_per_instance, fastrtps_prop["publisher.qos.durabilityService.max_samples_per_instance"].c_str());
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.durabilityService.service_cleanup_delay"), Wparam.qos.m_durabilityService.service_cleanup_delay);
+
+      
+      //Wparam.qos.m_groupData;
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.latencyBudget.duration"), Wparam.qos.m_latencyBudget.duration);
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.lifespan.duration"), Wparam.qos.m_lifespan.duration);
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.liveliness.announcement_period"), Wparam.qos.m_liveliness.announcement_period);
+
+      std::string liveliness_kind = fastrtps_prop.getProperty("publisher.qos.liveliness.kind", "AUTOMATIC_LIVELINESS_QOS");
+
+      if (liveliness_kind == "AUTOMATIC_LIVELINESS_QOS")
+      {
+        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::AUTOMATIC_LIVELINESS_QOS;
+      }
+      else if (liveliness_kind == "MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")
+      {
+        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      }
+      else if (liveliness_kind == "MANUAL_BY_TOPIC_LIVELINESS_QOS")
+      {
+        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      }
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.liveliness.lease_duration"), Wparam.qos.m_liveliness.lease_duration);
+
+
+      std::string ownership_kind = fastrtps_prop.getProperty("publisher.qos.ownership.kind", "SHARED_OWNERSHIP_QOS");
+
+      if (ownership_kind == "SHARED_OWNERSHIP_QOS")
+      {
+        Wparam.qos.m_ownership.kind = eprosima::fastdds::dds::SHARED_OWNERSHIP_QOS;
+      }
+      else if (ownership_kind == "EXCLUSIVE_OWNERSHIP_QOS")
+      {
+        Wparam.qos.m_ownership.kind = eprosima::fastdds::dds::EXCLUSIVE_OWNERSHIP_QOS;
+      }
+
+
+      coil::stringTo<uint32_t>(Wparam.qos.m_ownershipStrength.value, fastrtps_prop["publisher.qos.ownershipStrength.value"].c_str());
+
+      //Wparam.qos.m_partition
+
+
+      std::string presentation_access_scope = fastrtps_prop.getProperty("publisher.qos.presentation.access_scope", "INSTANCE_PRESENTATION_QOS");
+
+      if (presentation_access_scope == "INSTANCE_PRESENTATION_QOS")
+      {
+        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::INSTANCE_PRESENTATION_QOS;
+      }
+      else if (presentation_access_scope == "TOPIC_PRESENTATION_QOS")
+      {
+        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::TOPIC_PRESENTATION_QOS;
+      }
+      else if (presentation_access_scope == "GROUP_PRESENTATION_QOS")
+      {
+        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::GROUP_PRESENTATION_QOS;
+      }
+
+      Wparam.qos.m_presentation.coherent_access = coil::toBool(fastrtps_prop["publisher.qos.presentation.coherent_access"], "YES", "NO", Wparam.qos.m_presentation.coherent_access);
+      Wparam.qos.m_presentation.ordered_access = coil::toBool(fastrtps_prop["publisher.qos.presentation.ordered_access"], "YES", "NO", Wparam.qos.m_presentation.ordered_access);
+
+
+      std::string publishMode_kind = fastrtps_prop.getProperty("publisher.qos.publishMode.kind", "SYNCHRONOUS_PUBLISH_MODE");
+
+      if (publishMode_kind == "SYNCHRONOUS_PUBLISH_MODE")
+      {
+        Wparam.qos.m_publishMode.kind = eprosima::fastdds::dds::SYNCHRONOUS_PUBLISH_MODE;
+      }
+      else if (publishMode_kind == "ASYNCHRONOUS_PUBLISH_MODE")
+      {
+        Wparam.qos.m_publishMode.kind = eprosima::fastdds::dds::ASYNCHRONOUS_PUBLISH_MODE;
+      }
+
+
+      std::string reliability_kind = fastrtps_prop.getProperty("publisher.qos.reliability.kind", "BEST_EFFORT_RELIABILITY_QOS");
+
+      if (reliability_kind == "BEST_EFFORT_RELIABILITY_QOS")
+      {
+        Wparam.qos.m_reliability.kind = eprosima::fastrtps::BEST_EFFORT_RELIABILITY_QOS;
+      }
+      else if (reliability_kind == "RELIABLE_RELIABILITY_QOS")
+      {
+        Wparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
+      }
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.reliability.max_blocking_time"), Wparam.qos.m_reliability.max_blocking_time);
+
+      setDuration(fastrtps_prop.getNode("publisher.qos.timeBasedFilter.minimum_separation"), Wparam.qos.m_timeBasedFilter.minimum_separation);
+      
+
+      std::string history_memory_policy = fastrtps_prop.getProperty("publisher.history_memory_policy", "PREALLOCATED_WITH_REALLOC_MEMORY_MODE");
+      if (history_memory_policy == "PREALLOCATED_MEMORY_MODE")
+      {
+        Wparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_MEMORY_MODE;
+      }
+      else if (history_memory_policy == "PREALLOCATED_WITH_REALLOC_MEMORY_MODE")
+      {
+        Wparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_WITH_REALLOC_MEMORY_MODE;
+      }
+      else if (history_memory_policy == "DYNAMIC_RESERVE_MEMORY_MODE")
+      {
+        Wparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_RESERVE_MEMORY_MODE;
+      }
+      else if (history_memory_policy == "DYNAMIC_REUSABLE_MEMORY_MODE")
+      {
+        Wparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_REUSABLE_MEMORY_MODE;
+      }
+
+      coil::stringTo<int32_t>(Wparam.topic.historyQos.depth, fastrtps_prop["publisher.topic.historyQos.depth"].c_str());
+
+      std::string topic_historyQos_kind = fastrtps_prop.getProperty("publisher.topic.historyQos.kind", "KEEP_LAST_HISTORY_QOS");
+      if (history_memory_policy == "KEEP_LAST_HISTORY_QOS")
+      {
+        Wparam.topic.historyQos.kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+      }
+      else if (history_memory_policy == "KEEP_ALL_HISTORY_QOS")
+      {
+        Wparam.topic.historyQos.kind = eprosima::fastdds::dds::KEEP_ALL_HISTORY_QOS;
+      }
     }
     else
     {
-      eprosima::fastrtps::PublisherAttributes *Wparam = new eprosima::fastrtps::PublisherAttributes();
-      if(eprosima::fastrtps::xmlparser::XMLP_ret::XML_ERROR == eprosima::fastrtps::xmlparser::XMLProfileManager::fillPublisherAttributes(publisher_name, *Wparam))
+      RTC_INFO(("Publisher name:", publisher_name.c_str()));
+      if(eprosima::fastrtps::xmlparser::XMLP_ret::XML_ERROR == eprosima::fastrtps::xmlparser::XMLProfileManager::fillPublisherAttributes(publisher_name, Wparam))
       {
         RTC_ERROR(("xml file load failed"));
-        delete Wparam;
-        return;
+        throw;
       }
-      Wparam->topic.topicDataType = m_dataType;
-      Wparam->topic.topicName = m_topic;
-      Wparam->qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
-      m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, *Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
-      delete Wparam;
+      Wparam.topic.topicDataType = m_dataType;
+      //Wparam.topic.topicName = m_topic;
+      //Wparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
+      
     }
+
+
+    RTC_DEBUG(("WriterQos setting: publisher.deadline.period: sec=%d nanosec=%u", Wparam.qos.m_deadline.period.seconds, Wparam.qos.m_deadline.period.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.destinationOrder.kind: %hhu", Wparam.qos.m_destinationOrder.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.enabled: %s", (Wparam.qos.m_disablePositiveACKs.enabled ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.duration: sec=%d nanosec=%u", Wparam.qos.m_disablePositiveACKs.duration.seconds, Wparam.qos.m_disablePositiveACKs.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.durability.kind: %hhu", Wparam.qos.m_durability.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_depth: %d", Wparam.qos.m_durabilityService.history_depth));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_kind: %hhu", Wparam.qos.m_durabilityService.history_kind));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_instances: %d", Wparam.qos.m_durabilityService.max_instances));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples: %d", Wparam.qos.m_durabilityService.max_samples));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples_per_instance: %d", Wparam.qos.m_durabilityService.max_samples_per_instance));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.service_cleanup_delay: sec=%d nanosec=%u", Wparam.qos.m_durabilityService.service_cleanup_delay.seconds, Wparam.qos.m_durabilityService.service_cleanup_delay.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.latencyBudget.duration: sec=%d nanosec=%u", Wparam.qos.m_latencyBudget.duration.seconds, Wparam.qos.m_latencyBudget.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.lifespan.duration: sec=%d nanosec=%u", Wparam.qos.m_lifespan.duration.seconds, Wparam.qos.m_lifespan.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.announcement_period: sec=%d nanosec=%u", Wparam.qos.m_liveliness.announcement_period.seconds, Wparam.qos.m_liveliness.announcement_period.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.kind: %hhu", Wparam.qos.m_liveliness.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.lease_duration: sec=%d nanosec=%u", Wparam.qos.m_liveliness.lease_duration.seconds, Wparam.qos.m_liveliness.lease_duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.ownership.kind: %hhu", Wparam.qos.m_ownership.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.ownershipStrength.value: %u", Wparam.qos.m_ownershipStrength.value));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.access_scope: %hhu", Wparam.qos.m_presentation.access_scope));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.coherent_access: %s", (Wparam.qos.m_presentation.coherent_access ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.ordered_access: %s", (Wparam.qos.m_presentation.ordered_access ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.publishMode.kind: %hhu", Wparam.qos.m_publishMode.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.reliability.kind: %hhu", Wparam.qos.m_reliability.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.reliability.max_blocking_time: sec=%d nanosec=%u", Wparam.qos.m_reliability.max_blocking_time.seconds, Wparam.qos.m_reliability.max_blocking_time.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam.qos.m_timeBasedFilter.minimum_separation.seconds, Wparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam.historyMemoryPolicy));
+
+    m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
 
     
     if (m_publisher == nullptr)
     {
         RTC_ERROR(("Publisher initialize failed"));
-        return;
+        throw;
     }
 
   }
@@ -265,6 +475,33 @@ namespace RTC
     if (m_publisher != nullptr)
     {
     }
+  }
+
+
+  /*!
+   * @if jp
+   * @brief プロパティからfastrtps::Duration_tを設定する
+   *
+   * @param prop プロパティ(seconds、nanosecの要素に値を格納する)
+   * @param time fastrtps::Duration_t
+   *
+   * @else
+   * @brief
+   *
+   * @param prop
+   * @param time
+   *
+   *
+   * @endif
+   */
+  void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time)
+  {
+    std::string sec_str = prop["seconds"];
+    std::string nanosec_str = prop["nanosec"];
+
+
+    coil::stringTo<int32_t>(time.seconds, sec_str.c_str());
+    coil::stringTo<uint32_t>(time.nanosec, nanosec_str.c_str());
   }
 
 

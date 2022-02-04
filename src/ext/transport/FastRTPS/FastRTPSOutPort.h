@@ -24,8 +24,15 @@
 #include <map>
 #include <rtm/InPortConsumer.h>
 #include <rtm/Manager.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
 #include <fastrtps/fastrtps_fwd.h>
 #include <fastrtps/publisher/PublisherListener.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
 #include "CORBACdrDataPubSubTypes.h"
 
 
@@ -228,8 +235,23 @@ namespace RTC
 
 
   private:
-
-
+    /*!
+     * @if jp
+     * @brief プロパティからfastrtps::Duration_tを設定する
+     * 
+     * @param prop プロパティ(seconds、nanosecの要素に値を格納する)
+     * @param time fastrtps::Duration_t
+     *
+     * @else
+     * @brief
+     *
+     * @param prop 
+     * @param time 
+     *
+     *
+     * @endif
+     */
+    static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
 
     mutable Logger rtclog;
     coil::Properties m_properties;

@@ -29,7 +29,7 @@ namespace RTC
 {
   FastRTPSManager* FastRTPSManager::manager = nullptr;
   std::mutex FastRTPSManager::mutex;
-
+  std::once_flag FastRTPSManager::m_once;
 
   /*!
    * @if jp
@@ -44,13 +44,8 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager::FastRTPSManager(std::string& xml_profile_file)
+  FastRTPSManager::FastRTPSManager() : m_participant(nullptr)
   {
-      if (!xml_profile_file.empty())
-      {
-          eprosima::fastrtps::Domain::loadXMLProfilesFile(xml_profile_file);
-          m_xml_profile_file = std::move(xml_profile_file);
-      }
   }
 
   /*!
@@ -66,7 +61,7 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager::FastRTPSManager(const FastRTPSManager &/*mgr*/)
+  FastRTPSManager::FastRTPSManager(const FastRTPSManager &/*mgr*/) : m_participant(nullptr)
   {
     
   }
@@ -100,8 +95,20 @@ namespace RTC
    *
    * @endif
    */
-  void FastRTPSManager::start()
+  void FastRTPSManager::start(coil::Properties& prop)
   {
+      Logger rtclog("FastRTPSManager");
+      RTC_INFO(("FastRTPSManager::start()"));
+      RTC_INFO_STR((prop));
+      
+
+      m_xml_profile_file = std::move(prop["xmlprofile.filename"]);
+      if (!m_xml_profile_file.empty())
+      {
+        eprosima::fastrtps::Domain::loadXMLProfilesFile(m_xml_profile_file);
+        RTC_INFO(("Load XMl file: %s", m_xml_profile_file.c_str()));
+      }
+
       if(m_xml_profile_file.empty())
       {
         eprosima::fastrtps::ParticipantAttributes PParam;
@@ -115,7 +122,9 @@ namespace RTC
       }
       else
       {
-          m_participant = eprosima::fastrtps::Domain::createParticipant("participant_openrtm");
+        const std::string paticipant_name = std::move(prop["xmlprofile.participant.name"]);
+        RTC_INFO(("Create participant: %s", paticipant_name.c_str()));
+        m_participant = eprosima::fastrtps::Domain::createParticipant(paticipant_name);
       }
    
   }
@@ -134,6 +143,8 @@ namespace RTC
    */
   void FastRTPSManager::shutdown()
   {
+      Logger rtclog("FastRTPSManager");
+      RTC_INFO(("FastRTPSManager::shutdown()"));
       eprosima::fastrtps::Domain::removeParticipant(m_participant);
       manager = nullptr;
   }
@@ -242,14 +253,12 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager* FastRTPSManager::init(std::string xml_profile_file)
+  FastRTPSManager* FastRTPSManager::init(coil::Properties& prop)
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
-      manager = new FastRTPSManager(xml_profile_file);
-      manager->start();
-    }
+    std::call_once(m_once, [&] {
+      manager = new FastRTPSManager();
+      manager->start(prop);
+      });
     return manager;
   }
 
@@ -267,14 +276,13 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager& FastRTPSManager::instance(std::string xml_profile_file)
+  FastRTPSManager& FastRTPSManager::instance()
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
-      manager = new FastRTPSManager(xml_profile_file);
-      manager->start();
-    }
+    std::call_once(m_once, [&] {
+      coil::Properties prop;
+      manager = new FastRTPSManager();
+      manager->start(prop);
+      });
     return *manager;
   }
 

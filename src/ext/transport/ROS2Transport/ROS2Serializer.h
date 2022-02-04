@@ -22,7 +22,16 @@
 #include <rtm/ByteDataStreamBase.h>
 #include <coil/Factory.h>
 #include <rtm/Manager.h>
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
 #include <rmw_fastrtps_cpp/TypeSupport.hpp>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
+
 #include <fastcdr/FastBuffer.h>
 #include <fastcdr/Cdr.h>
 
