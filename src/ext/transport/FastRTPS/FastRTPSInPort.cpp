@@ -653,7 +653,11 @@ namespace RTC
    *
    * @endif
    */
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR == 6)
+  void FastRTPSInPort::setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time)
+#else
   void FastRTPSInPort::setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time)
+#endif
   {
     std::string sec_str = prop["seconds"];
     std::string nanosec_str = prop["nanosec"];
