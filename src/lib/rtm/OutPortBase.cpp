@@ -771,7 +771,7 @@ namespace RTC
         }
         coil::Properties prop;
         NVUtil::copyToProperties(prop, m_profile.properties);
-        coil::Properties& prop_dataport(prop.getNode("dataport.interface_type"));
+        coil::Properties& prop_dataport(prop.getNode("dataport.interface_option"));
         prop_dataport << prop_options;
         NVUtil::copyFromProperties(m_profile.properties, prop);
       }
@@ -832,7 +832,7 @@ namespace RTC
         }
         coil::Properties prop;
         NVUtil::copyToProperties(prop, m_profile.properties);
-        coil::Properties& prop_dataport(prop.getNode("dataport.interface_type"));
+        coil::Properties& prop_dataport(prop.getNode("dataport.interface_option"));
         prop_dataport << prop_options;
         NVUtil::copyFromProperties(m_profile.properties, prop);
       }
