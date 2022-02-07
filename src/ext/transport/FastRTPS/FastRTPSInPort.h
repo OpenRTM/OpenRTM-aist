@@ -408,6 +408,8 @@ namespace RTC
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
 #endif
 
+    static void setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes& Rparam);
+
     CdrBufferBase* m_buffer;
     ConnectorInfo m_profile;
     ConnectorListenersBase* m_listeners;

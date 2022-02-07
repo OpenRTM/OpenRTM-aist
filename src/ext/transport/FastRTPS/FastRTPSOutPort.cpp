@@ -167,7 +167,174 @@ namespace RTC
       Wparam.topic.topicDataType = m_dataType;
       Wparam.topic.topicName = m_topic;
       
+      setPubParam(fastrtps_prop, Wparam);
+
+    }
+    else
+    {
+      RTC_INFO(("Publisher name:", publisher_name.c_str()));
+      if(eprosima::fastrtps::xmlparser::XMLP_ret::XML_ERROR == eprosima::fastrtps::xmlparser::XMLProfileManager::fillPublisherAttributes(publisher_name, Wparam))
+      {
+        RTC_ERROR(("xml file load failed"));
+        throw;
+      }
+      Wparam.topic.topicDataType = m_dataType;
+      //Wparam.topic.topicName = m_topic;
+      //Wparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
       
+    }
+
+/*
+    RTC_DEBUG(("WriterQos setting: publisher.deadline.period: sec=%d nanosec=%u", Wparam.qos.m_deadline.period.seconds, Wparam.qos.m_deadline.period.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.destinationOrder.kind: %hhu", Wparam.qos.m_destinationOrder.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.enabled: %s", (Wparam.qos.m_disablePositiveACKs.enabled ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.duration: sec=%d nanosec=%u", Wparam.qos.m_disablePositiveACKs.duration.seconds, Wparam.qos.m_disablePositiveACKs.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.durability.kind: %hhu", Wparam.qos.m_durability.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_depth: %d", Wparam.qos.m_durabilityService.history_depth));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_kind: %hhu", Wparam.qos.m_durabilityService.history_kind));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_instances: %d", Wparam.qos.m_durabilityService.max_instances));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples: %d", Wparam.qos.m_durabilityService.max_samples));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples_per_instance: %d", Wparam.qos.m_durabilityService.max_samples_per_instance));
+    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.service_cleanup_delay: sec=%d nanosec=%u", Wparam.qos.m_durabilityService.service_cleanup_delay.seconds, Wparam.qos.m_durabilityService.service_cleanup_delay.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.latencyBudget.duration: sec=%d nanosec=%u", Wparam.qos.m_latencyBudget.duration.seconds, Wparam.qos.m_latencyBudget.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.lifespan.duration: sec=%d nanosec=%u", Wparam.qos.m_lifespan.duration.seconds, Wparam.qos.m_lifespan.duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.announcement_period: sec=%d nanosec=%u", Wparam.qos.m_liveliness.announcement_period.seconds, Wparam.qos.m_liveliness.announcement_period.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.kind: %hhu", Wparam.qos.m_liveliness.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.liveliness.lease_duration: sec=%d nanosec=%u", Wparam.qos.m_liveliness.lease_duration.seconds, Wparam.qos.m_liveliness.lease_duration.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.ownership.kind: %hhu", Wparam.qos.m_ownership.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.ownershipStrength.value: %u", Wparam.qos.m_ownershipStrength.value));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.access_scope: %hhu", Wparam.qos.m_presentation.access_scope));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.coherent_access: %s", (Wparam.qos.m_presentation.coherent_access ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.presentation.ordered_access: %s", (Wparam.qos.m_presentation.ordered_access ? "true" : "false")));
+    RTC_DEBUG(("WriterQos setting: publisher.publishMode.kind: %hhu", Wparam.qos.m_publishMode.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.reliability.kind: %hhu", Wparam.qos.m_reliability.kind));
+    RTC_DEBUG(("WriterQos setting: publisher.reliability.max_blocking_time: sec=%d nanosec=%u", Wparam.qos.m_reliability.max_blocking_time.seconds, Wparam.qos.m_reliability.max_blocking_time.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam.qos.m_timeBasedFilter.minimum_separation.seconds, Wparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam.historyMemoryPolicy));
+*/
+    m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
+
+    
+    if (m_publisher == nullptr)
+    {
+        RTC_ERROR(("Publisher initialize failed"));
+        throw;
+    }
+
+  }
+
+  /*!
+   * @if jp
+   * @brief バッファへのデータ書込
+   * @else
+   * @brief Write data into the buffer
+   * @endif
+   */
+  DataPortStatus FastRTPSOutPort::put(ByteData& data)
+  {
+    
+    RTC_PARANOID(("put()"));
+    RTC_VERBOSE(("Data size:%d", data.getDataLength()));
+    if (m_publisher == nullptr)
+    {
+        RTC_VERBOSE(("Publisher is None"));
+        return DataPortStatus::PRECONDITION_NOT_MET;
+    }
+    if (m_publisher->write(&data))
+    {
+        RTC_PARANOID(("write:OK"));
+        return DataPortStatus::PORT_OK;
+    }
+    else
+    {
+        RTC_ERROR(("write:ERROR"));
+        return DataPortStatus::PORT_ERROR;
+    }
+    
+  }
+
+  /*!
+   * @if jp
+   * @brief InterfaceProfile情報を公開する
+   * @else
+   * @brief Publish InterfaceProfile information
+   * @endif
+   */
+  void FastRTPSOutPort::
+  publishInterfaceProfile(SDOPackage::NVList& /*properties*/)
+  {
+    return;
+  }
+
+  /*!
+   * @if jp
+   * @brief データ送信通知への登録
+   * @else
+   * @brief Subscribe to the data sending notification
+   * @endif
+   */
+  bool FastRTPSOutPort::
+  subscribeInterface(const SDOPackage::NVList& properties)
+  {
+    RTC_TRACE(("subscribeInterface()"));
+    RTC_DEBUG_STR((NVUtil::toString(properties)));
+    
+    
+    return true;
+  }
+  
+  /*!
+   * @if jp
+   * @brief データ送信通知からの登録解除
+   * @else
+   * @brief Unsubscribe the data send notification
+   * @endif
+   */
+  void FastRTPSOutPort::
+  unsubscribeInterface(const SDOPackage::NVList& properties)
+  {
+    RTC_TRACE(("unsubscribeInterface()"));
+    RTC_DEBUG_STR((NVUtil::toString(properties)));
+
+    if (m_publisher != nullptr)
+    {
+    }
+  }
+
+
+  /*!
+   * @if jp
+   * @brief プロパティからfastrtps::Duration_tを設定する
+   *
+   * @param prop プロパティ(seconds、nanosecの要素に値を格納する)
+   * @param time fastrtps::Duration_t
+   *
+   * @else
+   * @brief
+   *
+   * @param prop
+   * @param time
+   *
+   *
+   * @endif
+   */
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
+  void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time)
+#else
+  void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time)
+#endif
+  {
+    std::string sec_str = prop["seconds"];
+    std::string nanosec_str = prop["nanosec"];
+
+
+    coil::stringTo<int32_t>(time.seconds, sec_str.c_str());
+    coil::stringTo<uint32_t>(time.nanosec, nanosec_str.c_str());
+  }
+
+
+  void FastRTPSOutPort::setPubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::PublisherAttributes& Wparam)
+  {
       setDuration(fastrtps_prop.getNode("publisher.qos.deadline.period"), Wparam.qos.m_deadline.period);
 
       std::string destinationOrder_kind = fastrtps_prop.getProperty("publisher.qos.destinationOrder.kind", "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
@@ -347,169 +514,7 @@ namespace RTC
       {
         Wparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
       }
-    }
-    else
-    {
-      RTC_INFO(("Publisher name:", publisher_name.c_str()));
-      if(eprosima::fastrtps::xmlparser::XMLP_ret::XML_ERROR == eprosima::fastrtps::xmlparser::XMLProfileManager::fillPublisherAttributes(publisher_name, Wparam))
-      {
-        RTC_ERROR(("xml file load failed"));
-        throw;
-      }
-      Wparam.topic.topicDataType = m_dataType;
-      //Wparam.topic.topicName = m_topic;
-      //Wparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
-      
-    }
-
-/*
-    RTC_DEBUG(("WriterQos setting: publisher.deadline.period: sec=%d nanosec=%u", Wparam.qos.m_deadline.period.seconds, Wparam.qos.m_deadline.period.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.destinationOrder.kind: %hhu", Wparam.qos.m_destinationOrder.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.enabled: %s", (Wparam.qos.m_disablePositiveACKs.enabled ? "true" : "false")));
-    RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.duration: sec=%d nanosec=%u", Wparam.qos.m_disablePositiveACKs.duration.seconds, Wparam.qos.m_disablePositiveACKs.duration.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.durability.kind: %hhu", Wparam.qos.m_durability.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_depth: %d", Wparam.qos.m_durabilityService.history_depth));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.history_kind: %hhu", Wparam.qos.m_durabilityService.history_kind));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_instances: %d", Wparam.qos.m_durabilityService.max_instances));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples: %d", Wparam.qos.m_durabilityService.max_samples));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.max_samples_per_instance: %d", Wparam.qos.m_durabilityService.max_samples_per_instance));
-    RTC_DEBUG(("WriterQos setting: publisher.durabilityService.service_cleanup_delay: sec=%d nanosec=%u", Wparam.qos.m_durabilityService.service_cleanup_delay.seconds, Wparam.qos.m_durabilityService.service_cleanup_delay.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.latencyBudget.duration: sec=%d nanosec=%u", Wparam.qos.m_latencyBudget.duration.seconds, Wparam.qos.m_latencyBudget.duration.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.lifespan.duration: sec=%d nanosec=%u", Wparam.qos.m_lifespan.duration.seconds, Wparam.qos.m_lifespan.duration.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.liveliness.announcement_period: sec=%d nanosec=%u", Wparam.qos.m_liveliness.announcement_period.seconds, Wparam.qos.m_liveliness.announcement_period.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.liveliness.kind: %hhu", Wparam.qos.m_liveliness.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.liveliness.lease_duration: sec=%d nanosec=%u", Wparam.qos.m_liveliness.lease_duration.seconds, Wparam.qos.m_liveliness.lease_duration.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.ownership.kind: %hhu", Wparam.qos.m_ownership.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.ownershipStrength.value: %u", Wparam.qos.m_ownershipStrength.value));
-    RTC_DEBUG(("WriterQos setting: publisher.presentation.access_scope: %hhu", Wparam.qos.m_presentation.access_scope));
-    RTC_DEBUG(("WriterQos setting: publisher.presentation.coherent_access: %s", (Wparam.qos.m_presentation.coherent_access ? "true" : "false")));
-    RTC_DEBUG(("WriterQos setting: publisher.presentation.ordered_access: %s", (Wparam.qos.m_presentation.ordered_access ? "true" : "false")));
-    RTC_DEBUG(("WriterQos setting: publisher.publishMode.kind: %hhu", Wparam.qos.m_publishMode.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.reliability.kind: %hhu", Wparam.qos.m_reliability.kind));
-    RTC_DEBUG(("WriterQos setting: publisher.reliability.max_blocking_time: sec=%d nanosec=%u", Wparam.qos.m_reliability.max_blocking_time.seconds, Wparam.qos.m_reliability.max_blocking_time.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam.qos.m_timeBasedFilter.minimum_separation.seconds, Wparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
-    RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam.historyMemoryPolicy));
-*/
-    m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
-
-    
-    if (m_publisher == nullptr)
-    {
-        RTC_ERROR(("Publisher initialize failed"));
-        throw;
-    }
-
   }
-
-  /*!
-   * @if jp
-   * @brief バッファへのデータ書込
-   * @else
-   * @brief Write data into the buffer
-   * @endif
-   */
-  DataPortStatus FastRTPSOutPort::put(ByteData& data)
-  {
-    
-    RTC_PARANOID(("put()"));
-    RTC_VERBOSE(("Data size:%d", data.getDataLength()));
-    if (m_publisher == nullptr)
-    {
-        RTC_VERBOSE(("Publisher is None"));
-        return DataPortStatus::PRECONDITION_NOT_MET;
-    }
-    if (m_publisher->write(&data))
-    {
-        RTC_PARANOID(("write:OK"));
-        return DataPortStatus::PORT_OK;
-    }
-    else
-    {
-        RTC_ERROR(("write:ERROR"));
-        return DataPortStatus::PORT_ERROR;
-    }
-    
-  }
-
-  /*!
-   * @if jp
-   * @brief InterfaceProfile情報を公開する
-   * @else
-   * @brief Publish InterfaceProfile information
-   * @endif
-   */
-  void FastRTPSOutPort::
-  publishInterfaceProfile(SDOPackage::NVList& /*properties*/)
-  {
-    return;
-  }
-
-  /*!
-   * @if jp
-   * @brief データ送信通知への登録
-   * @else
-   * @brief Subscribe to the data sending notification
-   * @endif
-   */
-  bool FastRTPSOutPort::
-  subscribeInterface(const SDOPackage::NVList& properties)
-  {
-    RTC_TRACE(("subscribeInterface()"));
-    RTC_DEBUG_STR((NVUtil::toString(properties)));
-    
-    
-    return true;
-  }
-  
-  /*!
-   * @if jp
-   * @brief データ送信通知からの登録解除
-   * @else
-   * @brief Unsubscribe the data send notification
-   * @endif
-   */
-  void FastRTPSOutPort::
-  unsubscribeInterface(const SDOPackage::NVList& properties)
-  {
-    RTC_TRACE(("unsubscribeInterface()"));
-    RTC_DEBUG_STR((NVUtil::toString(properties)));
-
-    if (m_publisher != nullptr)
-    {
-    }
-  }
-
-
-  /*!
-   * @if jp
-   * @brief プロパティからfastrtps::Duration_tを設定する
-   *
-   * @param prop プロパティ(seconds、nanosecの要素に値を格納する)
-   * @param time fastrtps::Duration_t
-   *
-   * @else
-   * @brief
-   *
-   * @param prop
-   * @param time
-   *
-   *
-   * @endif
-   */
-#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
-  void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time)
-#else
-  void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time)
-#endif
-  {
-    std::string sec_str = prop["seconds"];
-    std::string nanosec_str = prop["nanosec"];
-
-
-    coil::stringTo<int32_t>(time.seconds, sec_str.c_str());
-    coil::stringTo<uint32_t>(time.nanosec, nanosec_str.c_str());
-  }
-
 
   /*!
    * @if jp

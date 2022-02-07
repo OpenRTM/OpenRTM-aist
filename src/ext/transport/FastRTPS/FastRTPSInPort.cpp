@@ -185,231 +185,7 @@ namespace RTC
       Rparam.topic.topicDataType = m_dataType;
       Rparam.topic.topicName = m_topic;
       
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.deadline.period"), Rparam.qos.m_deadline.period);
-
-      std::string destinationOrder_kind = fastrtps_prop.getProperty("subscriber.qos.destinationOrder.kind", "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
-
-      if (destinationOrder_kind == "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")
-      {
-        Rparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
-      }
-      else if (destinationOrder_kind == "BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")
-      {
-        Rparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
-      }
-
-      Rparam.qos.m_disablePositiveACKs.enabled = coil::toBool(fastrtps_prop["subscriber.qos.disablePositiveACKs.enabled"], "YES", "NO", Rparam.qos.m_disablePositiveACKs.enabled);
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.disablePositiveACKs.duration"), Rparam.qos.m_disablePositiveACKs.duration);
-
-      std::string durability_kind = fastrtps_prop.getProperty("subscriber.qos.durability.kind", "VOLATILE_DURABILITY_QOS");
-
-      if (durability_kind == "VOLATILE_DURABILITY_QOS")
-      {
-        Rparam.qos.m_durability.kind = eprosima::fastrtps::VOLATILE_DURABILITY_QOS;
-      }
-      else if (durability_kind == "TRANSIENT_LOCAL_DURABILITY_QOS")
-      {
-        Rparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_LOCAL_DURABILITY_QOS;
-      }
-      else if (durability_kind == "TRANSIENT_DURABILITY_QOS")
-      {
-        Rparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_DURABILITY_QOS;
-      }
-      else if (durability_kind == "PERSISTENT_DURABILITY_QOS")
-      {
-        Rparam.qos.m_durability.kind = eprosima::fastrtps::PERSISTENT_DURABILITY_QOS;
-      }
-
-      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.history_depth, fastrtps_prop["subscriber.qos.durabilityService.history_depth"].c_str());
-
-
-      std::string durabilityService_history_kind = fastrtps_prop.getProperty("subscriber.qos.durabilityService.history_kind", "KEEP_LAST_HISTORY_QOS");
-
-      if (durabilityService_history_kind == "KEEP_LAST_HISTORY_QOS")
-      {
-        Rparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
-      }
-      else if (durabilityService_history_kind == "KEEP_ALL_HISTORY_QOS")
-      {
-        Rparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
-      }
-
-      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_instances, fastrtps_prop["subscriber.qos.durabilityService.max_instances"].c_str());
-      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_samples, fastrtps_prop["subscriber.qos.durabilityService.max_samples"].c_str());
-      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_samples_per_instance, fastrtps_prop["subscriber.qos.durabilityService.max_samples_per_instance"].c_str());
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.durabilityService.service_cleanup_delay"), Rparam.qos.m_durabilityService.service_cleanup_delay);
-
-
-
-      //Rparam.qos.m_groupData
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.latencyBudget.duration"), Rparam.qos.m_latencyBudget.duration);
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.lifespan.duration"), Rparam.qos.m_lifespan.duration);
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.liveliness.announcement_period"), Rparam.qos.m_liveliness.announcement_period);
-
-      std::string liveliness_kind = fastrtps_prop.getProperty("subscriber.qos.liveliness.kind", "AUTOMATIC_LIVELINESS_QOS");
-
-      if (liveliness_kind == "AUTOMATIC_LIVELINESS_QOS")
-      {
-        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::AUTOMATIC_LIVELINESS_QOS;
-      }
-      else if (liveliness_kind == "MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")
-      {
-        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-      }
-      else if (liveliness_kind == "MANUAL_BY_TOPIC_LIVELINESS_QOS")
-      {
-        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-      }
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.liveliness.lease_duration"), Rparam.qos.m_liveliness.lease_duration);
-
-
-      std::string ownership_kind = fastrtps_prop.getProperty("subscriber.qos.ownership.kind", "SHARED_OWNERSHIP_QOS");
-
-      if (ownership_kind == "SHARED_OWNERSHIP_QOS")
-      {
-        Rparam.qos.m_ownership.kind = eprosima::fastrtps::SHARED_OWNERSHIP_QOS;
-      }
-      else if (ownership_kind == "EXCLUSIVE_OWNERSHIP_QOS")
-      {
-        Rparam.qos.m_ownership.kind = eprosima::fastrtps::EXCLUSIVE_OWNERSHIP_QOS;
-      }
-
-
-      //Rparam.qos.m_partition
-
-
-      std::string presentation_access_scope = fastrtps_prop.getProperty("subscriber.qos.presentation.access_scope", "INSTANCE_PRESENTATION_QOS");
-
-      if (presentation_access_scope == "INSTANCE_PRESENTATION_QOS")
-      {
-        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::INSTANCE_PRESENTATION_QOS;
-      }
-      else if (presentation_access_scope == "TOPIC_PRESENTATION_QOS")
-      {
-        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::TOPIC_PRESENTATION_QOS;
-      }
-      else if (presentation_access_scope == "GROUP_PRESENTATION_QOS")
-      {
-        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::GROUP_PRESENTATION_QOS;
-      }
-
-      Rparam.qos.m_presentation.coherent_access = coil::toBool(fastrtps_prop["subscriber.qos.presentation.coherent_access"], "YES", "NO", Rparam.qos.m_presentation.coherent_access);
-      Rparam.qos.m_presentation.ordered_access = coil::toBool(fastrtps_prop["subscriber.qos.presentation.ordered_access"], "YES", "NO", Rparam.qos.m_presentation.ordered_access);
-
-      std::string reliability_kind = fastrtps_prop.getProperty("subscriber.qos.reliability.kind", "BEST_EFFORT_RELIABILITY_QOS");
-
-      if (reliability_kind == "BEST_EFFORT_RELIABILITY_QOS")
-      {
-        Rparam.qos.m_reliability.kind = eprosima::fastrtps::BEST_EFFORT_RELIABILITY_QOS;
-      }
-      else if (reliability_kind == "RELIABLE_RELIABILITY_QOS")
-      {
-        Rparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
-      }
-
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.reliability.max_blocking_time"), Rparam.qos.m_reliability.max_blocking_time);
-
-      setDuration(fastrtps_prop.getNode("subscriber.qos.timeBasedFilter.minimum_separation"), Rparam.qos.m_timeBasedFilter.minimum_separation);
-
-
-      //Rparam.qos.m_topicData
-      //Rparam.qos.m_userData
-      //Rparam.qos.representation.m_value
-      
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.m_typeConsistency.m_force_type_validation);
-#else
-      Rparam.qos.type_consistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
-#endif
-
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_member_names);
-#else
-      Rparam.qos.type_consistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_member_names);
-#endif
-
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds);
-#else
-      Rparam.qos.type_consistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_sequence_bounds);
-#endif
-
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_string_bounds);
-#else
-      Rparam.qos.type_consistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_string_bounds);
-#endif
-
-      std::string type_consistency_kind = fastrtps_prop.getProperty("subscriber.qos.type_consistency.kind", "ALLOW_TYPE_COERCION");
-
-      if (type_consistency_kind == "DISALLOW_TYPE_COERCION")
-      {
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-        Rparam.qos.m_typeConsistency.m_kind
-#else
-        Rparam.qos.type_consistency.m_kind
-#endif
-            = eprosima::fastrtps::DISALLOW_TYPE_COERCION;
-      }
-      else if (type_consistency_kind == "ALLOW_TYPE_COERCION")
-      {
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-        Rparam.qos.m_typeConsistency.m_kind
-#else
-        Rparam.qos.type_consistency.m_kind
-#endif
-            = eprosima::fastrtps::ALLOW_TYPE_COERCION;
-      }
-
-#if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.m_typeConsistency.m_prevent_type_widening);
-#else
-      Rparam.qos.type_consistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.type_consistency.m_prevent_type_widening);
-#endif
-
-
-
-
-      std::string history_memory_policy = fastrtps_prop.getProperty("subscriber.history_memory_policy", "PREALLOCATED_WITH_REALLOC_MEMORY_MODE");
-      if (history_memory_policy == "PREALLOCATED_MEMORY_MODE")
-      {
-        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_MEMORY_MODE;
-      }
-      else if (history_memory_policy == "PREALLOCATED_WITH_REALLOC_MEMORY_MODE")
-      {
-        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_WITH_REALLOC_MEMORY_MODE;
-      }
-      else if (history_memory_policy == "DYNAMIC_RESERVE_MEMORY_MODE")
-      {
-        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_RESERVE_MEMORY_MODE;
-      }
-#if (FASTRTPS_VERSION_MAJOR > 1)
-      else if (history_memory_policy == "DYNAMIC_REUSABLE_MEMORY_MODE")
-      {
-        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_REUSABLE_MEMORY_MODE;
-      }
-#endif
-
-      coil::stringTo<int32_t>(Rparam.topic.historyQos.depth, fastrtps_prop["subscriber.topic.historyQos.depth"].c_str());
-
-      std::string topic_historyQos_kind = fastrtps_prop.getProperty("subscriber.topic.historyQos.kind", "KEEP_LAST_HISTORY_QOS");
-      if (history_memory_policy == "KEEP_LAST_HISTORY_QOS")
-      {
-        Rparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
-      }
-      else if (history_memory_policy == "KEEP_ALL_HISTORY_QOS")
-      {
-        Rparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
-      }
-
+      setSubParam(fastrtps_prop, Rparam);
       
     }
     else
@@ -712,6 +488,233 @@ namespace RTC
 
     coil::stringTo<int32_t>(time.seconds, sec_str.c_str());
     coil::stringTo<uint32_t>(time.nanosec, nanosec_str.c_str());
+  }
+
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.deadline.period"), Rparam.qos.m_deadline.period);
+
+      std::string destinationOrder_kind = fastrtps_prop.getProperty("subscriber.qos.destinationOrder.kind", "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
+
+      if (destinationOrder_kind == "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")
+      {
+        Rparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+      }
+      else if (destinationOrder_kind == "BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")
+      {
+        Rparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+      }
+
+      Rparam.qos.m_disablePositiveACKs.enabled = coil::toBool(fastrtps_prop["subscriber.qos.disablePositiveACKs.enabled"], "YES", "NO", Rparam.qos.m_disablePositiveACKs.enabled);
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.disablePositiveACKs.duration"), Rparam.qos.m_disablePositiveACKs.duration);
+
+      std::string durability_kind = fastrtps_prop.getProperty("subscriber.qos.durability.kind", "VOLATILE_DURABILITY_QOS");
+
+      if (durability_kind == "VOLATILE_DURABILITY_QOS")
+      {
+        Rparam.qos.m_durability.kind = eprosima::fastrtps::VOLATILE_DURABILITY_QOS;
+      }
+      else if (durability_kind == "TRANSIENT_LOCAL_DURABILITY_QOS")
+      {
+        Rparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_LOCAL_DURABILITY_QOS;
+      }
+      else if (durability_kind == "TRANSIENT_DURABILITY_QOS")
+      {
+        Rparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_DURABILITY_QOS;
+      }
+      else if (durability_kind == "PERSISTENT_DURABILITY_QOS")
+      {
+        Rparam.qos.m_durability.kind = eprosima::fastrtps::PERSISTENT_DURABILITY_QOS;
+      }
+
+      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.history_depth, fastrtps_prop["subscriber.qos.durabilityService.history_depth"].c_str());
+
+
+      std::string durabilityService_history_kind = fastrtps_prop.getProperty("subscriber.qos.durabilityService.history_kind", "KEEP_LAST_HISTORY_QOS");
+
+      if (durabilityService_history_kind == "KEEP_LAST_HISTORY_QOS")
+      {
+        Rparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
+      }
+      else if (durabilityService_history_kind == "KEEP_ALL_HISTORY_QOS")
+      {
+        Rparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
+      }
+
+      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_instances, fastrtps_prop["subscriber.qos.durabilityService.max_instances"].c_str());
+      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_samples, fastrtps_prop["subscriber.qos.durabilityService.max_samples"].c_str());
+      coil::stringTo<int32_t>(Rparam.qos.m_durabilityService.max_samples_per_instance, fastrtps_prop["subscriber.qos.durabilityService.max_samples_per_instance"].c_str());
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.durabilityService.service_cleanup_delay"), Rparam.qos.m_durabilityService.service_cleanup_delay);
+
+
+
+      //Rparam.qos.m_groupData
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.latencyBudget.duration"), Rparam.qos.m_latencyBudget.duration);
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.lifespan.duration"), Rparam.qos.m_lifespan.duration);
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.liveliness.announcement_period"), Rparam.qos.m_liveliness.announcement_period);
+
+      std::string liveliness_kind = fastrtps_prop.getProperty("subscriber.qos.liveliness.kind", "AUTOMATIC_LIVELINESS_QOS");
+
+      if (liveliness_kind == "AUTOMATIC_LIVELINESS_QOS")
+      {
+        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::AUTOMATIC_LIVELINESS_QOS;
+      }
+      else if (liveliness_kind == "MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")
+      {
+        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      }
+      else if (liveliness_kind == "MANUAL_BY_TOPIC_LIVELINESS_QOS")
+      {
+        Rparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      }
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.liveliness.lease_duration"), Rparam.qos.m_liveliness.lease_duration);
+
+
+      std::string ownership_kind = fastrtps_prop.getProperty("subscriber.qos.ownership.kind", "SHARED_OWNERSHIP_QOS");
+
+      if (ownership_kind == "SHARED_OWNERSHIP_QOS")
+      {
+        Rparam.qos.m_ownership.kind = eprosima::fastrtps::SHARED_OWNERSHIP_QOS;
+      }
+      else if (ownership_kind == "EXCLUSIVE_OWNERSHIP_QOS")
+      {
+        Rparam.qos.m_ownership.kind = eprosima::fastrtps::EXCLUSIVE_OWNERSHIP_QOS;
+      }
+
+
+      //Rparam.qos.m_partition
+
+
+      std::string presentation_access_scope = fastrtps_prop.getProperty("subscriber.qos.presentation.access_scope", "INSTANCE_PRESENTATION_QOS");
+
+      if (presentation_access_scope == "INSTANCE_PRESENTATION_QOS")
+      {
+        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::INSTANCE_PRESENTATION_QOS;
+      }
+      else if (presentation_access_scope == "TOPIC_PRESENTATION_QOS")
+      {
+        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::TOPIC_PRESENTATION_QOS;
+      }
+      else if (presentation_access_scope == "GROUP_PRESENTATION_QOS")
+      {
+        Rparam.qos.m_presentation.access_scope = eprosima::fastrtps::GROUP_PRESENTATION_QOS;
+      }
+
+      Rparam.qos.m_presentation.coherent_access = coil::toBool(fastrtps_prop["subscriber.qos.presentation.coherent_access"], "YES", "NO", Rparam.qos.m_presentation.coherent_access);
+      Rparam.qos.m_presentation.ordered_access = coil::toBool(fastrtps_prop["subscriber.qos.presentation.ordered_access"], "YES", "NO", Rparam.qos.m_presentation.ordered_access);
+
+      std::string reliability_kind = fastrtps_prop.getProperty("subscriber.qos.reliability.kind", "BEST_EFFORT_RELIABILITY_QOS");
+
+      if (reliability_kind == "BEST_EFFORT_RELIABILITY_QOS")
+      {
+        Rparam.qos.m_reliability.kind = eprosima::fastrtps::BEST_EFFORT_RELIABILITY_QOS;
+      }
+      else if (reliability_kind == "RELIABLE_RELIABILITY_QOS")
+      {
+        Rparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
+      }
+
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.reliability.max_blocking_time"), Rparam.qos.m_reliability.max_blocking_time);
+
+      setDuration(fastrtps_prop.getNode("subscriber.qos.timeBasedFilter.minimum_separation"), Rparam.qos.m_timeBasedFilter.minimum_separation);
+
+
+      //Rparam.qos.m_topicData
+      //Rparam.qos.m_userData
+      //Rparam.qos.representation.m_value
+      
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.m_typeConsistency.m_force_type_validation);
+#else
+      Rparam.qos.type_consistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
+#endif
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_member_names);
+#else
+      Rparam.qos.type_consistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_member_names);
+#endif
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds);
+#else
+      Rparam.qos.type_consistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_sequence_bounds);
+#endif
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_string_bounds);
+#else
+      Rparam.qos.type_consistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_string_bounds);
+#endif
+
+      std::string type_consistency_kind = fastrtps_prop.getProperty("subscriber.qos.type_consistency.kind", "ALLOW_TYPE_COERCION");
+
+      if (type_consistency_kind == "DISALLOW_TYPE_COERCION")
+      {
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+        Rparam.qos.m_typeConsistency.m_kind
+#else
+        Rparam.qos.type_consistency.m_kind
+#endif
+            = eprosima::fastrtps::DISALLOW_TYPE_COERCION;
+      }
+      else if (type_consistency_kind == "ALLOW_TYPE_COERCION")
+      {
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+        Rparam.qos.m_typeConsistency.m_kind
+#else
+        Rparam.qos.type_consistency.m_kind
+#endif
+            = eprosima::fastrtps::ALLOW_TYPE_COERCION;
+      }
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.m_typeConsistency.m_prevent_type_widening);
+#else
+      Rparam.qos.type_consistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.type_consistency.m_prevent_type_widening);
+#endif
+
+
+  void FastRTPSInPort::setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes& Rparam)
+  {
+
+      std::string history_memory_policy = fastrtps_prop.getProperty("subscriber.history_memory_policy", "PREALLOCATED_WITH_REALLOC_MEMORY_MODE");
+      if (history_memory_policy == "PREALLOCATED_MEMORY_MODE")
+      {
+        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_MEMORY_MODE;
+      }
+      else if (history_memory_policy == "PREALLOCATED_WITH_REALLOC_MEMORY_MODE")
+      {
+        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::PREALLOCATED_WITH_REALLOC_MEMORY_MODE;
+      }
+      else if (history_memory_policy == "DYNAMIC_RESERVE_MEMORY_MODE")
+      {
+        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_RESERVE_MEMORY_MODE;
+      }
+#if (FASTRTPS_VERSION_MAJOR > 1)
+      else if (history_memory_policy == "DYNAMIC_REUSABLE_MEMORY_MODE")
+      {
+        Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_REUSABLE_MEMORY_MODE;
+      }
+#endif
+
+      coil::stringTo<int32_t>(Rparam.topic.historyQos.depth, fastrtps_prop["subscriber.topic.historyQos.depth"].c_str());
+
+      std::string topic_historyQos_kind = fastrtps_prop.getProperty("subscriber.topic.historyQos.kind", "KEEP_LAST_HISTORY_QOS");
+      if (history_memory_policy == "KEEP_LAST_HISTORY_QOS")
+      {
+        Rparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
+      }
+      else if (history_memory_policy == "KEEP_ALL_HISTORY_QOS")
+      {
+        Rparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
+      }
   }
 
 } // namespace RTC

@@ -258,6 +258,8 @@ namespace RTC
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
 #endif
 
+    static void setPubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::PublisherAttributes& Wparam);
+
     mutable Logger rtclog;
     coil::Properties m_properties;
     
