@@ -90,7 +90,7 @@ namespace RTC
    *
    * @endif
    */
-  void FastRTPSInPort::init(coil::Properties& /*prop*/)
+  void FastRTPSInPort::init(coil::Properties& prop)
   {
     RTC_PARANOID(("FastRTPSInPort::init()"));
 
@@ -111,7 +111,7 @@ namespace RTC
 
     
 
-    std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
+    //std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
     coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
     m_topic = fastrtps_prop.getProperty("topic", "chatter");
     
