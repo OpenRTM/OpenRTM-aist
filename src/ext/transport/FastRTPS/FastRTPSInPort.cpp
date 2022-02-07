@@ -111,11 +111,11 @@ namespace RTC
 
     
 
-    //std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
+    std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
     coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
     m_topic = fastrtps_prop.getProperty("topic", "chatter");
     
-/*
+
     const std::string str_corba = "corba";
 
     bool is_serializer_cdr = !(marshaling_type.compare(0, str_corba.size(), str_corba) != 0);
@@ -147,7 +147,7 @@ namespace RTC
             m_dataType = data;
         }
     }
-
+/*
     if (!topicmgr.registeredType(m_dataType.c_str()))
     {
         CORBACdrDataPubSubType* type = new CORBACdrDataPubSubType();
