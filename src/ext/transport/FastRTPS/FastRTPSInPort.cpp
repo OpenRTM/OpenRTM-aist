@@ -93,7 +93,7 @@ namespace RTC
   void FastRTPSInPort::init(coil::Properties& prop)
   {
     RTC_PARANOID(("FastRTPSInPort::init()"));
-
+/*
     if(prop.propertyNames().size() == 0)
     {
       RTC_DEBUG(("Property is empty."));
@@ -115,7 +115,7 @@ namespace RTC
     coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
     m_topic = fastrtps_prop.getProperty("topic", "chatter");
     
-/*
+
     const std::string str_corba = "corba";
 
     bool is_serializer_cdr = !(marshaling_type.compare(0, str_corba.size(), str_corba) != 0);
