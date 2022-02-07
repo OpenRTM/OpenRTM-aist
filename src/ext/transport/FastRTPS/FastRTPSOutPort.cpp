@@ -174,11 +174,11 @@ namespace RTC
       
       if (destinationOrder_kind == "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")
       {
-        Wparam.qos.m_destinationOrder.kind = eprosima::fastdds::dds::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+        Wparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
       }
       else if (destinationOrder_kind == "BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")
       {
-        Wparam.qos.m_destinationOrder.kind = eprosima::fastdds::dds::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+        Wparam.qos.m_destinationOrder.kind = eprosima::fastrtps::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       }
 
       Wparam.qos.m_disablePositiveACKs.enabled = coil::toBool(fastrtps_prop["publisher.qos.disablePositiveACKs.enabled"], "YES", "NO", Wparam.qos.m_disablePositiveACKs.enabled);
@@ -190,19 +190,19 @@ namespace RTC
 
       if (durability_kind == "VOLATILE_DURABILITY_QOS")
       {
-        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::VOLATILE_DURABILITY_QOS;
+        Wparam.qos.m_durability.kind = eprosima::fastrtps::VOLATILE_DURABILITY_QOS;
       }
       else if (durability_kind == "TRANSIENT_LOCAL_DURABILITY_QOS")
       {
-        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+        Wparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_LOCAL_DURABILITY_QOS;
       }
       else if (durability_kind == "TRANSIENT_DURABILITY_QOS")
       {
-        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::TRANSIENT_DURABILITY_QOS;
+        Wparam.qos.m_durability.kind = eprosima::fastrtps::TRANSIENT_DURABILITY_QOS;
       }
       else if (durability_kind == "PERSISTENT_DURABILITY_QOS")
       {
-        Wparam.qos.m_durability.kind = eprosima::fastdds::dds::PERSISTENT_DURABILITY_QOS;
+        Wparam.qos.m_durability.kind = eprosima::fastrtps::PERSISTENT_DURABILITY_QOS;
       }
 
       coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.history_depth, fastrtps_prop["publisher.qos.durabilityService.history_depth"].c_str());
@@ -212,11 +212,11 @@ namespace RTC
 
       if (durabilityService_history_kind == "KEEP_LAST_HISTORY_QOS")
       {
-        Wparam.qos.m_durabilityService.history_kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+        Wparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
       }
       else if (durabilityService_history_kind == "KEEP_ALL_HISTORY_QOS")
       {
-        Wparam.qos.m_durabilityService.history_kind = eprosima::fastdds::dds::KEEP_ALL_HISTORY_QOS;
+        Wparam.qos.m_durabilityService.history_kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
       }
       
       coil::stringTo<int32_t>(Wparam.qos.m_durabilityService.max_instances, fastrtps_prop["publisher.qos.durabilityService.max_instances"].c_str());
@@ -238,15 +238,15 @@ namespace RTC
 
       if (liveliness_kind == "AUTOMATIC_LIVELINESS_QOS")
       {
-        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::AUTOMATIC_LIVELINESS_QOS;
+        Wparam.qos.m_liveliness.kind = eprosima::fastrtps::AUTOMATIC_LIVELINESS_QOS;
       }
       else if (liveliness_kind == "MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")
       {
-        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+        Wparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
       }
       else if (liveliness_kind == "MANUAL_BY_TOPIC_LIVELINESS_QOS")
       {
-        Wparam.qos.m_liveliness.kind = eprosima::fastdds::dds::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+        Wparam.qos.m_liveliness.kind = eprosima::fastrtps::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       }
 
       setDuration(fastrtps_prop.getNode("publisher.qos.liveliness.lease_duration"), Wparam.qos.m_liveliness.lease_duration);
@@ -256,11 +256,11 @@ namespace RTC
 
       if (ownership_kind == "SHARED_OWNERSHIP_QOS")
       {
-        Wparam.qos.m_ownership.kind = eprosima::fastdds::dds::SHARED_OWNERSHIP_QOS;
+        Wparam.qos.m_ownership.kind = eprosima::fastrtps::SHARED_OWNERSHIP_QOS;
       }
       else if (ownership_kind == "EXCLUSIVE_OWNERSHIP_QOS")
       {
-        Wparam.qos.m_ownership.kind = eprosima::fastdds::dds::EXCLUSIVE_OWNERSHIP_QOS;
+        Wparam.qos.m_ownership.kind = eprosima::fastrtps::EXCLUSIVE_OWNERSHIP_QOS;
       }
 
 
@@ -273,15 +273,15 @@ namespace RTC
 
       if (presentation_access_scope == "INSTANCE_PRESENTATION_QOS")
       {
-        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::INSTANCE_PRESENTATION_QOS;
+        Wparam.qos.m_presentation.access_scope = eprosima::fastrtps::INSTANCE_PRESENTATION_QOS;
       }
       else if (presentation_access_scope == "TOPIC_PRESENTATION_QOS")
       {
-        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::TOPIC_PRESENTATION_QOS;
+        Wparam.qos.m_presentation.access_scope = eprosima::fastrtps::TOPIC_PRESENTATION_QOS;
       }
       else if (presentation_access_scope == "GROUP_PRESENTATION_QOS")
       {
-        Wparam.qos.m_presentation.access_scope = eprosima::fastdds::dds::GROUP_PRESENTATION_QOS;
+        Wparam.qos.m_presentation.access_scope = eprosima::fastrtps::GROUP_PRESENTATION_QOS;
       }
 
       Wparam.qos.m_presentation.coherent_access = coil::toBool(fastrtps_prop["publisher.qos.presentation.coherent_access"], "YES", "NO", Wparam.qos.m_presentation.coherent_access);
@@ -292,11 +292,11 @@ namespace RTC
 
       if (publishMode_kind == "SYNCHRONOUS_PUBLISH_MODE")
       {
-        Wparam.qos.m_publishMode.kind = eprosima::fastdds::dds::SYNCHRONOUS_PUBLISH_MODE;
+        Wparam.qos.m_publishMode.kind = eprosima::fastrtps::SYNCHRONOUS_PUBLISH_MODE;
       }
       else if (publishMode_kind == "ASYNCHRONOUS_PUBLISH_MODE")
       {
-        Wparam.qos.m_publishMode.kind = eprosima::fastdds::dds::ASYNCHRONOUS_PUBLISH_MODE;
+        Wparam.qos.m_publishMode.kind = eprosima::fastrtps::ASYNCHRONOUS_PUBLISH_MODE;
       }
 
 
@@ -339,11 +339,11 @@ namespace RTC
       std::string topic_historyQos_kind = fastrtps_prop.getProperty("publisher.topic.historyQos.kind", "KEEP_LAST_HISTORY_QOS");
       if (history_memory_policy == "KEEP_LAST_HISTORY_QOS")
       {
-        Wparam.topic.historyQos.kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+        Wparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_LAST_HISTORY_QOS;
       }
       else if (history_memory_policy == "KEEP_ALL_HISTORY_QOS")
       {
-        Wparam.topic.historyQos.kind = eprosima::fastdds::dds::KEEP_ALL_HISTORY_QOS;
+        Wparam.topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
       }
     }
     else
