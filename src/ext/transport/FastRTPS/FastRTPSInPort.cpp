@@ -422,14 +422,8 @@ namespace RTC
       //Rparam.topic.topicName = m_topic;
       //Rparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
     }
-    m_subscriber = eprosima::fastrtps::Domain::createSubscriber(participant, Rparam, (eprosima::fastrtps::SubscriberListener*)&m_listener);
 
-    if(m_subscriber == nullptr)
-    {
-      RTC_ERROR(("Subscriber initialize failed"));
-      throw;
-    }
-   
+   /*
     RTC_DEBUG(("ReaderQos setting: subscriber.deadline.period: sec=%d nanosec=%u", Rparam.qos.m_deadline.period.seconds, Rparam.qos.m_deadline.period.nanosec));
     RTC_DEBUG(("ReaderQos setting: subscriber.destinationOrder.kind: %hhu", Rparam.qos.m_destinationOrder.kind));
     RTC_DEBUG(("ReaderQos setting: subscriber.disablePositiveACKs.enabled: %s", (Rparam.qos.m_disablePositiveACKs.enabled ? "true" : "false")));
@@ -469,8 +463,18 @@ namespace RTC
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.prevent_type_widening: %s", (Rparam.qos.type_consistency.m_prevent_type_widening ? "true" : "false")));
 #endif
     RTC_DEBUG(("ReaderQos setting: subscriber.history_memory_policy: %d", Rparam.historyMemoryPolicy));
-   
-    
+   */
+
+
+    m_subscriber = eprosima::fastrtps::Domain::createSubscriber(participant, Rparam, (eprosima::fastrtps::SubscriberListener*)&m_listener);
+
+    if(m_subscriber == nullptr)
+    {
+      RTC_ERROR(("Subscriber initialize failed"));
+      throw;
+    }
+
+
   }
 
 

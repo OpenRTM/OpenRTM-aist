@@ -360,7 +360,7 @@ namespace RTC
       
     }
 
-
+/*
     RTC_DEBUG(("WriterQos setting: publisher.deadline.period: sec=%d nanosec=%u", Wparam.qos.m_deadline.period.seconds, Wparam.qos.m_deadline.period.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.destinationOrder.kind: %hhu", Wparam.qos.m_destinationOrder.kind));
     RTC_DEBUG(("WriterQos setting: publisher.disablePositiveACKs.enabled: %s", (Wparam.qos.m_disablePositiveACKs.enabled ? "true" : "false")));
@@ -387,7 +387,7 @@ namespace RTC
     RTC_DEBUG(("WriterQos setting: publisher.reliability.max_blocking_time: sec=%d nanosec=%u", Wparam.qos.m_reliability.max_blocking_time.seconds, Wparam.qos.m_reliability.max_blocking_time.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam.qos.m_timeBasedFilter.minimum_separation.seconds, Wparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam.historyMemoryPolicy));
-
+*/
     m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
 
     
