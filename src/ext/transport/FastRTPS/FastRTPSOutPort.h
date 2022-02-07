@@ -28,6 +28,7 @@
 #pragma warning(push)
 #pragma warning(disable:4819)
 #endif
+#include <fastrtps/fastrtps_all.h>
 #include <fastrtps/fastrtps_fwd.h>
 #include <fastrtps/publisher/PublisherListener.h>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -251,7 +252,7 @@ namespace RTC
      *
      * @endif
      */
-#if (FASTRTPS_VERSION_MAJOR <= 1)
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time);
 #else
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);

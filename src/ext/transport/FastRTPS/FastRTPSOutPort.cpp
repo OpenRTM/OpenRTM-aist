@@ -494,7 +494,7 @@ namespace RTC
    *
    * @endif
    */
-#if (FASTRTPS_VERSION_MAJOR <= 1)
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
   void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time)
 #else
   void FastRTPSOutPort::setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time)

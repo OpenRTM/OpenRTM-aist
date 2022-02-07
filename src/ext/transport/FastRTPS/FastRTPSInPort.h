@@ -30,6 +30,7 @@
 #pragma warning(push)
 #pragma warning(disable:4819)
 #endif
+#include <fastrtps/fastrtps_all.h>
 #include <fastrtps/subscriber/Subscriber.h>
 #include <fastrtps/Domain.h>
 #include <fastrtps/fastrtps_fwd.h>
@@ -401,7 +402,7 @@ namespace RTC
      *
      * @endif
      */
-#if (FASTRTPS_VERSION_MAJOR <= 1)
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time);
 #else
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
