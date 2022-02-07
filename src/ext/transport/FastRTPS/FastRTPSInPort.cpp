@@ -185,7 +185,7 @@ namespace RTC
       Rparam.topic.topicDataType = m_dataType;
       Rparam.topic.topicName = m_topic;
       
-      setSubParam(fastrtps_prop, Rparam);
+      //setSubParam(fastrtps_prop, Rparam);
       
     }
     else
