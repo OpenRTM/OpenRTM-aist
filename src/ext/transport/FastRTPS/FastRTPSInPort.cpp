@@ -112,7 +112,7 @@ namespace RTC
     
 
     std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
-    //coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
+    coil::Properties& fastrtps_prop = prop.getNode("fast-rtps");
     m_topic = fastrtps_prop.getProperty("topic", "chatter");
     
 /*
