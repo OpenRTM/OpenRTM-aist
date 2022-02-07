@@ -325,11 +325,11 @@ namespace RTC
       //Rparam.qos.representation.m_value
       
 #if (FASTRTPS_VERSION_MAJOR <= 1)
-      Rparam.qos.m_typeConsistency.m_force_type_validation
+      Rparam.qos.m_typeConsistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.m_typeConsistency.m_force_type_validation);
 #else
-      Rparam.qos.type_consistency.m_force_type_validation
+      Rparam.qos.type_consistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
 #endif
-             = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
+
 #if (FASTRTPS_VERSION_MAJOR <= 1)
       Rparam.qos.m_typeConsistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_member_names);
 #else
