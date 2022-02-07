@@ -324,24 +324,56 @@ namespace RTC
       //Rparam.qos.m_userData
       //Rparam.qos.representation.m_value
       
-      Rparam.qos.type_consistency.m_force_type_validation = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_force_type_validation
+#else
+      Rparam.qos.type_consistency.m_force_type_validation
+#endif
+             = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.force_type_validation"], "YES", "NO", Rparam.qos.type_consistency.m_force_type_validation);
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_member_names);
+#else
       Rparam.qos.type_consistency.m_ignore_member_names = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_member_names"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_member_names);
+#endif
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds);
+#else
       Rparam.qos.type_consistency.m_ignore_sequence_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_sequence_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_sequence_bounds);
+#endif
+
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.m_typeConsistency.m_ignore_string_bounds);
+#else
       Rparam.qos.type_consistency.m_ignore_string_bounds = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.ignore_string_bounds"], "YES", "NO", Rparam.qos.type_consistency.m_ignore_string_bounds);
+#endif
 
       std::string type_consistency_kind = fastrtps_prop.getProperty("subscriber.qos.type_consistency.kind", "ALLOW_TYPE_COERCION");
 
       if (type_consistency_kind == "DISALLOW_TYPE_COERCION")
       {
-        Rparam.qos.type_consistency.m_kind = eprosima::fastrtps::DISALLOW_TYPE_COERCION;
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+        Rparam.qos.m_typeConsistency.m_kind
+#else
+        Rparam.qos.type_consistency.m_kind
+#endif
+            = eprosima::fastrtps::DISALLOW_TYPE_COERCION;
       }
       else if (type_consistency_kind == "ALLOW_TYPE_COERCION")
       {
-        Rparam.qos.type_consistency.m_kind = eprosima::fastrtps::ALLOW_TYPE_COERCION;
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+        Rparam.qos.m_typeConsistency.m_kind
+#else
+        Rparam.qos.type_consistency.m_kind
+#endif
+            = eprosima::fastrtps::ALLOW_TYPE_COERCION;
       }
 
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+      Rparam.qos.m_typeConsistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.m_typeConsistency.m_prevent_type_widening);
+#else
       Rparam.qos.type_consistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.type_consistency.m_prevent_type_widening);
-      
+#endif
 
 
 
@@ -421,12 +453,21 @@ namespace RTC
     RTC_DEBUG(("ReaderQos setting: subscriber.reliability.kind: %hhu", Rparam.qos.m_reliability.kind));
     RTC_DEBUG(("ReaderQos setting: subscriber.reliability.max_blocking_time: sec=%d nanosec=%u", Rparam.qos.m_reliability.max_blocking_time.seconds, Rparam.qos.m_reliability.max_blocking_time.nanosec));
     RTC_DEBUG(("ReaderQos setting: subscriber.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Rparam.qos.m_timeBasedFilter.minimum_separation.seconds, Rparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
+#if (FASTRTPS_VERSION_MAJOR <= 1)
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.force_type_validation: %s", (Rparam.qos.m_typeConsistency.m_force_type_validation ? "true" : "false")));
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_member_names: %s", (Rparam.qos.m_typeConsistency.m_ignore_member_names ? "true" : "false")));
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_sequence_bounds: %s", (Rparam.qos.m_typeConsistency.m_ignore_sequence_bounds ? "true" : "false")));
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_string_bounds: %s", (Rparam.qos.m_typeConsistency.m_ignore_string_bounds ? "true" : "false")));
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.kind: %hhu", Rparam.qos.m_typeConsistency.m_kind));
+    RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.prevent_type_widening: %s", (Rparam.qos.m_typeConsistency.m_prevent_type_widening ? "true" : "false")));
+#else
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.force_type_validation: %s", (Rparam.qos.type_consistency.m_force_type_validation ? "true" : "false")));
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_member_names: %s", (Rparam.qos.type_consistency.m_ignore_member_names ? "true" : "false")));
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_sequence_bounds: %s", (Rparam.qos.type_consistency.m_ignore_sequence_bounds ? "true" : "false")));
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.ignore_string_bounds: %s", (Rparam.qos.type_consistency.m_ignore_string_bounds ? "true" : "false")));
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.kind: %hhu", Rparam.qos.type_consistency.m_kind));
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.prevent_type_widening: %s", (Rparam.qos.type_consistency.m_prevent_type_widening ? "true" : "false")));
+#endif
     RTC_DEBUG(("ReaderQos setting: subscriber.history_memory_policy: %d", Rparam.historyMemoryPolicy));
    
     
