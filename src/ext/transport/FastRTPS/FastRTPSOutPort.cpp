@@ -212,14 +212,14 @@ namespace RTC
     RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam.qos.m_timeBasedFilter.minimum_separation.seconds, Wparam.qos.m_timeBasedFilter.minimum_separation.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam.historyMemoryPolicy));
 */
-    m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
+    /*m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
 
     
     if (m_publisher == nullptr)
     {
         RTC_ERROR(("Publisher initialize failed"));
         throw;
-    }
+    }*/
 
   }
 
