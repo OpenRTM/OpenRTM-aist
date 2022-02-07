@@ -245,13 +245,13 @@ namespace RTC
    */
 
 
-    m_subscriber = eprosima::fastrtps::Domain::createSubscriber(participant, Rparam, (eprosima::fastrtps::SubscriberListener*)&m_listener);
+    /*m_subscriber = eprosima::fastrtps::Domain::createSubscriber(participant, Rparam, (eprosima::fastrtps::SubscriberListener*)&m_listener);
 
     if(m_subscriber == nullptr)
     {
       RTC_ERROR(("Subscriber initialize failed"));
       throw;
-    }
+    }*/
 
 
   }
