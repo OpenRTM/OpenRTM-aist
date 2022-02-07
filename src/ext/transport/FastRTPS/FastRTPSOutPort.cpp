@@ -167,7 +167,7 @@ namespace RTC
       Wparam.topic.topicDataType = m_dataType;
       Wparam.topic.topicName = m_topic;
       
-      //setPubParam(fastrtps_prop, Wparam);
+      setPubParam(fastrtps_prop, Wparam);
 
     }
     else

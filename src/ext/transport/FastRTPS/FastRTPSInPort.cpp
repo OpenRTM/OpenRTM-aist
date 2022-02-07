@@ -178,6 +178,7 @@ namespace RTC
 
     std::string subscriber_name = fastrtps_prop.getProperty("subscriber.name");
     eprosima::fastrtps::SubscriberAttributes Rparam;
+/*
     if(subscriber_name.empty())
     {
       
@@ -185,7 +186,7 @@ namespace RTC
       Rparam.topic.topicDataType = m_dataType;
       Rparam.topic.topicName = m_topic;
       
-      //setSubParam(fastrtps_prop, Rparam);
+      setSubParam(fastrtps_prop, Rparam);
       
     }
     else
@@ -200,7 +201,7 @@ namespace RTC
       //Rparam.topic.topicName = m_topic;
       //Rparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
     }
-
+*/
    /*
     RTC_DEBUG(("ReaderQos setting: subscriber.deadline.period: sec=%d nanosec=%u", Rparam.qos.m_deadline.period.seconds, Rparam.qos.m_deadline.period.nanosec));
     RTC_DEBUG(("ReaderQos setting: subscriber.destinationOrder.kind: %hhu", Rparam.qos.m_destinationOrder.kind));
