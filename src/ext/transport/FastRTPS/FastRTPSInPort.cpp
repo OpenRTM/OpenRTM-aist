@@ -391,10 +391,12 @@ namespace RTC
       {
         Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_RESERVE_MEMORY_MODE;
       }
+#if (FASTRTPS_VERSION_MAJOR <= 1)
       else if (history_memory_policy == "DYNAMIC_REUSABLE_MEMORY_MODE")
       {
         Rparam.historyMemoryPolicy = eprosima::fastrtps::rtps::DYNAMIC_REUSABLE_MEMORY_MODE;
       }
+#endif
 
       coil::stringTo<int32_t>(Rparam.topic.historyQos.depth, fastrtps_prop["subscriber.topic.historyQos.depth"].c_str());
 
