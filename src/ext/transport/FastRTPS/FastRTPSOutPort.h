@@ -257,8 +257,39 @@ namespace RTC
 #else
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
 #endif
+    /*!
+     * @if jp
+     * @brief プロパティからeprosima::fastrtps::PublisherAttributesを設定する
+     *
+     * @param fastrtps_prop プロパティ
+     * @param Wparam Publisherの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param fastrtps_prop
+     * @param Wparam
+     *
+     *
+     * @endif
+     */
+    static void setPubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::PublisherAttributes* Wparam);
 
-    static void setPubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::PublisherAttributes& Wparam);
+    /*!
+     * @if jp
+     * @brief eprosima::fastrtps::PublisherAttributesのパラメータをログに出力する
+     *
+     * @param Wparam Publisherの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param Wparam
+     *
+     *
+     * @endif
+     */
+    void outputLog(const eprosima::fastrtps::PublisherAttributes* Wparam);
 
     mutable Logger rtclog;
     coil::Properties m_properties;

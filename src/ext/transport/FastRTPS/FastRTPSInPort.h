@@ -407,8 +407,38 @@ namespace RTC
 #else
     static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
 #endif
-
-    static void setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes& Rparam);
+    /*!
+     * @if jp
+     * @brief プロパティからeprosima::fastrtps::SubscriberAttributesを設定する
+     *
+     * @param fastrtps_prop プロパティ
+     * @param Rparam Subscriberの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param fastrtps_prop
+     * @param Rparam
+     *
+     *
+     * @endif
+     */
+    static void setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes* Rparam);
+    /*!
+     * @if jp
+     * @brief eprosima::fastrtps::SubscriberAttributesのパラメータをログに出力する
+     *
+     * @param Rparam Subscriberの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param Rparam
+     *
+     *
+     * @endif
+     */
+    void outputLog(const eprosima::fastrtps::SubscriberAttributes* Rparam);
 
     CdrBufferBase* m_buffer;
     ConnectorInfo m_profile;
