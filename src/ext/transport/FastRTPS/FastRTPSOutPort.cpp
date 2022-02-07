@@ -74,10 +74,10 @@ namespace RTC
    * @brief Initializing configuration
    * @endif
    */
-  void FastRTPSOutPort::init(coil::Properties& prop)
+  void FastRTPSOutPort::init(coil::Properties& /*prop*/)
   { 
     RTC_PARANOID(("FastRTPSOutPort::init()"));
-    
+    /*
     if(prop.propertyNames().size() == 0)
     {
       RTC_DEBUG(("Property is empty."));
@@ -182,7 +182,7 @@ namespace RTC
       //Wparam.topic.topicName = m_topic;
       //Wparam.qos.m_reliability.kind = eprosima::fastrtps::RELIABLE_RELIABILITY_QOS;
       
-    }
+    }*/
 
 /*
     RTC_DEBUG(("WriterQos setting: publisher.deadline.period: sec=%d nanosec=%u", Wparam.qos.m_deadline.period.seconds, Wparam.qos.m_deadline.period.nanosec));
