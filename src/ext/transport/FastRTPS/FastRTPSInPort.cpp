@@ -490,7 +490,8 @@ namespace RTC
     coil::stringTo<uint32_t>(time.nanosec, nanosec_str.c_str());
   }
 
-
+  void FastRTPSInPort::setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes& Rparam)
+  {
       setDuration(fastrtps_prop.getNode("subscriber.qos.deadline.period"), Rparam.qos.m_deadline.period);
 
       std::string destinationOrder_kind = fastrtps_prop.getProperty("subscriber.qos.destinationOrder.kind", "BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
@@ -680,9 +681,6 @@ namespace RTC
       Rparam.qos.type_consistency.m_prevent_type_widening = coil::toBool(fastrtps_prop["subscriber.qos.type_consistency.prevent_type_widening"], "YES", "NO", Rparam.qos.type_consistency.m_prevent_type_widening);
 #endif
 
-
-  void FastRTPSInPort::setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes& Rparam)
-  {
 
       std::string history_memory_policy = fastrtps_prop.getProperty("subscriber.history_memory_policy", "PREALLOCATED_WITH_REALLOC_MEMORY_MODE");
       if (history_memory_policy == "PREALLOCATED_MEMORY_MODE")
