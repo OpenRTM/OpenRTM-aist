@@ -90,7 +90,7 @@ namespace RTC
    *
    * @endif
    */
-  void FastRTPSInPort::init(coil::Properties& prop)
+  void FastRTPSInPort::init(coil::Properties& /*prop*/)
   {
     RTC_PARANOID(("FastRTPSInPort::init()"));
 /*
