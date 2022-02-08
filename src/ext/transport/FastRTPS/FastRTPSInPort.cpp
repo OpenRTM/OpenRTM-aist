@@ -693,6 +693,9 @@ namespace RTC
     {
       Rparam->topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
     }
+
+    setDuration(fastrtps_prop.getNode("subscriber.times.heartbeatResponseDelay"), Rparam->times.heartbeatResponseDelay);
+    setDuration(fastrtps_prop.getNode("subscriber.times.initialAcknackDelay"), Rparam->times.initialAcknackDelay);
   }
 
 
@@ -751,6 +754,8 @@ namespace RTC
     RTC_DEBUG(("ReaderQos setting: subscriber.type_consistency.prevent_type_widening: %s", (Rparam->qos.type_consistency.m_prevent_type_widening ? "true" : "false")));
 #endif
     RTC_DEBUG(("ReaderQos setting: subscriber.history_memory_policy: %d", Rparam->historyMemoryPolicy));
+    RTC_DEBUG(("ReaderQos setting: subscriber.times.heartbeatResponseDelay: sec=%d nanosec=%u", Rparam->times.heartbeatResponseDelay.seconds, Rparam->times.heartbeatResponseDelay.nanosec));
+    RTC_DEBUG(("ReaderQos setting: subscriber.times.initialAcknackDelay: sec=%d nanosec=%u", Rparam->times.initialAcknackDelay.seconds, Rparam->times.initialAcknackDelay.nanosec));
   }
 
 } // namespace RTC

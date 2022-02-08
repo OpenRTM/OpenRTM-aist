@@ -118,11 +118,14 @@ namespace RTC
 #endif
         PParam.rtps.setName("participant_openrtm");
         
+        setParticipantSecParam(prop, PParam);
+
+
         m_participant = eprosima::fastrtps::Domain::createParticipant(PParam);
       }
       else
       {
-        const std::string paticipant_name = std::move(prop["xmlprofile.participant.name"]);
+        const std::string paticipant_name = std::move(prop["participant.name"]);
         RTC_INFO(("Create participant: %s", paticipant_name.c_str()));
         m_participant = eprosima::fastrtps::Domain::createParticipant(paticipant_name);
       }
@@ -306,6 +309,78 @@ namespace RTC
       {
           manager->shutdown();
       }
+  }
+
+
+  /*!
+   * @if jp
+   * @brief プロパティからeprosima::fastrtps::ParticipantAttributesを設定する
+   *
+   * @param prop プロパティ
+   * @param PParam Participantの属性
+   *
+   * @else
+   * @brief
+   *
+   * @param prop
+   * @param PParam
+   *
+   *
+   * @endif
+   */
+  void FastRTPSManager::setParticipantSecParam(coil::Properties& prop, eprosima::fastrtps::ParticipantAttributes &PParam)
+  {
+    std::string auth_plugin{ std::move(prop["dds.sec.auth.plugin"]) };
+    if (!auth_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.auth.plugin", auth_plugin);
+      const std::string path = "dds.sec.auth." + auth_plugin;
+      const std::vector<Properties*>& auth_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : auth_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string access_plugin{ std::move(prop["dds.sec.access.plugin"]) };
+    if (!access_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.access.plugin", access_plugin);
+      const std::string path = "dds.sec.access." + access_plugin;
+      const std::vector<Properties*>& access_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : access_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string crypto_plugin{ std::move(prop["dds.sec.crypto.plugin"]) };
+    if (!crypto_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.crypto.plugin", crypto_plugin);
+      const std::string path = "dds.sec.crypto." + crypto_plugin;
+      const std::vector<Properties*>& crypto_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : crypto_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string log_plugin{ std::move(prop["dds.sec.log.plugin"]) };
+    if (!log_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.log.plugin", log_plugin);
+      const std::string path = "dds.sec.log." + log_plugin;
+      const std::vector<Properties*>& log_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : log_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
   }
 }
 

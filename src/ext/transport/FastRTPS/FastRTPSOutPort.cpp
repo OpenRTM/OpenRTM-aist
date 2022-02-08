@@ -504,6 +504,13 @@ namespace RTC
     {
       Wparam->topic.historyQos.kind = eprosima::fastrtps::KEEP_ALL_HISTORY_QOS;
     }
+
+    setDuration(fastrtps_prop.getNode("publisher.times.heartbeatPeriod"), Wparam->times.heartbeatPeriod);
+    setDuration(fastrtps_prop.getNode("publisher.times.initialHeartbeatDelay"), Wparam->times.initialHeartbeatDelay);
+    setDuration(fastrtps_prop.getNode("publisher.times.nackResponseDelay"), Wparam->times.nackResponseDelay);
+    setDuration(fastrtps_prop.getNode("publisher.times.nackSupressionDuration"), Wparam->times.nackSupressionDuration);
+
+
   }
 
   /*!
@@ -548,6 +555,12 @@ namespace RTC
     RTC_DEBUG(("WriterQos setting: publisher.reliability.max_blocking_time: sec=%d nanosec=%u", Wparam->qos.m_reliability.max_blocking_time.seconds, Wparam->qos.m_reliability.max_blocking_time.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.timeBasedFilter.minimum_separation: sec=%d nanosec=%u", Wparam->qos.m_timeBasedFilter.minimum_separation.seconds, Wparam->qos.m_timeBasedFilter.minimum_separation.nanosec));
     RTC_DEBUG(("WriterQos setting: publisher.history_memory_policy: %d", Wparam->historyMemoryPolicy));
+
+
+    RTC_DEBUG(("WriterQos setting: publisher.times.heartbeatPeriod: sec=%d nanosec=%u", Wparam->times.heartbeatPeriod.seconds, Wparam->times.heartbeatPeriod.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.times.initialHeartbeatDelay: sec=%d nanosec=%u", Wparam->times.initialHeartbeatDelay.seconds, Wparam->times.initialHeartbeatDelay.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.times.nackResponseDelay: sec=%d nanosec=%u", Wparam->times.nackResponseDelay.seconds, Wparam->times.nackResponseDelay.nanosec));
+    RTC_DEBUG(("WriterQos setting: publisher.times.nackSupressionDuration: sec=%d nanosec=%u", Wparam->times.nackSupressionDuration.seconds, Wparam->times.nackSupressionDuration.nanosec));
 
   }
 

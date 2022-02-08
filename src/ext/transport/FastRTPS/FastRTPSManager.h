@@ -235,6 +235,23 @@ namespace RTC
          */
         static void shutdown_global();
     private:
+        /*!
+         * @if jp
+         * @brief プロパティからeprosima::fastrtps::ParticipantAttributesを設定する
+         *
+         * @param prop プロパティ
+         * @param PParam Participantの属性
+         *
+         * @else
+         * @brief
+         *
+         * @param prop
+         * @param PParam
+         *
+         *
+         * @endif
+         */
+        static void setParticipantSecParam(coil::Properties& prop, eprosima::fastrtps::ParticipantAttributes &PParam);
         static FastRTPSManager* manager;
         static std::mutex mutex;
         eprosima::fastrtps::Participant *m_participant;

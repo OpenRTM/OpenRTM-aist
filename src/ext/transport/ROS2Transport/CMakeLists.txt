@@ -145,3 +145,19 @@ install(
 	FILES ${CMAKE_CURRENT_SOURCE_DIR}/FastRTPsQoSExample.xml
 	DESTINATION ${INSTALL_SAMPLEQOSPROFILE_DIR}
 	COMPONENT ext)
+
+
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ros2.ssl.conf.in ${PROJECT_BINARY_DIR}/rtc.ros2.ssl.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ros2.ssl.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)
+
+install(
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/mainexamplecacert.pem
+	${CMAKE_CURRENT_SOURCE_DIR}/appexamplekey.pem
+	${CMAKE_CURRENT_SOURCE_DIR}/appexamplecert.pem
+	DESTINATION ${INSTALL_SAMPLEQOSPROFILE_DIR}
+	COMPONENT ext)
