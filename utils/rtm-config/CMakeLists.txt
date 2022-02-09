@@ -19,7 +19,12 @@ elseif(CORBA STREQUAL "TAO")
 	if(WIN32)
 		set(IDLCOMMAND_FLAGS -as -DTAO_IDL -I${OPENRTM_DIR}/ACE/${RTM_VC_VER}/TAO)
 	else()
-		set(IDLCOMMAND_FLAGS -as -DTAO_IDL -I${ORB_ROOT}/TAO)
+		if(ORB_ROOT)
+			set(IDLCOMMAND_FLAGS -as -DTAO_IDL -I${ORB_ROOT}/TAO)
+		else()
+			set(IDLCOMMAND_FLAGS -as -DTAO_IDL -I${ACE_TAO_DIR}/include)
+		endif()
+		
 	endif()
 endif()
 
