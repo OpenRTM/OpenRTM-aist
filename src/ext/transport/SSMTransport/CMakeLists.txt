@@ -5,7 +5,14 @@ project (SSMTransport
 	LANGUAGES CXX)
 
 
+set(SSM_ROOT ${SSM_ROOT} CACHE PATH "set SSM_ROOT")
+
+
+
 link_directories(${ORB_LINK_DIR})
+if(SSM_ROOT)
+	link_directories(${SSM_ROOT}/lib ${SSM_ROOT}/lib64)
+endif()
 add_definitions(${ORB_C_FLAGS_LIST})
 
 if(WIN32)
@@ -29,6 +36,9 @@ if(VXWORKS AND NOT RTP)
 	openrtm_set_link_props_shared(${target})
 	openrtm_include_rtm(${target})
 	target_link_libraries(${target} ${libs} ssm)
+	if(SSM_ROOT)
+		target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+	endif()
 
 	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
 				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
@@ -43,6 +53,9 @@ else()
 	openrtm_include_rtm(${target})
 	openrtm_set_link_props_shared(${target})
 	target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ssm)
+	if(SSM_ROOT)
+		target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+	endif()
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
 	set_target_properties(${target} PROPERTIES
@@ -65,3 +78,10 @@ if(VXWORKS)
 	endif(RTP)
 endif(VXWORKS)
 
+set(INSTALL_SSMTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ssm.conf.in ${PROJECT_BINARY_DIR}/rtc.ssm.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ssm.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)
