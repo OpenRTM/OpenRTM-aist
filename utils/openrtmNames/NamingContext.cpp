@@ -699,6 +699,7 @@ namespace RTM
    */
   bool NamingContext::add_object(const CosNaming::Name& n, CosNaming::BindingType t, CORBA::Object_ptr obj)
   {
+    /*
     if(t == CosNaming::nobject && (strcmp(n[0].kind, RTOBJECT_KIND) == 0))
     {
       m_objects.push_back((ObjectBinding*)(new RTObjectBinding(n, t, obj, this)));
@@ -711,6 +712,8 @@ namespace RTM
     {
       m_objects.push_back(new ObjectBinding(n, t, obj, this));
     }
+    */
+    m_objects.push_back(new ObjectBinding(n, t, obj, this));
     return true;
   }
 
