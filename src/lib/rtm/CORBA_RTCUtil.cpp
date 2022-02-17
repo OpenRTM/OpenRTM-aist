@@ -1847,22 +1847,28 @@ namespace CORBA_RTCUtil
       }
       else
       {
-        m_rtcpath = addrname;
+        hostport = addrname;
       }
       
-
-      if (protocol == "http" || protocol == "https" || protocol == "ws" || protocol == "wss")
+      if(hostport != "*")
       {
-        m_address = protocol;
-        m_address += "://";
-        m_address += hostport;
+        if (protocol == "http" || protocol == "https" || protocol == "ws" || protocol == "wss")
+        {
+          m_address = protocol;
+          m_address += "://";
+          m_address += hostport;
+        }
+        else
+        {
+          m_address = "corbaloc:";
+          m_address += protocol;
+          m_address += ":";
+          m_address += hostport;
+        }
       }
       else
       {
-        m_address = "corbaloc:";
-        m_address += protocol;
-        m_address += ":";
-        m_address += hostport;
+        m_address = hostport;
       }
 
     }
