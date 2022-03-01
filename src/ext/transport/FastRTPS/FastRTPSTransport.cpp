@@ -27,6 +27,12 @@ namespace FastRTPSRTC
 {
   static const char* const fastrtps_sub_option[] =
   {
+    "topic.__value__", "chatter",
+    "topic.__widget__", "text",
+    "topic.__constraint__", "none",
+    "subscriber.name.__value__", "",
+    "subscriber.name.__widget__", "text",
+    "subscriber.name.__constraint__", "none",
     "subscriber.qos.deadline.period.seconds.__value__", "2147483647",
     "subscriber.qos.deadline.period.seconds.__widget__", "spin",
     "subscriber.qos.deadline.period.seconds.__constraint__", "0 <= x <= 2147483647",
@@ -167,6 +173,12 @@ namespace FastRTPSRTC
 
   static const char* const fastrtps_pub_option[] =
   {
+    "topic.__value__", "chatter",
+    "topic.__widget__", "text",
+    "topic.__constraint__", "none",
+    "publisher.name.__value__", "",
+    "publisher.name.__widget__", "text",
+    "publisher.name.__constraint__", "none",
     "publisher.qos.deadline.period.seconds.__value__", "2147483647",
     "publisher.qos.deadline.period.seconds.__widget__", "spin",
     "publisher.qos.deadline.period.seconds.__constraint__", "0 <= x <= 2147483647",
