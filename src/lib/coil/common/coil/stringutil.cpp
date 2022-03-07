@@ -620,7 +620,11 @@ namespace coil
         std::string::size_type pos = param.find('=');
         if (pos != std::string::npos)
           {
-            retmap[param.substr(0, pos)] = param.substr(pos + 1);
+            const std::string key{param.substr(0, pos)};
+            if (!coil::eraseBothEndsBlank(key).empty())
+              {
+                retmap[key] = param.substr(pos + 1);
+              }
           }
         else
           {
