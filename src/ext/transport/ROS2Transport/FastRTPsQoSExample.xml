@@ -8,7 +8,7 @@
 
         <publisher profile_name="publisher_openrtm">
             <topic>
-                <name>rtm_test1</name>
+                <name>rt/chatter</name>
                 <dataType>XMLProfilesExample</dataType>
                 <kind>NO_KEY</kind>
                 <historyQos>
@@ -23,7 +23,7 @@
 
         <subscriber profile_name="subscriber_openrtm">
             <topic>
-                <name>rtm_test1</name>
+                <name>rt/chatter</name>
                 <dataType>XMLProfilesExample</dataType>
                 <kind>NO_KEY</kind>
                 <historyQos>
