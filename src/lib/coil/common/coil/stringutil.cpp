@@ -613,6 +613,10 @@ namespace coil
     std::map<std::string, std::string> retmap;
     for (auto & param : params)
       {
+        if (coil::eraseBothEndsBlank(param).empty())
+          {
+            continue;
+          }
         std::string::size_type pos = param.find('=');
         if (pos != std::string::npos)
           {
