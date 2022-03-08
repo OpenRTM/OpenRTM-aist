@@ -178,7 +178,7 @@ namespace RTC
 
     std::string subscriber_name = fastrtps_prop.getProperty("subscriber.name");
     eprosima::fastrtps::SubscriberAttributes *Rparam = new eprosima::fastrtps::SubscriberAttributes();
-    if(subscriber_name.empty())
+    if (subscriber_name.empty() || !topicmgr.xmlConfigured())
     {
       
       Rparam->topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
@@ -448,6 +448,17 @@ namespace RTC
   {
     std::string sec_str = prop["seconds"];
     std::string nanosec_str = prop["nanosec"];
+
+    if (sec_str == "2147483647" && nanosec_str == "4294967295")
+    {
+      time = eprosima::fastrtps::c_TimeInfinite;
+      return;
+    }
+    else if (sec_str == "0" && nanosec_str == "0")
+    {
+      time = eprosima::fastrtps::c_TimeZero;
+      return;
+    }
 
 
     coil::stringTo<int32_t>(time.seconds, sec_str.c_str());

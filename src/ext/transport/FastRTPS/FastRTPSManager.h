@@ -234,6 +234,21 @@ namespace RTC
          * @endif
          */
         static void shutdown_global();
+        /*!
+         * @if jp
+         * @brief XMLファイルが設定済みかを判定
+         *
+         * @return true：設定済み、false：未設定
+         *
+         * @else
+         * @brief
+         *
+         * @return
+         *
+         *
+         * @endif
+         */
+        bool xmlConfigured();
     private:
         /*!
          * @if jp

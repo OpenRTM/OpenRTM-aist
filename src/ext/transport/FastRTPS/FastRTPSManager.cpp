@@ -107,28 +107,35 @@ namespace RTC
       {
         eprosima::fastrtps::Domain::loadXMLProfilesFile(m_xml_profile_file);
         RTC_INFO(("Load XMl file: %s", m_xml_profile_file.c_str()));
+
+        const std::string paticipant_name = std::move(prop["participant.name"]);
+        RTC_INFO(("Create participant: %s", paticipant_name.c_str()));
+        m_participant = eprosima::fastrtps::Domain::createParticipant(paticipant_name);
       }
 
-      if(m_xml_profile_file.empty())
+      else
       {
         eprosima::fastrtps::ParticipantAttributes PParam;
 #if (FASTRTPS_VERSION_MAJOR >= 2)
+        coil::stringTo<uint32_t>(PParam.domainId, prop["domain.id"].c_str());
+        RTC_INFO(("Domain ID: %d", PParam.domainId));
 #else
         PParam.rtps.builtin.domainId = 0;
+        coil::stringTo<uint32_t>(PParam.rtps.builtin.domainId, prop["domain.id"].c_str());
+        RTC_INFO(("Domain ID: %d", PParam.rtps.builtin.domainId));
 #endif
-        PParam.rtps.setName("participant_openrtm");
+
+        
+        const std::string paticipant_name = std::move(prop.getProperty("participant.name", "participant_openrtm").c_str());
+        RTC_INFO(("Participant name: %s", paticipant_name.c_str()));
+        PParam.rtps.setName(paticipant_name.c_str());
         
         setParticipantSecParam(prop, PParam);
 
 
         m_participant = eprosima::fastrtps::Domain::createParticipant(PParam);
       }
-      else
-      {
-        const std::string paticipant_name = std::move(prop["participant.name"]);
-        RTC_INFO(("Create participant: %s", paticipant_name.c_str()));
-        m_participant = eprosima::fastrtps::Domain::createParticipant(paticipant_name);
-      }
+
    
   }
 
@@ -381,6 +388,25 @@ namespace RTC
         PParam.rtps.properties.properties().emplace_back(key, value);
       }
     }
+  }
+
+  /*!
+   * @if jp
+   * @brief XMLファイルが設定済みかを判定
+   *
+   * @return true：設定済み、false：未設定
+   *
+   * @else
+   * @brief
+   *
+   * @return
+   *
+   *
+   * @endif
+   */
+  bool FastRTPSManager::xmlConfigured()
+  {
+    return !m_xml_profile_file.empty();
   }
 }
 
