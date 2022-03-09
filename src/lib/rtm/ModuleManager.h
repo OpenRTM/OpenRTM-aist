@@ -771,7 +771,7 @@ namespace RTC
     };
 
     vProperties m_modprofs;
-	std::map<std::string, coil::vstring> m_loadfailmods;
+    std::map<std::string, coil::vstring> m_loadfailmods;
 
   };   // class ModuleManager
 } // namespace RTC

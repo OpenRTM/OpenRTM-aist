@@ -97,7 +97,7 @@ namespace RTC
 
   void InPortSHMProvider::setConnector(InPortConnector* connector)
   {
-	  m_connector = connector;
+    m_connector = connector;
   }
 
 
@@ -114,31 +114,31 @@ namespace RTC
   {
     RTC_PARANOID(("InPortSHMProvider::put()"));
     if (m_connector == nullptr)
-	{
-		return ::OpenRTM::PORT_ERROR;
-	}
-	
-	bool endian_type = m_connector->isLittleEndian();
+    {
+      return ::OpenRTM::PORT_ERROR;
+    }
 
-	try
-	{
-		setEndian(endian_type);
-		read(m_cdr);
-		
-		RTC_PARANOID(("received data size: %d", m_cdr.getDataLength()));
+    bool endian_type = m_connector->isLittleEndian();
 
-		
-	}
-	catch (...)
-	{
+    try
+    {
+      setEndian(endian_type);
+      read(m_cdr);
 
-	}
-	
-	onReceived(m_cdr);
-	
+      RTC_PARANOID(("received data size: %d", m_cdr.getDataLength()));
+
+
+    }
+    catch (...)
+    {
+
+    }
+
+    onReceived(m_cdr);
+
     BufferStatus ret = m_connector->write(m_cdr);
-	
-	return convertReturn(ret, m_cdr);
+
+    return convertReturn(ret, m_cdr);
   }
 
   /*!

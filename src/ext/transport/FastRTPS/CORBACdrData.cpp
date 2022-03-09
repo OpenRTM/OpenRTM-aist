@@ -106,5 +106,4 @@ bool RTC::CORBACdrData::isKeyDefined()
 
 void RTC::CORBACdrData::serializeKey(eprosima::fastcdr::Cdr &/*scdr*/) const
 {
-	 
 }

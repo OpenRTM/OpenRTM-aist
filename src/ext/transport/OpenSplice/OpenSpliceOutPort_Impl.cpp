@@ -313,7 +313,7 @@ namespace RTC
             return false;
         }
 
-       	m_listener = new PubListener();
+        m_listener = new PubListener();
 
         DDS::DataWriter_var writer = topicmgr.createWriter(m_topic, m_listener.in());
 

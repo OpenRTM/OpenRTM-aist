@@ -28,6 +28,48 @@
 
 namespace ROSRTM
 {
+  static const char* const ros_sub_option[] =
+  {
+    "topic.__value__", "chatter",
+    "topic.__widget__", "text",
+    "topic.__constraint__", "none",
+    "roscore.host.__value__", "",
+    "roscore.host.__widget__", "text",
+    "roscore.host.__constraint__", "none",
+    "roscore.port.__value__", "",
+    "roscore.port.__widget__", "text",
+    "roscore.port.__constraint__", "none",
+    "node.name.__value__", "",
+    "node.name.__widget__", "text",
+    "node.name.__constraint__", "none",
+    "node.anonymous.__value__", "NO",
+    "node.anonymous.__widget__", "radio",
+    "node.anonymous.__constraint__", "(YES, NO)",
+    "tcp_nodelay.__value__", "YES",
+    "tcp_nodelay.__widget__", "radio",
+    "tcp_nodelay.__constraint__", "(YES, NO)",
+    ""
+  };
+
+  static const char* const ros_pub_option[] =
+  {
+    "topic.__value__", "chatter",
+    "topic.__widget__", "text",
+    "topic.__constraint__", "none",
+    "roscore.host.__value__", "",
+    "roscore.host.__widget__", "text",
+    "roscore.host.__constraint__", "none",
+    "roscore.port.__value__", "",
+    "roscore.port.__widget__", "text",
+    "roscore.port.__constraint__", "none",
+    "node.name.__value__", "",
+    "node.name.__widget__", "text",
+    "node.name.__constraint__", "none",
+    "node.anonymous.__value__", "NO",
+    "node.anonymous.__widget__", "radio",
+    "node.anonymous.__constraint__", "(YES, NO)",
+    ""
+  };
 
   ManagerActionListener::ManagerActionListener()
   {
@@ -70,21 +112,25 @@ extern "C"
   {
     (void)manager;
     {
+      coil::Properties prop(ROSRTM::ros_sub_option);
       RTC::InPortProviderFactory& factory(RTC::InPortProviderFactory::instance());
       factory.addFactory("ros",
                         ::coil::Creator< ::RTC::InPortProvider,
                                           ::RTC::ROSInPort>,
                         ::coil::Destructor< ::RTC::InPortProvider,
-                                            ::RTC::ROSInPort>);
+                                            ::RTC::ROSInPort>,
+                        prop);
     }
 
     {
+      coil::Properties prop(ROSRTM::ros_pub_option);
       RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
       factory.addFactory("ros",
                         ::coil::Creator< ::RTC::InPortConsumer,
                                           ::RTC::ROSOutPort>,
                         ::coil::Destructor< ::RTC::InPortConsumer,
-                                            ::RTC::ROSOutPort>);
+                                            ::RTC::ROSOutPort>,
+                        prop);
     }
     ROSSerializerInit(manager);
 

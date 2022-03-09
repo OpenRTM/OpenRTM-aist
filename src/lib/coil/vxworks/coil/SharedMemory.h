@@ -181,8 +181,8 @@ namespace coil
      *
      * @endif
      */
-	virtual int open(std::string shm_address,
-		unsigned long long memory_size = DEFAULT_MEMORY_SIZE);
+    virtual int open(std::string shm_address,
+                     unsigned long long memory_size = DEFAULT_MEMORY_SIZE);
 
 
     /*!

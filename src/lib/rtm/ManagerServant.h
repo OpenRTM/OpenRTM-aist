@@ -690,21 +690,21 @@ namespace RTM
     RTC::RTObject_ptr
     createComponentByAddress(const std::string& create_arg);
 
-	/*
-	* @if jp
-	* @brief マスターマネージャの有無を確認してリストを更新する
-	*
-	*
-	*
-	* @else
-	* @brief 
-	*
-	*
-	* @endif
-	*/
-	void updateMasterManager();
-	std::string getParameterByModulename(const std::string& param_name, std::string &module_name);
-	static bool isProcessIDManager(const std::string& mgrname);
+    /*
+     * @if jp
+     * @brief マスターマネージャの有無を確認してリストを更新する
+     *
+     *
+     *
+     * @else
+     * @brief 
+     *
+     *
+     * @endif
+     */
+    void updateMasterManager();
+    std::string getParameterByModulename(const std::string& param_name, std::string &module_name);
+    static bool isProcessIDManager(const std::string& mgrname);
 
   private:
     /*!
@@ -813,24 +813,23 @@ namespace RTM
   class CompParam
   {
   public:
-	  CompParam(std::string module_name);
-	  ~CompParam();
-	  static const unsigned int prof_list_size = 6;
-	  static const char* prof_list[prof_list_size];
-	  std::string vendor();
-	  std::string category();
-	  std::string impl_id();
-	  std::string language();
-	  std::string version();
+    CompParam(std::string module_name);
+    ~CompParam();
+    static const unsigned int prof_list_size = 6;
+    static const char* prof_list[prof_list_size];
+    std::string vendor();
+    std::string category();
+    std::string impl_id();
+    std::string language();
+    std::string version();
   private:
-	  std::string m_type;
-	  std::string m_vendor;
-	  std::string m_category;
-	  std::string m_impl_id;
-	  std::string m_language;
-	  std::string m_version;
-
-	  
+    std::string m_type;
+    std::string m_vendor;
+    std::string m_category;
+    std::string m_impl_id;
+    std::string m_language;
+    std::string m_version;
+  
   };
 
 } // namespace RTM

@@ -604,16 +604,16 @@ namespace RTC
      * @brief onStarted() template function
      */
     virtual RTC::ReturnCode_t onStarted();
-    // template virtual functions adding/removing component	
-    /*!	
-     * @brief onAddedComponent() template function	
-     */	
-     virtual RTC::ReturnCode_t	
-     onAddedComponent(RTC::LightweightRTObject_ptr rtobj);	
-    /*!	
-     * @brief onRemovedComponent() template function	
-     */	
-    virtual RTC::ReturnCode_t	
+    // template virtual functions adding/removing component
+    /*!
+     * @brief onAddedComponent() template function
+     */
+     virtual RTC::ReturnCode_t
+     onAddedComponent(RTC::LightweightRTObject_ptr rtobj);
+    /*!
+     * @brief onRemovedComponent() template function
+     */
+    virtual RTC::ReturnCode_t
     onRemovedComponent(RTC::LightweightRTObject_ptr rtobj);
     /*!
      * @brief onWaitingActivated() template function

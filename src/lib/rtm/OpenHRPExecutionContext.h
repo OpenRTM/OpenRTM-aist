@@ -467,17 +467,17 @@ namespace RTC
      */
     RTC::ExecutionContextProfile* get_profile() override;
   protected:
-    // template virtual functions adding/removing component	
+    // template virtual functions adding/removing component
     /*!
-    * @brief onAddedComponent() template function
-    */
+     * @brief onAddedComponent() template function
+     */
     RTC::ReturnCode_t
-		onAddedComponent(RTC::LightweightRTObject_ptr rtobj) override;
+        onAddedComponent(RTC::LightweightRTObject_ptr rtobj) override;
     /*!
-    * @brief onRemovedComponent() template function
-    */
+     * @brief onRemovedComponent() template function
+     */
     RTC::ReturnCode_t
-		onRemovedComponent(RTC::LightweightRTObject_ptr rtobj) override;
+        onRemovedComponent(RTC::LightweightRTObject_ptr rtobj) override;
     /*!
      * @brief Mutex to guard tick() reenter.
      */

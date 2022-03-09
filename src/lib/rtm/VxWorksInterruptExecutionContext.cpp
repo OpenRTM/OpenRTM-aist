@@ -26,20 +26,20 @@
 
 #if defined(__powerpc__)
 #include <arch/ppc/ivPpc.h>
-#define	IV_CI	0
-#define	IV_SRI	4
-#define	IV_STI	5
-#define	IV_JRI	6
-#define	IV_JTI	7
-#define	IV_D0I	8
-#define	IV_D1I	9
-#define	IV_D2I	10
-#define	IV_D3I	11
-#define	IV_E0I	27
-#define	IV_E1I	28
-#define	IV_E2I	29
-#define	IV_E3I	30
-#define	IV_E4I	31
+#define IV_CI 0
+#define IV_SRI 4
+#define IV_STI 5
+#define IV_JRI 6
+#define IV_JTI 7
+#define IV_D0I 8
+#define IV_D1I 9
+#define IV_D2I 10
+#define IV_D3I 11
+#define IV_E0I 27
+#define IV_E1I 28
+#define IV_E2I 29
+#define IV_E3I 30
+#define IV_E4I 31
 #else
 #include <arch/simlinux/ivSimlinux.h>
 #endif

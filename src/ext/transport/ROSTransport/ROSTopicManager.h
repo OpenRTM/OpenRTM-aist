@@ -418,6 +418,7 @@ namespace RTC
         std::vector<SubscriberLink> m_tcp_sub_connecters;
         std::mutex m_publink_mutex;
         std::mutex m_sublink_mutex;
+        static std::once_flag m_once;
     public:
         /*!
          * @if jp

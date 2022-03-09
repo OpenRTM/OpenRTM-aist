@@ -33,7 +33,7 @@ namespace RTC
                                    ConnectorListenersBase* listeners,
                                    CdrBufferBase* buffer)
     : rtclog("InPortConnector"), m_profile(info),
-	m_listeners(listeners), m_buffer(buffer), m_littleEndian(true), m_outPortListeners(nullptr), m_directOutPort(nullptr), m_marshaling_type("cdr"), m_cdr(nullptr)
+      m_listeners(listeners), m_buffer(buffer), m_littleEndian(true), m_outPortListeners(nullptr), m_directOutPort(nullptr), m_marshaling_type("cdr"), m_cdr(nullptr)
   {
   }
 
@@ -157,16 +157,16 @@ namespace RTC
 
   bool InPortConnector::setOutPort(OutPortBase* directOutPort)
   {
-	  {
-		  if (directOutPort == nullptr)
-		  {
-			  return false;
-		  }
-		  m_directOutPort = directOutPort;
-		  
-		  m_outPortListeners = directOutPort->getListeners();
-		  return true;
-	  }
+    {
+      if (directOutPort == nullptr)
+      {
+        return false;
+      }
+      m_directOutPort = directOutPort;
+    
+      m_outPortListeners = directOutPort->getListeners();
+     return true;
+    }
   }
 
   BufferStatus InPortConnector::write(ByteData & /*cdr*/)
