@@ -13,4 +13,4 @@ fast-rtps.dds.sec.auth.plugin: builtin.PKI-DH
 fast-rtps.dds.sec.auth.builtin.PKI-DH.identity_ca: file://@CMAKE_INSTALL_PREFIX@/@INSTALL_SAMPLEQOSPROFILE_DIR@/mainexamplecacert.pem
 fast-rtps.dds.sec.auth.builtin.PKI-DH.identity_certificate: file://@CMAKE_INSTALL_PREFIX@/@INSTALL_SAMPLEQOSPROFILE_DIR@/appexamplecert.pem
 fast-rtps.dds.sec.auth.builtin.PKI-DH.private_key: file://@CMAKE_INSTALL_PREFIX@/@INSTALL_SAMPLEQOSPROFILE_DIR@/appexamplekey.pem
-dds.sec.crypto.plugin: builtin.AES-GCM-GMAC
+fast-rtps.dds.sec.crypto.plugin: builtin.AES-GCM-GMAC
