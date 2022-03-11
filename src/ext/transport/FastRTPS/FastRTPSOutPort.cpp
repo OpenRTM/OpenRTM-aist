@@ -90,7 +90,7 @@ namespace RTC
     if (participant == nullptr)
     {
         RTC_ERROR(("Can not initialize Fast-RTPS"));
-        return;
+        throw std::bad_alloc();
     }
 
     std::string marshaling_type = prop.getProperty("marshaling_type", "corba");
@@ -109,7 +109,7 @@ namespace RTC
         if (!info)
         {
             RTC_ERROR(("Can not find message type(%s)", marshaling_type.c_str()));
-            return;
+            throw std::bad_alloc();
         }
 
         m_dataType = info->data_type();
@@ -177,7 +177,7 @@ namespace RTC
       {
         RTC_ERROR(("xml file load failed"));
         delete Wparam;
-        throw;
+        throw std::bad_alloc();
       }
       Wparam->topic.topicDataType = m_dataType;
       //Wparam->topic.topicName = m_topic;
@@ -193,7 +193,7 @@ namespace RTC
     if (m_publisher == nullptr)
     {
         RTC_ERROR(("Publisher initialize failed"));
-        throw;
+        throw std::bad_alloc();
     }
 
   }

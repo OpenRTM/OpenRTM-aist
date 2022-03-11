@@ -106,7 +106,7 @@ namespace RTC
     if (participant == nullptr)
     {
         RTC_ERROR(("Can not initialize Fast-RTPS"));
-        return;
+        throw std::bad_alloc();
     }
 
     
@@ -127,7 +127,7 @@ namespace RTC
         if (!info)
         {
             RTC_ERROR(("Can not find message type(%s)", marshaling_type.c_str()));
-            return;
+            throw std::bad_alloc();
         }
 
         m_dataType = info->data_type();
@@ -195,7 +195,7 @@ namespace RTC
       {
         RTC_ERROR(("xml file load failed"));
         delete Rparam;
-        throw;
+        throw std::bad_alloc();
       }
       Rparam->topic.topicDataType = m_dataType;
       //Rparam->topic.topicName = m_topic;
@@ -213,7 +213,7 @@ namespace RTC
     if(m_subscriber == nullptr)
     {
       RTC_ERROR(("Subscriber initialize failed"));
-      throw;
+      throw std::bad_alloc();
     }
    
     
