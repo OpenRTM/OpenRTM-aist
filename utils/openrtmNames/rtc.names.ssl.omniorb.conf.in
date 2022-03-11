@@ -1,0 +1,4 @@
+corba.ssl.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/root.crt
+corba.ssl.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/server.pem
+corba.ssl.key_file_password:password
+corba.args:-ORBserverTransportRule "* ssl" -ORBclientTransportRule "* ssl" -ORBendPoint giop:ssl:localhost:2809

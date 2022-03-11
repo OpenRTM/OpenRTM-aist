@@ -1,0 +1,4 @@
+dynamic SSLIOP_Factory Service_Object *
+        TAO_SSLIOP:_make_TAO_SSLIOP_Protocol_Factory()
+        "-SSLPrivateKey PEM:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@ssl/server.pem -SSLCertificate PEM:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@ssl/root.crt -SSLPassword passward"
+static Advanced_Resource_Factory "-ORBProtocolFactory SSLIOP_Factory"

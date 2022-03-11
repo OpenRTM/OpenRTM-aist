@@ -1396,6 +1396,27 @@ namespace RTC
 
     /*!
      * @if jp
+     * @brief giopからはじまるORBエンドポイントでの指定した場合にtrue、
+     * それ以外(例えばホスト名:ポート番号の指定)の場合はfalseを返す。
+     *
+     *
+     * @param endpoint エンドポイント
+     *
+     * @return エンドポイントの指定方法
+     *
+     * @else
+     * @brief 
+     *
+     * @param endpoint 
+     *
+     * @return
+     *
+     * @endif
+     */
+    static bool isORBEndPoint(const std::string& endpoint);
+
+    /*!
+     * @if jp
      * @brief エンドポイントの生成
      *
      * コンフィグレーションからエンドポイントを生成する。
@@ -2064,7 +2085,7 @@ namespace RTC
      * @brief The argument of ORB_init
      * @endif
      */
-    int m_argvSize;
+    int m_argvSize{0};
 
     //------------------------------------------------------------
     // Manager's variable

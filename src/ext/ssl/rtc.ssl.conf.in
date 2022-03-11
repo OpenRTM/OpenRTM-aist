@@ -9,5 +9,5 @@ corba.ssl.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR
 corba.ssl.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/server.pem
 corba.ssl.key_file_password:password
 corba.args:-ORBserverTransportRule "* ssl" -ORBclientTransportRule "* ssl" -ORBendPoint giop:ssl::
-corba.nameservers: corbaloc:ssliop:127.0.0.1:2809
-corba.master_manager: giop:ssl:127.0.0.1:2810
+corba.nameservers: corbaloc:ssliop:localhost:2809
+corba.master_manager: giop:ssl:localhost:2810

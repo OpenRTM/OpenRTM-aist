@@ -52,6 +52,10 @@
 #endif
 #endif
 
+#if defined(ORB_IS_TAO) && defined(SSL_ENABLE)
+#include <orbsvcs/SecurityLevel2C.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <utility>
@@ -1519,6 +1523,31 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         CORBA::Object_var obj =
           m_pORB->resolve_initial_references((char*)"RootPOA");
         m_pPOA = PortableServer::POA::_narrow(obj);
+#if defined(ORB_IS_TAO) && defined(SSL_ENABLE)
+        for(size_t i=0;i < args.size();i++)
+        {
+          if(args[i].find("-ORB") != std::string::npos && args[i].find("Endpoint") != std::string::npos)
+          {
+            if(i < args.size()-1)
+            {
+              if(args[i+1].find("ssliop://") != std::string::npos)
+              {
+                CORBA::Object_var sec_man =
+                  m_pORB->resolve_initial_references ("SecurityLevel2:SecurityManager");
+                SecurityLevel2::SecurityManager_var sec2manager =
+                  SecurityLevel2::SecurityManager::_narrow (sec_man.in ());
+                SecurityLevel2::AccessDecision_var ad_tmp = sec2manager->access_decision ();
+                TAO::SL2::AccessDecision_var ad =
+                  TAO::SL2::AccessDecision::_narrow (ad_tmp.in ());
+                ad->default_collocated_decision (true);
+                break;
+              }
+            }
+          }
+        }
+
+#endif
+        
 #endif
         if (CORBA::is_nil(m_pPOA))
           {
@@ -1594,6 +1623,62 @@ std::vector<coil::Properties> Manager::getLoadableModules()
     return opt;
   }
 
+  /*!
+   * @if jp
+   * @brief giopからはじまるORBエンドポイントでの指定した場合にtrue、
+   * それ以外(例えばホスト名:ポート番号の指定)の場合はfalseを返す。
+   *
+   *
+   * @param endpoint エンドポイント
+   *
+   * @return エンドポイントの指定方法
+   *
+   * @else
+   * @brief 
+   *
+   * @param endpoint 
+   *
+   * @return
+   *
+   * @endif
+   */
+  bool Manager::isORBEndPoint(const std::string& endpoint)
+  {
+    if(endpoint.find("giop:") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("iiop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("diop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("uiop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("ssliop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("shmiop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("htiop://") != std::string::npos)
+    {
+      return true;
+    }
+    else if(endpoint.find("inet:") != std::string::npos)
+    {
+      return true;
+    }
+    return false;
+  }
+
   void Manager::createORBEndpoints(coil::vstring& endpoints)
   {
     // corba.endpoint is obsolete
@@ -1619,15 +1704,22 @@ std::vector<coil::Properties> Manager::getLoadableModules()
     if (coil::toBool(m_config["manager.is_master"], "YES", "NO", false))
       {
         std::string mm(m_config.getProperty("corba.master_manager", ":2810"));
-        coil::vstring mmm(coil::split(mm, ":"));
-        if (mmm.size() == 2)
-          {
-            endpoints.emplace(endpoints.begin(), std::string(":") + mmm[1]);
-          }
+        if(!isORBEndPoint(mm))
+        {
+          coil::vstring mmm(coil::split(mm, ":"));
+          if (mmm.size() == 2)
+            {
+              endpoints.emplace(endpoints.begin(), std::string(":") + mmm[1]);
+            }
+          else
+            {
+              endpoints.emplace(endpoints.begin(), ":2810");
+            }
+        }
         else
-          {
-            endpoints.emplace(endpoints.begin(), ":2810");
-          }
+        {
+          endpoints.emplace(endpoints.begin(), mm);
+        }
       }
     endpoints = coil::unique_sv(std::move(endpoints));
   }
@@ -1660,16 +1752,37 @@ std::vector<coil::Properties> Manager::getLoadableModules()
               }
             else
               {
-                opt += " -ORBendPoint giop:tcp:" + endpoint;
+                if(!isORBEndPoint(endpoint))
+                {
+                  opt += " -ORBendPoint giop:tcp:" + endpoint;
+                }
+                else
+                {
+                  opt += " -ORBendPoint " + endpoint;
+                }
               }
           }
         else if (corba == "TAO")
           {
-            opt += " -ORBEndPoint iiop://" + endpoint;
+            if(!isORBEndPoint(endpoint))
+            {
+              opt += " -ORBEndPoint iiop://" + endpoint;
+            }
+            else
+            {
+              opt += " -ORBEndPoint " + endpoint;
+            }
           }
         else if (corba == "MICO")
           {
-            opt += "-ORBIIOPAddr inet:" + endpoint;
+            if(!isORBEndPoint(endpoint))
+            {
+              opt += "-ORBIIOPAddr inet:" + endpoint;
+            }
+            else
+            {
+              opt += "-ORBIIOPAddr " + endpoint;
+            }
           }
         else
           {
@@ -2582,9 +2695,16 @@ std::vector<coil::Properties> Manager::getLoadableModules()
             configs["interface_type"] = "corba_cdr";
           }
 
-        coil::vstring tmp = coil::split(port0_str, ".");
-        tmp.pop_back();
-        std::string comp0_name = coil::flatten(tmp, ".");
+        size_t pos_port0 = port0_str.find_last_of(".");
+        std::string comp0_name;
+        if (pos_port0 != std::string::npos)
+        {
+          comp0_name = port0_str.substr(0, pos_port0);
+        }
+        else
+        {
+          comp0_name = port0_str;
+        }
 
         std::string port0_name = port0_str;
         RTObject_impl* comp0 = nullptr;
@@ -2609,14 +2729,18 @@ std::vector<coil::Properties> Manager::getLoadableModules()
                 continue;
               }
             comp0_ref = RTObject::_duplicate(rtcs[0]);
-            coil::vstring tmp_port0_name = coil::split(port0_str, "/");
-            port0_name = tmp_port0_name.back();
+            size_t pos_port0_name = port0_str.find_last_of("/");
+            if (pos_port0_name != std::string::npos)
+            {
+              port0_name = port0_str.substr(pos_port0_name + 1);
+            }
+            
           }
 
         RTC::PortService_var port0_var = CORBA_RTCUtil::get_port_by_name(comp0_ref.in(), port0_name);
         if (CORBA::is_nil(port0_var))
           {
-            RTC_DEBUG(("port %s found: ", port0_str.c_str()));
+            RTC_DEBUG(("port %s not found: ", port0_str.c_str()));
             continue;
           }
 
@@ -2641,10 +2765,20 @@ std::vector<coil::Properties> Manager::getLoadableModules()
 
         for (auto const& port : ports)
           {
-            tmp = coil::split(port, ".");
-            tmp.pop_back();
-            std::string comp_name = coil::flatten(tmp, ".");
+            size_t pos_port = port.find_last_of(".");
+            std::string comp_name;
+            
+            if (pos_port != std::string::npos)
+            {
+              comp_name = port.substr(0, pos_port);
+            }
+            else
+            {
+              comp_name = port;
+            }
+
             std::string port_name = port;
+            
             RTObject_impl* comp = nullptr;
             RTC::RTObject_var comp_ref;
 
@@ -2667,15 +2801,15 @@ std::vector<coil::Properties> Manager::getLoadableModules()
                     continue;
                   }
                 comp_ref = RTObject::_duplicate(rtcs[0]);
-                coil::vstring tmp_port_name = coil::split(port, "/");
-                port_name = tmp_port_name.back();
+                size_t pos_port_name = port.find_last_of("/");
+                port_name = port.substr(pos_port_name + 1);
               }
 
             RTC::PortService_var port_var = CORBA_RTCUtil::get_port_by_name(comp_ref.in(), port_name);
 
             if (CORBA::is_nil(port_var))
               {
-                RTC_DEBUG(("port %s found: ", port.c_str()));
+                RTC_DEBUG(("port %s not found: ", port.c_str()));
                 continue;
               }
 
