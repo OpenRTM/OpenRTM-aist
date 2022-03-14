@@ -2741,7 +2741,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         
         try
           {
-            CORBA_RTCUtil::get_port_by_name(comp0_ref.in(), port0_name);
+            port0_var = CORBA_RTCUtil::get_port_by_name(comp0_ref.in(), port0_name);
           }
         catch (...)
           {
