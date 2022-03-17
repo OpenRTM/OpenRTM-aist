@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.5.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rtc.conf.sample DESTINATION ${INSTALL_RTM_ETC_DIR} COMPONENT ext)
 
 if(CORBA STREQUAL "TAO")
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_diop/svc.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_diop COMPONENT ext)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_diop/svc.diop.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_diop COMPONENT ext)
 
 	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/tao_diop/rtc.diop.conf.in ${PROJECT_BINARY_DIR}/rtc.diop.conf @ONLY)
@@ -16,8 +16,14 @@ if(CORBA STREQUAL "TAO")
 
 
 
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_htiop/svc.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_htiop COMPONENT ext)
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_htiop/HT_Config.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_htiop COMPONENT ext)
+
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/tao_htiop/svc.htiop.conf.in ${PROJECT_BINARY_DIR}/svc.htiop.conf @ONLY)
+	install(
+		FILES ${PROJECT_BINARY_DIR}/svc.htiop.conf
+		DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_htiop
+		COMPONENT ext)
 
 	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/tao_htiop/rtc.htiop.conf.in ${PROJECT_BINARY_DIR}/rtc.htiop.conf @ONLY)
@@ -36,14 +42,14 @@ if(CORBA STREQUAL "TAO")
 		COMPONENT ext)
 
 	configure_file(
-		${CMAKE_CURRENT_SOURCE_DIR}/tao_ssliop/svc.conf.in ${PROJECT_BINARY_DIR}/svc.conf @ONLY)
+		${CMAKE_CURRENT_SOURCE_DIR}/tao_ssliop/svc.ssliop.conf.in ${PROJECT_BINARY_DIR}/svc.ssliop.conf @ONLY)
 	install(
-		FILES ${PROJECT_BINARY_DIR}/svc.conf
+		FILES ${PROJECT_BINARY_DIR}/svc.ssliop.conf
 		DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_ssliop
 		COMPONENT ext)
 
 
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_shmiop/svc.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_shmiop COMPONENT ext)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tao_shmiop/svc.shmiop.conf DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_shmiop COMPONENT ext)
 
 	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/tao_shmiop/rtc.shmiop.conf.in ${PROJECT_BINARY_DIR}/rtc.shmiop.conf @ONLY)
@@ -51,5 +57,21 @@ if(CORBA STREQUAL "TAO")
 		FILES ${PROJECT_BINARY_DIR}/rtc.shmiop.conf
 		DESTINATION ${INSTALL_RTM_ETC_DIR}/tao_shmiop
 		COMPONENT ext)
+
+
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/svc.names.htiop.conf.in ${PROJECT_BINARY_DIR}/svc.names.htiop.conf @ONLY)
+	install(
+		FILES ${PROJECT_BINARY_DIR}/svc.names.htiop.conf
+		DESTINATION ${INSTALL_RTM_ETC_DIR}
+		COMPONENT ext)
+
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/svc.names.ssliop.conf.in ${PROJECT_BINARY_DIR}/svc.names.ssliop.conf @ONLY)
+	install(
+		FILES ${PROJECT_BINARY_DIR}/svc.names.ssliop.conf
+		DESTINATION ${INSTALL_RTM_ETC_DIR}
+		COMPONENT ext)
+
 
 endif()
