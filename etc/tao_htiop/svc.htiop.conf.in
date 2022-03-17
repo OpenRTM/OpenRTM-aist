@@ -1,6 +1,6 @@
 
 dynamic HTIOP_Factory Service_Object *
         TAO_HTIOP:_make_TAO_HTIOP_Protocol_Factory ()
-        "-config @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@tao_htiop/HT_Config.conf"
+        "-config @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/tao_htiop/HT_Config.conf"
 
 static Advanced_Resource_Factory "-ORBProtocolFactory HTIOP_Factory"
