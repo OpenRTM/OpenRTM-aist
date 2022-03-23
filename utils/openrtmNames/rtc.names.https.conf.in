@@ -1,0 +1,4 @@
+corba.http.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/root.crt
+corba.http.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/server.pem
+corba.http.key_file_password:password
+corba.args:-ORBserverTransportRule "* http" -ORBclientTransportRule "* http" -ORBendPoint giop:http:https://:2809/call

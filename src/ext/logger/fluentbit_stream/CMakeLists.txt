@@ -15,6 +15,7 @@ if(NOT FLUENTBIT_ROOT)
 	message(STATUS "libfluent-bit.so: " ${FLB_LIBRARY_DIR}/libfluent-bit.so)
 
 else()
+	set(FLB_BINARY_DIR ${FLUENTBIT_ROOT}/bin)
 	set(FLB_INCLUDR_DIR ${FLUENTBIT_ROOT}/include)
 	set(FLB_LIBRARY_DIR ${FLUENTBIT_ROOT}/lib/fluent-bit)
 endif()
@@ -81,4 +82,19 @@ if(VXWORKS)
 	endif(RTP)
 endif(VXWORKS)
 
+set(FLUENTPLUGIN_PATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_RTM_EXT_DIR}/logger/FluentBit${CMAKE_SHARED_LIBRARY_SUFFIX}")
+if(MSVC)
+	string(REPLACE "/" "\\\\" FLUENTPLUGIN_PATH "${FLUENTPLUGIN_PATH}")
+else()
+	
+endif()
 
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.fluentbit_stream.conf.in ${PROJECT_BINARY_DIR}/rtc.fluentbit_stream.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.fluentbit_stream.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/logger
+	COMPONENT ext)
+if(MSVC)
+	install(PROGRAMS ${FLB_BINARY_DIR}/fluent-bit.dll DESTINATION ${INSTALL_RTM_BIN_DIR} COMPONENT fluentbitlib)
+endif()

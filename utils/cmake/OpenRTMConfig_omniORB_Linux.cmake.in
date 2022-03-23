@@ -51,8 +51,6 @@ set(OPENRTM_DIR @CMAKE_INSTALL_PREFIX@)
 
 # OpenRTM-aist specific directory
 set(COIL_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_COIL_INCLUDE_DIR@)
-set(OPENRTM_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_INCLUDE_DIR@)
-set(OPENRTM_LIB_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_LIB_DIR@)
 set(OPENRTM_DATA_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_SHARE_DIR@)
 
 # OpenRTM-aist version
@@ -69,7 +67,10 @@ set(OPENRTM_IDL_WRAPPER_FLAGS --include-dir= --skel-suffix=Skel --stub-suffix=St
 set(OPENRTM_IDLC @IDL_COMPILE_COMMAND@)
 set(OPENRTM_IDLFLAGS -bcxx -Wba -nf -Wbuse_quotes -Wbshortcut -I${OPENRTM_INCLUDE_DIR}/rtm/idl)
 
-include(FindPkgConfig)
+if(NOT PKG_CONFIG_FOUND)
+  include(CMakeFindDependencyMacro)
+  find_dependency(PkgConfig)
+endif()
 #
 # Getting omniORB settings
 #
