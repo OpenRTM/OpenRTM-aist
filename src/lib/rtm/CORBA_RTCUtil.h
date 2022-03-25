@@ -818,7 +818,7 @@ namespace CORBA_RTCUtil
   RTC::ReturnCode_t connect_multi(const std::string& name,
     const coil::Properties& prop,
     RTC::PortService_ptr port,
-    RTC::PortServiceList* target_ports);
+    RTC::PortServiceList& target_ports);
   /*!
    * @if jp
    * @brief ポートを名前から検索

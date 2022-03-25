@@ -158,6 +158,7 @@ set(rtm_headers
 	ConfigurationListener.h
 	OutPortPullConnector.h
 	LogstreamFile.h
+	LogstreamBase.h
 	RTCUtil.h
 	CdrRingBuffer.h
 	InPortCorbaCdrProvider.h
