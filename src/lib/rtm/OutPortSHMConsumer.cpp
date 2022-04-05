@@ -20,6 +20,10 @@
 #include <coil/UUID.h>
 #include <mutex>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   /*!

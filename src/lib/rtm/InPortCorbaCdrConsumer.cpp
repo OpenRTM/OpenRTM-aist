@@ -20,6 +20,10 @@
 #include <rtm/NVUtil.h>
 #include <rtm/InPortCorbaCdrConsumer.h>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   /*!

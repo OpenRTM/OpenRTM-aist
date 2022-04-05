@@ -18,6 +18,10 @@
 #include <coil/UUID.h>
 #include <memory>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   /*!

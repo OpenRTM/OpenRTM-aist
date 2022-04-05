@@ -24,6 +24,10 @@
 #include <rtm/PortCallback.h>
 #include <rtm/CORBA_RTCUtil.h>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   //============================================================
