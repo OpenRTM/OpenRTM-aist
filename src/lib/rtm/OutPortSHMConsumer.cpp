@@ -121,32 +121,55 @@ namespace RTC
     try
       {
           
-            std::lock_guard<std::mutex> guard(m_mutex);
+        std::lock_guard<std::mutex> guard(m_mutex);
             
+        ::OpenRTM::PortStatus ret(::OpenRTM::PortStatus::PORT_ERROR);
+        try
+          {
+            ret = _ptr()->get();
+          }
+#ifdef ORB_IS_OMNIORB
+          catch (const CORBA::COMM_FAILURE& ex)
+          {
+            if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+            {
+              RTC_DEBUG(("Retry get message"));
+              ret = _ptr()->get();
+            }
+            else
+            {
+              throw;
+            }
+          }
+#endif
+        catch (...)
+          {
+            throw;
+          }
 
-            ::OpenRTM::PortStatus ret(_ptr()->get());
-			if (ret == ::OpenRTM::PORT_OK)
-			{
-				m_shmem.read(data);
 
-				RTC_DEBUG(("get() successful"));
-                RTC_PARANOID(("CDR data length: %d", data.getDataLength()));
+        if (ret == ::OpenRTM::PORT_OK)
+          {
+            m_shmem.read(data);
 
-				onReceived(data);
-				onBufferWrite(data);
+            RTC_DEBUG(("get() successful"));
+            RTC_PARANOID(("CDR data length: %d", data.getDataLength()));
 
-				if (m_buffer->full())
-				{
-					RTC_INFO(("InPort buffer is full."));
-					onBufferFull(data);
-					onReceiverFull(data);
-				}
-				m_buffer->put(data);
-				m_buffer->advanceWptr();
-				m_buffer->advanceRptr();
+            onReceived(data);
+            onBufferWrite(data);
 
-				return DataPortStatus::PORT_OK;
-			}
+            if (m_buffer->full())
+              {
+                RTC_INFO(("InPort buffer is full."));
+                onBufferFull(data);
+                onReceiverFull(data);
+              }
+            m_buffer->put(data);
+            m_buffer->advanceWptr();
+            m_buffer->advanceRptr();
+
+            return DataPortStatus::PORT_OK;
+          }
           
         return convertReturn(ret, data);
       }

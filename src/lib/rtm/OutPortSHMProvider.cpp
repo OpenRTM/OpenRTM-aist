@@ -167,8 +167,38 @@ namespace RTC
             return ::OpenRTM::BUFFER_EMPTY;
         }
         bool endian_type = m_connector->isLittleEndian();
-        setEndian(endian_type);
-        create_memory(m_memory_size, m_shm_address.c_str());
+        try
+        {
+          setEndian(endian_type);
+          create_memory(m_memory_size, m_shm_address.c_str());
+        }
+#ifdef ORB_IS_OMNIORB
+        catch (const CORBA::COMM_FAILURE& ex)
+        {
+          if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+          {
+            RTC_DEBUG(("Retry create memory"));
+            try
+            {
+              setEndian(endian_type);
+              create_memory(m_memory_size, m_shm_address.c_str());
+            }
+            catch (...)
+            {
+              return ::OpenRTM::UNKNOWN_ERROR;
+            }
+          }
+          else
+          {
+            return ::OpenRTM::UNKNOWN_ERROR;
+          }
+        }
+#endif
+        catch (...)
+        {
+          return ::OpenRTM::UNKNOWN_ERROR;
+        }
+        
         write(m_cdr);
       }
 

@@ -97,7 +97,29 @@ namespace RTC
 
     try
       {
-        ::RTC::PortStatus ret(_ptr()->pull(cdr_data.out()));
+        ::RTC::PortStatus ret(::RTC::PortStatus::PORT_ERROR);
+        try
+          {
+            ret = _ptr()->pull(cdr_data.out());
+          }
+#ifdef ORB_IS_OMNIORB
+        catch (const CORBA::COMM_FAILURE& ex)
+          {
+            if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+            {
+              RTC_DEBUG(("Retry pull message"));
+              ret = _ptr()->pull(cdr_data.out());
+            }
+            else
+            {
+              throw;
+            }
+          }
+#endif
+        catch (...)
+          {
+            throw;
+          }
 
         if (ret == ::RTC::PORT_OK)
           {

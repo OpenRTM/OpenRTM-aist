@@ -83,6 +83,27 @@ namespace RTC
         // (IDL)OpenRTM::DataPort::ReturnCode_t -> DataPortStatus
         return convertReturnCode(_ptr()->put(m_data));
       }
+#ifdef ORB_IS_OMNIORB
+    catch (const CORBA::COMM_FAILURE& ex)
+      {
+        if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+          {
+            RTC_DEBUG(("Retry put message"));
+            try
+              {
+                return convertReturnCode(_ptr()->put(m_data));
+              }
+            catch (...)
+              {
+                return DataPortStatus::CONNECTION_LOST;
+              }
+          }
+        else
+          {
+            return DataPortStatus::CONNECTION_LOST;
+          }
+      }
+#endif
     catch (...)
       {
         return DataPortStatus::CONNECTION_LOST;
