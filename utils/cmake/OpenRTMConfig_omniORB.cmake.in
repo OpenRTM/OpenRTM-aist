@@ -99,7 +99,7 @@ set(COIL_INCLUDE_DIR ${OPENRTM_DIR}/bin)
 set(OPENRTM_ORB omniORB)
 set(OPENRTM_IDL_WRAPPER rtm-skelwrapper.py)
 set(OPENRTM_IDL_WRAPPER_FLAGS --include-dir=;--skel-suffix=Skel;--stub-suffix=Stub;--dependencies=@RTM_INCLUDE_IDLS@)
-set(OPENRTM_IDLC omniidl)
+set(OPENRTM_IDLC ${OMNIORB_DIR}/bin/@ARCH_NAME@/omniidl)
 set(OPENRTM_IDLFLAGS -bcxx;-Wba;-nf;-Wbshortcut;-I${OPENRTM_DIR}/rtm/idl)
 
 
