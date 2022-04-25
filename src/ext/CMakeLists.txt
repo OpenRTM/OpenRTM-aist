@@ -16,4 +16,7 @@ endif(VXWORKS)
 
 if(SSL_ENABLE)
 	add_subdirectory(ssl)
+	if(HTTP_ENABLE)
+		add_subdirectory(http)
+	endif(HTTP_ENABLE)
 endif(SSL_ENABLE)
