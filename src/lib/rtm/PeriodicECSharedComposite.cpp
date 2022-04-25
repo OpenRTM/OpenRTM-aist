@@ -153,11 +153,11 @@ namespace SDOPackage
       {
 
         Member& member(*it);
-		size_t len = strlen(id);
-		if (len < strlen(member.profile_->instance_name))
-		{
-			len = strlen(member.profile_->instance_name);
-		}
+        size_t len = strlen(id);
+        if (len < strlen(member.profile_->instance_name))
+          {
+            len = strlen(member.profile_->instance_name);
+          }
         if (strncmp(id, member.profile_->instance_name, len) != 0)
           {
             ++it;
@@ -172,13 +172,12 @@ namespace SDOPackage
         removeOrganizationFromTarget(member);
         startOwnedEC(member);
         it = m_rtcMembers.erase(it);
-		break;
+        break;
 
       }
 
     CORBA::Boolean result;
     result = ::SDOPackage::Organization_impl::remove_member(id);
-	
     
     return result;
   }
@@ -196,7 +195,7 @@ namespace SDOPackage
     updateExportedPortsList();
     MemIt it(m_rtcMembers.begin());
     MemIt it_end(m_rtcMembers.end());
-	
+
     while (it != it_end)
       {
         Member& member(*it);

@@ -138,7 +138,7 @@ namespace RTC
    */
   void ManagerConfig::parseArgs(int argc, char** argv)
   {
-	bool ignoreNoConf(false);
+    bool ignoreNoConf(false);
     coil::GetOpt get_opts(argc, argv, "af:io:p:d", 0);
     int opt;
 

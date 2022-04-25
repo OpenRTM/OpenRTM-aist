@@ -1716,141 +1716,141 @@ namespace RTC
     bool initFactories();
 
     void initCpuAffinity();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したポートを接続する
-	 *
-	 * 例:
-	 * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
-	 *
-	 *
-	 * @else
-	 * @brief 
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreConnection();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
-	 *
-	 * 例:
-	 * manager.components.preactivation: RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreActivation();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCを生成する
-	 *
-	 * 例:
-	 * manager.components.precreate RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreCreation();
-	/*!
-	* @if jp
-	* @brief 
-	*
-	*
-	*
-	* @else
-	* @brief
-	*
-	*
-	* @endif
-	*/
-	void invokeInitProc();
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void publishPorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void subscribePorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したポートを接続する
+     *
+     * 例:
+     * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
+     *
+     *
+     * @else
+     * @brief 
+     *
+     *
+     * @endif
+     */
+    void initPreConnection();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
+     *
+     * 例:
+     * manager.components.preactivation: RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreActivation();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCを生成する
+     *
+     * 例:
+     * manager.components.precreate RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreCreation();
+    /*!
+     * @if jp
+     * @brief 
+     *
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void invokeInitProc();
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void publishPorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void subscribePorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
 
     /*!
      * @if jp

@@ -67,7 +67,7 @@ namespace RTC
    * @endif
    */
   DataPortStatus InPortCorbaCdrConsumer::
-	  put(ByteData& data)
+     put(ByteData& data)
   {
     RTC_PARANOID(("put()"));
     CORBA::ULong len = static_cast<CORBA::ULong>(data.getDataLength());
