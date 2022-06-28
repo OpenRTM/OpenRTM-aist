@@ -362,14 +362,14 @@ namespace RTC
     }
 
   private:
-	  /*!
-	  * @if jp
-	  * @brief リターンコード変換
-	  * @else
-	  * @brief Return codes conversion
-	  * @endif
-	  */
-	  void convertReturn(BufferStatus status, ByteData& data);
+    /*!
+     * @if jp
+     * @brief リターンコード変換
+     * @else
+     * @brief Return codes conversion
+     * @endif
+     */
+    void convertReturn(BufferStatus status, ByteData& data);
 
     CdrBufferBase* m_buffer;
     ::OpenRTM::InPortCdrUDP_var m_objref;

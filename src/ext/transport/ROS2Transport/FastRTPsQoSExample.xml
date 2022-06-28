@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dds xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles" >
+    <profiles>
+        <participant profile_name="participant_openrtm">
+            <rtps>
+            </rtps>
+        </participant>
+
+        <publisher profile_name="publisher_openrtm">
+            <topic>
+                <name>rt/chatter</name>
+                <dataType>XMLProfilesExample</dataType>
+                <kind>NO_KEY</kind>
+                <historyQos>
+                </historyQos>
+            </topic>
+            <qos>
+                <reliability>
+                    <kind>RELIABLE</kind>
+                </reliability>
+            </qos>
+        </publisher>
+
+        <subscriber profile_name="subscriber_openrtm">
+            <topic>
+                <name>rt/chatter</name>
+                <dataType>XMLProfilesExample</dataType>
+                <kind>NO_KEY</kind>
+                <historyQos>
+                </historyQos>
+            </topic>
+            <qos>
+            </qos>
+        </subscriber>
+    </profiles>
+</dds>

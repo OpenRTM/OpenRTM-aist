@@ -554,7 +554,7 @@ OpenRTM_OpenSplice::CORBACdrDataDataReader_impl::dataSeqGetBuffer (
     DDS::ULong index)
 {
     OpenRTM_OpenSplice::CORBACdrDataSeq *data_seq = reinterpret_cast<OpenRTM_OpenSplice::CORBACdrDataSeq *>(received_data);
-	return &((*data_seq)[index]);
+    return &((*data_seq)[index]);
 }
 
 void

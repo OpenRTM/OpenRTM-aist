@@ -23,7 +23,15 @@
 #ifndef RTC_CORBACDRDATA_PUBSUBTYPES_H_
 #define RTC_CORBACDRDATA_PUBSUBTYPES_H_
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
 #include <fastrtps/TopicDataType.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
+
 
 #include "CORBACdrData.h"
 
@@ -37,23 +45,23 @@ namespace RTC
     public:
         using type = CORBACdrData;
 
-    	CORBACdrDataPubSubType();
-    	~CORBACdrDataPubSubType() override;
+        CORBACdrDataPubSubType();
+        ~CORBACdrDataPubSubType() override;
         void init(std::string name, bool header_enable);
         void setEndian(bool endian);
-    	bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
-    	bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
+        bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
+        bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
         std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
 #if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 6)
-    	bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle) override;
+        bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle) override;
 #else
         bool getKey(void *data, eprosima::fastrtps::rtps::InstanceHandle_t *ihandle, bool force_md5) override;
 #endif
-    	void* createData() override;
-    	void deleteData(void * data) override;
+        void* createData() override;
+        void deleteData(void * data) override;
     private:
-    	MD5 m_md5;
-    	unsigned char* m_keyBuffer;
+        MD5 m_md5;
+        unsigned char* m_keyBuffer;
         bool m_endian;
         bool m_header_enable;
     };

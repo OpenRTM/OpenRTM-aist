@@ -36,16 +36,16 @@ namespace coil
   {
     DWORD_PTR processMask, systemMask = 0;
     HANDLE h = GetCurrentProcess();
-	BOOL success = GetProcessAffinityMask(h, static_cast<PDWORD_PTR>(&processMask), static_cast<PDWORD_PTR>(&systemMask));
-	if (success != 0)
+    BOOL success = GetProcessAffinityMask(h, static_cast<PDWORD_PTR>(&processMask), static_cast<PDWORD_PTR>(&systemMask));
+    if (success != 0)
     {
-		for (int i = 0; i < 32; i++)
-		{
-			if ((processMask & (static_cast<DWORD_PTR>(0x00000001) << i)) != 0U)
-			{
-				cpu_mask.emplace_back(i);
-			}
-		}
+      for (int i = 0; i < 32; i++)
+      {
+        if ((processMask & (static_cast<DWORD_PTR>(0x00000001) << i)) != 0U)
+        {
+          cpu_mask.emplace_back(i);
+         }
+      }
       return true;
     }
     else
@@ -59,7 +59,7 @@ namespace coil
     DWORD_PTR cpu_num = listToCUPNUM(cpu_mask);
     HANDLE h = GetCurrentProcess();
     BOOL success = SetProcessAffinityMask(h, cpu_num);
-	return success != 0;
+    return success != 0;
   }
 
   bool setProcCpuAffinity(const std::string& cpu_mask)
@@ -87,7 +87,7 @@ namespace coil
     DWORD_PTR cpu_num = listToCUPNUM(cpu_mask);
     HANDLE h = GetCurrentThread();
     DWORD_PTR success = SetThreadAffinityMask(h, cpu_num);
-	return success != 0;
+    return success != 0;
   }
 
   bool setThreadCpuAffinity(const std::string& cpu_mask)

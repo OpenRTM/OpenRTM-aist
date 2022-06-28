@@ -115,6 +115,8 @@ else()
 endif()
 
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/install_manifest.txt.in ${PROJECT_BINARY_DIR}/install_manifest.txt @ONLY)
+
 
 
 
@@ -128,6 +130,34 @@ endif(VXWORKS)
 
 
 
+set(INSTALL_ROS2TRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+set(INSTALL_SAMPLEQOSPROFILE_DIR ${INSTALL_RTM_ETC_DIR}/transport)
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ros2.conf.in ${PROJECT_BINARY_DIR}/rtc.ros2.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ros2.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)
+
+
+install(
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/FastRTPsQoSExample.xml
+	DESTINATION ${INSTALL_SAMPLEQOSPROFILE_DIR}
+	COMPONENT ext)
 
 
 
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ros2.ssl.conf.in ${PROJECT_BINARY_DIR}/rtc.ros2.ssl.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ros2.ssl.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)
+
+install(
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/mainexamplecacert.pem
+	${CMAKE_CURRENT_SOURCE_DIR}/appexamplekey.pem
+	${CMAKE_CURRENT_SOURCE_DIR}/appexamplecert.pem
+	DESTINATION ${INSTALL_SAMPLEQOSPROFILE_DIR}
+	COMPONENT ext)

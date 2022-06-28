@@ -189,7 +189,6 @@ namespace RTC
 
 
     CORBA::Object_var obj = orb->string_to_object(ior);
-	
 
 #ifdef ORB_IS_TAO
     TAO_Stub *stub = obj->_stubobj();

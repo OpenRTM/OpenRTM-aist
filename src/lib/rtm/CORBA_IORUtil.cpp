@@ -319,7 +319,7 @@ namespace CORBA_IORUtil
 #if !defined(ORB_IS_ORBEXPRESS) && !defined(ORB_IS_TAO) && !defined(ORB_IS_RTORB)
   std::vector<IIOP::Address> getEndpoints(IOP::IOR& ior)
   {
-	std::vector<IIOP::Address> addr;
+    std::vector<IIOP::Address> addr;
 #ifndef ORB_IS_RTORB
     if (ior.profiles.length() == 0 && strlen(ior.type_id) == 0)
       {

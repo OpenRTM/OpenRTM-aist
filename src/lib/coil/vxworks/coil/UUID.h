@@ -49,7 +49,7 @@ namespace coil
     std::stringstream stream;
     stream << std::hex << v;
     std::string ret(stream.str());
-	
+
     if(ret.size() < size)
     {
       for(unsigned int i=ret.size();i < size;i++)
