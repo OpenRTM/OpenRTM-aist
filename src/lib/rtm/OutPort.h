@@ -76,7 +76,7 @@ namespace RTC
    */
   template <class DataType>
   class OutPort
-	  : public OutPortBase, DirectOutPortBase<DataType>
+      : public OutPortBase, DirectOutPortBase<DataType>
   {
   public:
     /*!
@@ -104,8 +104,8 @@ namespace RTC
      */
     OutPort(const char* name, DataType& value)
       : OutPortBase(name, ::CORBA_Util::toRepositoryId<DataType>()),
-	  m_value(value), m_onWrite(nullptr), m_onWriteConvert(nullptr),
-	  m_directNewData(false), m_directValue(value)
+        m_value(value), m_onWrite(nullptr), m_onWriteConvert(nullptr),
+        m_directNewData(false), m_directValue(value)
     {
       this->initConnectorListeners();
       this->addConnectorDataListener(ConnectorDataListenerType::ON_BUFFER_WRITE,
@@ -113,7 +113,7 @@ namespace RTC
       this->addConnectorDataListener(ConnectorDataListenerType::ON_SEND,
                                      new Timestamp<DataType>("on_send"));
 
-	  m_directport = this;
+      m_directport = this;
 
       CdrMemoryStreamInit<DataType>();
 

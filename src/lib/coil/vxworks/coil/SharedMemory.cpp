@@ -141,7 +141,7 @@ namespace coil
   int SharedMemory::open(std::string shm_address, unsigned long long memory_size)
   {
     m_shm_address = shm_address;
-	m_memory_size = memory_size;
+    m_memory_size = memory_size;
  
     return 0;
   }
@@ -169,14 +169,13 @@ namespace coil
    */
   int SharedMemory::write(const char *data, const unsigned long long pos, const unsigned long long size)
   {
-	  if (!created())
-	  {
-		  return -1;
-	  }
-	  memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
+    if (!created())
+    {
+      return -1;
+    }
+    memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
 
-    
-	  return 0;
+    return 0;
   }
 
   /*!
@@ -202,13 +201,13 @@ namespace coil
    */
   int SharedMemory::read(char* data, const unsigned long long pos, const unsigned long long size)
   {
-	  if (!created())
-	  {
-		  return -1;
-	  }
-	  memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
+    if (!created())
+    {
+      return -1;
+    }
+    memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
 
-	  return 0;
+    return 0;
   }
 
   /*!
@@ -239,7 +238,7 @@ namespace coil
     }
     else
     {
-	return -1;
+      return -1;
     }
     if(m_file_create)
     {
@@ -269,7 +268,7 @@ namespace coil
    */
   unsigned long long SharedMemory::get_size()
   {
-	return m_memory_size;
+    return m_memory_size;
   }
   /*!
    * @if jp
@@ -292,7 +291,7 @@ namespace coil
    */
   std::string SharedMemory::get_addresss()
   {
-	return m_shm_address;
+    return m_shm_address;
   };
   /*!
    * @if jp
@@ -315,7 +314,7 @@ namespace coil
    */
   char *SharedMemory::get_data()
   {
-	return m_shm;
+    return m_shm;
   }
 
 
@@ -341,7 +340,7 @@ namespace coil
    */
   int SharedMemory::unlink()
   {
-	return -1;
+    return -1;
   }
 
 
@@ -366,10 +365,7 @@ namespace coil
   */
   bool SharedMemory::created()
   {
-	return false;
+    return false;
   }
-
-
-
 
 }

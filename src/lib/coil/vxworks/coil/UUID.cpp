@@ -44,13 +44,13 @@ namespace coil
 
   uuid_t::uuid_t()
   {
-	    time_low = 0;
-	    time_mid = 0;
-	    time_hi_version = 0;
-	    clock_seq_low = 0;
-	    clock_seq_hi_variant = 0;
-	    node_low = 0;
-	    node_high = 0;
+    time_low = 0;
+    time_mid = 0;
+    time_hi_version = 0;
+    clock_seq_low = 0;
+    clock_seq_hi_variant = 0;
+    node_low = 0;
+    node_high = 0;
   }
   UUID_Generator::UUID_Generator(){}
   
@@ -91,33 +91,33 @@ namespace coil
   }
   
   UUID::UUID(uuid_t *uuid){
-	  _uuid.time_low = uuid->time_low;
-	  _uuid.time_mid = uuid->time_mid;
-	  _uuid.time_hi_version = uuid->time_hi_version;
-	  _uuid.clock_seq_low = uuid->clock_seq_low;
-	  _uuid.clock_seq_hi_variant = uuid->clock_seq_hi_variant;
-	  
-	  _uuid.node_low = uuid->node_low;
-	  _uuid.node_high = uuid->node_high;
+    _uuid.time_low = uuid->time_low;
+    _uuid.time_mid = uuid->time_mid;
+    _uuid.time_hi_version = uuid->time_hi_version;
+    _uuid.clock_seq_low = uuid->clock_seq_low;
+    _uuid.clock_seq_hi_variant = uuid->clock_seq_hi_variant;
+  
+    _uuid.node_low = uuid->node_low;
+    _uuid.node_high = uuid->node_high;
   }
   
   const char* UUID::to_string()
   {
-	  std::string result;
-	  
-	  result = StringToUUID<uint32_t>(_uuid.time_low,8);
-	  result += "-";
-	  result += StringToUUID<uint16_t>(_uuid.time_mid,4);
-	  result += "-";
-	  result += StringToUUID<uint16_t>(_uuid.time_hi_version,4);
-	  result += "-";
-	  result += StringToUUID<uint16_t>((uint16_t)_uuid.clock_seq_low,2);
-	  result += StringToUUID<uint16_t>((uint16_t)_uuid.clock_seq_hi_variant,2);
-	  result += "-";
-	  result += StringToUUID<uint32_t>(_uuid.node_low,8);
-	  result += StringToUUID<uint16_t>(_uuid.node_high,4);
-	  
-	  return strdup(result.c_str());
+    std::string result;
+
+    result = StringToUUID<uint32_t>(_uuid.time_low,8);
+    result += "-";
+    result += StringToUUID<uint16_t>(_uuid.time_mid,4);
+    result += "-";
+    result += StringToUUID<uint16_t>(_uuid.time_hi_version,4);
+    result += "-";
+    result += StringToUUID<uint16_t>((uint16_t)_uuid.clock_seq_low,2);
+    result += StringToUUID<uint16_t>((uint16_t)_uuid.clock_seq_hi_variant,2);
+    result += "-";
+    result += StringToUUID<uint32_t>(_uuid.node_low,8);
+    result += StringToUUID<uint16_t>(_uuid.node_high,4);
+
+    return strdup(result.c_str());
   }
 
 

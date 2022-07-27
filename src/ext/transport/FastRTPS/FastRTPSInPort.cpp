@@ -360,7 +360,7 @@ namespace RTC
   void FastRTPSInPort::SubListener::onNewDataMessage(eprosima::fastrtps::Subscriber* sub)
   {
     RTC_PARANOID(("onNewDataMessage()"));
-		
+
     RTC_PARANOID(("takeNextData"));
     if(sub->takeNextData(&m_data, &m_info))
     {

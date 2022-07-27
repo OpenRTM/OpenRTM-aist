@@ -1396,6 +1396,27 @@ namespace RTC
 
     /*!
      * @if jp
+     * @brief giopからはじまるORBエンドポイントでの指定した場合にtrue、
+     * それ以外(例えばホスト名:ポート番号の指定)の場合はfalseを返す。
+     *
+     *
+     * @param endpoint エンドポイント
+     *
+     * @return エンドポイントの指定方法
+     *
+     * @else
+     * @brief 
+     *
+     * @param endpoint 
+     *
+     * @return
+     *
+     * @endif
+     */
+    static bool isORBEndPoint(const std::string& endpoint);
+
+    /*!
+     * @if jp
      * @brief エンドポイントの生成
      *
      * コンフィグレーションからエンドポイントを生成する。
@@ -1716,141 +1737,141 @@ namespace RTC
     bool initFactories();
 
     void initCpuAffinity();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したポートを接続する
-	 *
-	 * 例:
-	 * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
-	 *
-	 *
-	 * @else
-	 * @brief 
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreConnection();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
-	 *
-	 * 例:
-	 * manager.components.preactivation: RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreActivation();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCを生成する
-	 *
-	 * 例:
-	 * manager.components.precreate RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreCreation();
-	/*!
-	* @if jp
-	* @brief 
-	*
-	*
-	*
-	* @else
-	* @brief
-	*
-	*
-	* @endif
-	*/
-	void invokeInitProc();
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void publishPorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void subscribePorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したポートを接続する
+     *
+     * 例:
+     * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
+     *
+     *
+     * @else
+     * @brief 
+     *
+     *
+     * @endif
+     */
+    void initPreConnection();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
+     *
+     * 例:
+     * manager.components.preactivation: RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreActivation();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCを生成する
+     *
+     * 例:
+     * manager.components.precreate RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreCreation();
+    /*!
+     * @if jp
+     * @brief 
+     *
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void invokeInitProc();
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void publishPorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void subscribePorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
 
     /*!
      * @if jp
@@ -2064,7 +2085,7 @@ namespace RTC
      * @brief The argument of ORB_init
      * @endif
      */
-    int m_argvSize;
+    int m_argvSize{0};
 
     //------------------------------------------------------------
     // Manager's variable

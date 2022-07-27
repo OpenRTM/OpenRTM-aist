@@ -126,7 +126,7 @@ namespace RTC
     bool CORBACdrDataPubSubType::deserialize(eprosima::fastrtps::rtps::SerializedPayload_t* payload, void* data)
     {
 
-        RTC::ByteData* p_type = (RTC::ByteData*) data; 	//Convert DATA to pointer of your type
+        RTC::ByteData* p_type = (RTC::ByteData*) data; //Convert DATA to pointer of your type
         eprosima::fastcdr::FastBuffer fastbuffer((char*)payload->data, payload->length); // Object that manages the raw buffer.
         eprosima::fastcdr::Cdr::Endianness endian;
         if (m_endian)
@@ -196,19 +196,19 @@ namespace RTC
         {
             return false;
         }
-        eprosima::fastcdr::FastBuffer fastbuffer((char*)m_keyBuffer,CORBACdrData::getKeyMaxCdrSerializedSize()); 	// Object that manages the raw buffer.
-        eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::BIG_ENDIANNESS); 	// Object that serializes the data.
+        eprosima::fastcdr::FastBuffer fastbuffer((char*)m_keyBuffer,CORBACdrData::getKeyMaxCdrSerializedSize()); // Object that manages the raw buffer.
+        eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::BIG_ENDIANNESS); // Object that serializes the data.
         
-        if(CORBACdrData::getKeyMaxCdrSerializedSize()>16)	{
+        if(CORBACdrData::getKeyMaxCdrSerializedSize()>16){
             m_md5.init();
             m_md5.update(m_keyBuffer,(unsigned int)ser.getSerializedDataLength());
             m_md5.finalize();
-            for(uint8_t i = 0;i<16;++i)    	{
+            for(uint8_t i = 0;i<16;++i)    {
                 handle->value[i] = m_md5.digest[i];
             }
         }
         else    {
-            for(uint8_t i = 0;i<16;++i)    	{
+            for(uint8_t i = 0;i<16;++i)    {
                 handle->value[i] = m_keyBuffer[i];
             }
         }
