@@ -36,6 +36,8 @@ namespace ros
   }
 }
 
+std::string ros::console::g_last_error_message = "Unknown Error";
+
 
 namespace RTC
 {
