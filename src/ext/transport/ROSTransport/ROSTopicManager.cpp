@@ -32,7 +32,40 @@ namespace ros
 {
   namespace network
   {
-    void init(const M_string& remappings);
+    void init(const M_string& remappings)
+    {
+      M_string::const_iterator it = remappings.find("__hostname");
+      if (it != remappings.end())
+      {
+        g_host = it->second;
+      }
+      else
+      {
+        it = remappings.find("__ip");
+        if (it != remappings.end())
+        {
+          g_host = it->second;
+        }
+      }
+
+      it = remappings.find("__tcpros_server_port");
+      if (it != remappings.end())
+      {
+        try
+        {
+          g_tcpros_server_port = boost::lexical_cast<uint16_t>(it->second);
+        }
+        catch (boost::bad_lexical_cast&)
+        {
+          throw ros::InvalidPortException("__tcpros_server_port [" + it->second + "] was not specified as a number within the 0-65535 range");
+        }
+      }
+
+      if (g_host.empty())
+      {
+        g_host = determineHost();
+      }
+    }
   }
 }
 
