@@ -24,6 +24,10 @@
 #include <rtm/PortCallback.h>
 #include <rtm/CORBA_RTCUtil.h>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   //============================================================
@@ -975,6 +979,24 @@ namespace RTC
                 return false;
               }
           }
+#ifdef ORB_IS_OMNIORB
+        catch (const CORBA::COMM_FAILURE& ex)
+          {
+            if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+              {
+                RTC_DEBUG(("Retry access connected port"));
+                if (ports[i]->_non_existent())
+                  {
+                    RTC_WARN(("Dead Port reference detected."));
+                    return false;
+                  }
+              }
+            else
+              {
+                return false;
+              }
+          }
+#endif
         catch (...)
           {
             return false;
