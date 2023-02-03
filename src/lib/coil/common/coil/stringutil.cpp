@@ -613,10 +613,18 @@ namespace coil
     std::map<std::string, std::string> retmap;
     for (auto & param : params)
       {
+        if (coil::eraseBothEndsBlank(param).empty())
+          {
+            continue;
+          }
         std::string::size_type pos = param.find('=');
         if (pos != std::string::npos)
           {
-            retmap[param.substr(0, pos)] = param.substr(pos + 1);
+            const std::string key{param.substr(0, pos)};
+            if (!coil::eraseBothEndsBlank(key).empty())
+              {
+                retmap[key] = param.substr(pos + 1);
+              }
           }
         else
           {
