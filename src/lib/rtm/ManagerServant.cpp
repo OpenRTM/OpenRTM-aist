@@ -323,65 +323,44 @@ namespace RTM
 
   std::string ManagerServant::getParameterByModulename(const std::string& param_name, std::string &module_name)
   {
-        size_t pos0 = module_name.find("&" + param_name + "=");
-        size_t pos1 = module_name.find("?" + param_name + "=");
+    std::vector<std::string> id_and_conf(coil::split(module_name, "?"));
 
-        if (pos0 == std::string::npos && pos1 == std::string::npos)
-          {
-            return "";
-          }
+    if (id_and_conf.size() != 2)
+    {
+      return "";
+    }
 
-        size_t pos = 0;
-        if (pos0 == std::string::npos)
+    std::string& id(id_and_conf[0]);
+
+    coil::mapstring props(coil::urlparam2map(module_name));
+
+    if (props.count(param_name) > 0)
+    {
+      std::string paramstr(props[param_name]);
+      RTC_VERBOSE(("%s arg: %s", param_name.c_str(), paramstr.c_str()));
+      props.erase(param_name);
+      module_name = id;
+      if (props.size() > 0)
+      {
+        module_name += "?";
+        int i = 0;
+        for (auto& prop : props)
+        {
+          if (i > 0)
           {
-            pos = pos1;
+            module_name += "&";
           }
-        else
-          {
-            pos = pos0;
+          i++;
+          module_name += prop.first + "=" + prop.second;
         }
 
-        std::string paramstr;
-        size_t endpos = module_name.find('&', pos + 1);
-
-
-        if (endpos == std::string::npos)
-          {
-            endpos = module_name.find('?', pos + 1);
-
-            if (endpos == std::string::npos)
-              {
-                paramstr = module_name.substr((pos + 1));
-                
-              }
-            else
-              {
-                paramstr = module_name.substr((pos + 1), endpos);
-              }
-          }
-        else
-          {
-            paramstr = module_name.substr((pos + 1), endpos);
-          }
-        RTC_VERBOSE(("%s arg: %s", param_name.c_str(), paramstr.c_str()));
-        
-        size_t eqpos = paramstr.find('=');
-
-        paramstr = paramstr.substr(eqpos + 1);
-
-
-        RTC_DEBUG(("%s is %s", param_name.c_str(), paramstr.c_str()));
-
-        if (endpos == std::string::npos)
-          {
-            module_name = module_name.substr(0, pos);
-          }
-        else
-          {
-            module_name = module_name.substr(0, pos) + module_name.substr(endpos);
-          }
-
-        return paramstr;
+      }
+      return paramstr;
+    }
+    else
+    {
+      return "";
+    }
   }
   
   /*!
@@ -395,7 +374,19 @@ namespace RTM
   {
     RTC_TRACE(("create_component(%s)", module_name));
     RTC_TRACE(("This manager is master: %s", m_isMaster ? "YES" : "NO"));
+
     std::string create_arg(module_name);
+    if (create_arg.find('?') == 0)
+    {
+      RTC_ERROR(("Module name is empty."));
+      return RTC::RTObject::_nil();
+    }
+    else if (create_arg.find('?') == std::string::npos && create_arg.find('=') != std::string::npos)
+    {
+      RTC_ERROR(("Incorrect module name."));
+      return RTC::RTObject::_nil();
+    }
+
     if (create_arg.empty()) // invalid arg
       {
         return RTC::RTObject::_nil();
@@ -462,7 +453,16 @@ namespace RTM
 
         if (manager_name.empty())
           {
-            create_arg = create_arg + "&manager_name=manager_%p";
+            coil::mapstring props(coil::urlparam2map(create_arg));
+            if (props.empty())
+            {
+              create_arg + "?";
+            }
+            else
+            {
+              create_arg + "&";
+            }
+            create_arg + "manager_name=manager_%p";
             rtobj = createComponentByManagerName(create_arg, manager_name);
             if (!CORBA::is_nil(rtobj)) { return rtobj._retn(); }
           }
