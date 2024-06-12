@@ -107,3 +107,11 @@ endif(VXWORKS)
 
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/devel/include/ros)
+
+set(INSTALL_ROSTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ros.conf.in ${PROJECT_BINARY_DIR}/rtc.ros.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ros.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)

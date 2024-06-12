@@ -41,7 +41,7 @@ namespace RTC
 {
   ROSTopicManager* ROSTopicManager::manager = nullptr;
   std::mutex ROSTopicManager::mutex;
-
+  std::once_flag ROSTopicManager::m_once;
 
   /*!
    * @if jp
@@ -1060,12 +1060,10 @@ namespace RTC
    */
   ROSTopicManager* ROSTopicManager::init()
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
+    std::call_once(m_once, [] {
       manager = new ROSTopicManager();
       manager->start();
-    }
+    });
     return manager;
   }
 
@@ -1085,12 +1083,10 @@ namespace RTC
    */
   ROSTopicManager& ROSTopicManager::instance()
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
+    std::call_once(m_once, [] {
       manager = new ROSTopicManager();
       manager->start();
-    }
+    });
     return *manager;
   }
 
