@@ -409,6 +409,7 @@ namespace coil
       "(?:"
         "^/" // UNIX absolute path
         R"(|^[a-zA-Z]{1}:\\)" // Windows absolute path
+        R"(|^[a-zA-Z]{1}:/)" // Windows absolute path
         R"(|^\\\\)" // Windows network file path
       ")"} ;
     return std::regex_search(str, path);

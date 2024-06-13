@@ -684,11 +684,21 @@ namespace RTC
     {
       std::string m_filepath;
     public:
-      explicit DllPred(const char* filepath) : m_filepath(filepath) {}
+      explicit DllPred(const char* filepath) 
+      {
+        m_filepath = coil::replaceString(filepath, "\\", "/");
+        m_filepath = coil::replaceString(m_filepath, "//", "/");
+      }
       explicit DllPred(const DLLEntity* dll)
-               : m_filepath(dll->properties["file_path"]) {}
+      {
+        m_filepath = coil::replaceString(dll->properties["file_path"], "\\", "/");
+        m_filepath = coil::replaceString(m_filepath, "//", "/");
+      }
       bool operator()(DLLEntity* dllentity)
       {
+        std::string file_path = coil::replaceString(
+          dllentity->properties.getProperty("file_path"), "\\", "/");
+        file_path = coil::replaceString(file_path, "//", "/");
         return m_filepath == dllentity->properties.getProperty("file_path");
       }
     };
