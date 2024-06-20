@@ -97,7 +97,7 @@ set(COIL_INCLUDE_DIR ${OPENRTM_DIR}/bin)
 set(OPENRTM_ORB TAO)
 set(OPENRTM_IDL_WRAPPER rtm-skelwrapper.py)
 set(OPENRTM_IDL_WRAPPER_FLAGS --include-dir=;--skel-suffix=Skel;--stub-suffix=Stub;--dependencies=@RTM_INCLUDE_IDLS@)
-set(OPENRTM_IDLC tao_idl)
+set(OPENRTM_IDLC ${TAO_DIR}/bin/tao_idl)
 set(OPENRTM_IDLFLAGS -as -DTAO_IDL -I${TAO_DIR}/TAO -I${OPENRTM_DIR}/rtm/idl)
 
 
