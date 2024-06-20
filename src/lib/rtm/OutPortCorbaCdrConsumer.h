@@ -256,7 +256,15 @@ namespace RTC
      * @endif
      */
     void unsubscribeInterface(const SDOPackage::NVList& properties) override;
-
+  protected:
+    /*!
+     * @if jp
+     * @brief ロガーストリーム
+     * @else
+     * @brief Logger stream
+     * @endif
+     */
+    mutable Logger rtclog;
   private:
     /*!
      * @if jp
