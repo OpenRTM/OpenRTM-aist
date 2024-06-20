@@ -36,6 +36,8 @@ jobs:
   - job: Build
     strategy:
       matrix:
+        vs2022:
+          imageVersion: 'windows-2022'
         vs2019:
           imageVersion: 'windows-2019'
         vs2017:
@@ -91,7 +93,7 @@ jobs:
       vmImage: 'windows-latest'
 
     variables:
-      vcPath: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+      vcPath: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC'
 
     steps:
       - template: .azure-pipelines/openrtm-build-environment.yml

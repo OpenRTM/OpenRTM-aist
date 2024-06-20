@@ -102,7 +102,7 @@ namespace coil
           typedef LONG(WINAPI* RtlGetVersionFunc)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
           RTL_OSVERSIONINFOW version_info;
-          RtlGetVersionFunc RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(GetProcAddress(handle, "RtlGetVersion"));
+          RtlGetVersionFunc RtlGetVersion = reinterpret_cast<RtlGetVersionFunc>((void*)GetProcAddress(handle, "RtlGetVersion"));
           if (RtlGetVersion != nullptr)
           {
               if (RtlGetVersion(&version_info) == 0)
