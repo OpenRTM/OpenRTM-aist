@@ -304,9 +304,9 @@ namespace coil
 #ifndef __RTP__
   typedef struct
   {
-  	const char* name;
-  	int         group;
-  	void*       addr;
+    const char* name;
+    int         group;
+    void*       addr;
   }SymbolObj;
   
   extern "C" bool SymbolIterator(char* name, int val, SYM_TYPE type, int arg, UINT16 group);

@@ -27,13 +27,16 @@
 #pragma warning(disable:4819)
 #endif
 #include <ccpp_dds_dcps.h>
+#include <QosProvider.h>
 #include "ccpp_CORBACdrData.h"
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #pragma warning(pop)
 #endif
+#include <coil/Properties.h>
 
 namespace RTC
 {
+    class Logger;
     /*!
      * @if jp
      * @class OpenSpliceManager
@@ -103,15 +106,16 @@ namespace RTC
          * @if jp
          * @brief マネージャ開始
          *
+         * @param prop 設定プロパティ
          *
          * @else
          * @brief 
          *
-         * 
+         * @param prop
          *
          * @endif
          */
-        void start();
+        void start(coil::Properties& prop);
 
         /*!
          * @if jp
@@ -131,30 +135,46 @@ namespace RTC
          * @if jp
          * @brief DataWriter生成
          *
+         * @param topic_name トピック名
+         * @param listener 書き込み時リスナ
+         * @param prop 設定プロパティ
+         *
          * @return DataWriter
          *
          * @else
          * @brief create DataWriter
          *
+         * @param topic_name
+         * @param listener
+         * @param prop
+         *
          * @return DataWriter
          *
          * @endif
          */
-        DDS::DataWriter_ptr createWriter(const std::string& topic_name, DDS::DataWriterListener_ptr listener);
+        DDS::DataWriter_ptr createWriter(const std::string& topic_name, DDS::DataWriterListener_ptr listener, coil::Properties& prop);
         /*!
          * @if jp
          * @brief DataReader生成
+         *
+         * @param topic_name トピック名
+         * @param listener 読み込み時リスナ
+         * @param prop 設定プロパティ
          *
          * @return DataReader
          *
          * @else
          * @brief create DataReader
          *
+         * @param topic_name
+         * @param listener
+         * @param prop
+         *
          * @return DataReader
          *
          * @endif
          */
-        DDS::DataReader_ptr createReader(const std::string& topic_name, DDS::DataReaderListener_ptr listener);
+        DDS::DataReader_ptr createReader(const std::string& topic_name, DDS::DataReaderListener_ptr listener, coil::Properties& prop);
         /*!
          * @if jp
          * @brief DataWriter削除
@@ -187,44 +207,56 @@ namespace RTC
          * @if jp
          * @brief トピック生成
          *
-         * @return DataReader
+         * @param prop 設定プロパティ
+         *
+         * @return true：生成成功
          *
          * @else
          * @brief create Topic
          *
-         * @return DataReader
+         * @param prop
+         *
+         * @return
          *
          * @endif
          */
-        bool createTopic(const std::string& topic_name, const std::string& typeName);
+        bool createTopic(const std::string& topic_name, const std::string& typeName, coil::Properties& prop);
         /*!
          * @if jp
          * @brief Publisher生成
+         * 
+         * @param prop 設定プロパティ
          *
          * @return true：生成成功、false：エラー
          *
          * @else
          * @brief create Publisher
          *
+         * @param prop 
+         * 
          * @return 
          *
          * @endif
          */
-        bool createPublisher();
+        bool createPublisher(coil::Properties& prop);
         /*!
          * @if jp
          * @brief Subscriber生成
          *
+         * @param prop 設定プロパティ
+         * 
          * @return true：生成成功、false：エラー
          *
          * @else
          * @brief create Subscriber
          *
+         * @param prop 
+         * 
          * @return
          *
          * @endif
          */
-        bool createSubscriber();
+        bool createSubscriber(coil::Properties& prop);
         /*!
          * @if jp
          * @brief 型の登録
@@ -289,30 +321,37 @@ namespace RTC
          */
         void finalize();
 
-
         /*!
          * @if jp
          * @brief 初期化関数
-         * 
+         *
+         * @param prop 設定プロパティ
+         *
          * @return インスタンス
          *
          * @else
-         * @brief 
+         * @brief
          *
-         * @return 
-         * 
+         * @param prop
+         *
+         * @return
+         *
          *
          * @endif
          */
-        static OpenSpliceManager* init();
+        static OpenSpliceManager* init(coil::Properties& prop);
         /*!
          * @if jp
          * @brief インスタンス取得
          * 
+         * @param prop 設定プロパティ
+         * 
          * @return インスタンス
          *
          * @else
          * @brief 
+         * 
+         * @param prop 
          *
          * @return 
          * 
@@ -374,7 +413,25 @@ namespace RTC
          * @endif
          */
         static bool checkHandle(void *handle, const char* info);
+
     private:
+        /*!
+         * @if jp
+         * @brief プロパティからDDS::Durationを設定する
+         *
+         * @param prop プロパティ(sec、nanosecの要素に値を格納する)
+         * @param time DDS::Duration
+         *
+         * @else
+         * @brief
+         *
+         * @param prop
+         * @param time
+         *
+         *
+         * @endif
+         */
+        static void setDuration(coil::Properties& prop, DDS::Duration_t &time);
         static OpenSpliceManager* manager;
         static std::mutex mutex;
         DDS::DomainParticipantFactory_var m_factory;
@@ -384,6 +441,8 @@ namespace RTC
         DDS::Subscriber_var m_subscriber;
         std::map <std::string, DDS::Topic_var> m_topics;
         std::map <std::string, OpenRTM_OpenSplice::CORBACdrDataTypeSupport_var> m_typesupports;
+        DDS::QosProvider_var m_qos_provider;
+        static std::once_flag m_once;
     protected:
     };
 

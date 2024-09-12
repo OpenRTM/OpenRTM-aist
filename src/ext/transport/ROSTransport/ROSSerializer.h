@@ -23,7 +23,7 @@
 #include <coil/Factory.h>
 #include <rtm/Manager.h>
 #include <ros/serialization.h>
-
+#include "ROSMessageInfo.h"
 
 
 namespace RTC
@@ -424,6 +424,30 @@ namespace RTC
       return true;
     }
   };
+  /*!
+   * @if jp
+   *
+   * @brief GlobalFactoryにROS用シリアライザを追加する
+   * 
+   * @param marshalingtype シリアライザの名称
+   *
+   * @else
+   *
+   * @brief 
+   *
+   * @param marshalingtype 
+   *
+   * @endif
+   */
+  template <class DataType, class MessageType, class SerializerType>
+  void addRosSerializer(const std::string &marshalingtype)
+  {
+    addSerializer<DataType, SerializerType>(marshalingtype);
+
+    RTC::GlobalROSMessageInfoList::
+            instance().addInfo(marshalingtype,
+            new RTC::ROSMessageInfo<MessageType>());
+  }
 }
 
 

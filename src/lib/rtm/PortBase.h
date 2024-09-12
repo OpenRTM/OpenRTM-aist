@@ -1259,20 +1259,20 @@ namespace RTC
      */
     void setPortConnectListenerHolder(PortConnectListeners* portconnListeners);
 
-	/*!
-	* @if jp
-	* @brief direct通信用ポートオブジェクト取得
-	*
-	* @return ポートのポインタ
-	*
-	* @else
-	* @brief 
-	*
-	* @return
-	*
-	* @endif
-	*/
-	virtual DirectPortBase* getDirectPort();
+    /*!
+     * @if jp
+     * @brief direct通信用ポートオブジェクト取得
+     *
+     * @return ポートのポインタ
+     *
+     * @else
+     * @brief 
+     *
+     * @return
+     *
+     * @endif
+     */
+    virtual DirectPortBase* getDirectPort();
     //============================================================
     // protected operations
     //============================================================
@@ -2236,7 +2236,7 @@ namespace RTC
      */
     PortConnectListeners* m_portconnListeners{nullptr};
 
-	DirectPortBase *m_directport{nullptr};
+    DirectPortBase *m_directport{nullptr};
 
     //============================================================
     // Functor
@@ -2271,7 +2271,7 @@ namespace RTC
 #ifdef ORB_IS_ORBEXPRESS
       bool operator()(PortService_var port_ref)
       {
-	return m_port->_is_equivalent(port_ref.in());
+        return m_port->_is_equivalent(port_ref.in());
       }
 #else
       bool operator()(PortService_ptr port_ref)

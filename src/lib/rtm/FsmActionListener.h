@@ -266,9 +266,9 @@ namespace RTC
           "PRE_FSM_ACTION_LISTENER_NUM"
         };
       if (type < PreFsmActionListenerType::PRE_FSM_ACTION_LISTENER_NUM)
-	{
-	  return typeString[static_cast<uint8_t>(type)];
-	}
+        {
+          return typeString[static_cast<uint8_t>(type)];
+        }
       return "";
     }
 
@@ -758,9 +758,9 @@ namespace RTC
           "FSM_PROFILE_LISTENER_NUM"
         };
       if (type < FsmProfileListenerType::FSM_PROFILE_LISTENER_NUM)
-	{
-	  return typeString[static_cast<uint8_t>(type)];
-	}
+        {
+          return typeString[static_cast<uint8_t>(type)];
+        }
       return "";
     }
 
@@ -973,9 +973,9 @@ namespace RTC
           "FSM_STRUCTURE_LISTENER_NUM"
         };
       if (type < FsmStructureListenerType::FSM_STRUCTURE_LISTENER_NUM)
-	{
-	  return typeString[static_cast<uint8_t>(type)];
-	}
+       {
+         return typeString[static_cast<uint8_t>(type)];
+       }
       return "";
     }
 

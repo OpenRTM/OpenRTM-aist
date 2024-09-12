@@ -23,6 +23,7 @@
 #include <coil/Factory.h>
 #include <rtm/DataPortStatus.h>
 #include <rtm/CdrBufferBase.h>
+#include <rtm/SystemLogger.h>
 
 // Why RtORB does not allow the following foward declaration?
 #if !defined(ORB_IS_RTORB) && !defined(ORB_IS_ORBEXPRESS)

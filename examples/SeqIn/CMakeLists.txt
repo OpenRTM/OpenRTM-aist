@@ -4,7 +4,6 @@ if(OpenRTM_aist_BINARY_DIR)
   set(srcs src/SeqIn.cpp include/SeqIn/SeqIn.h)
   examples_build(SeqIn SRCS "${srcs}" MAIN src/SeqInComp.cpp
 		EXTERNAL_INCLUDE PRIVATE include/SeqIn)
-  install(FILES rtc.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
 else(OpenRTM_aist_BINARY_DIR)
 
 project(SeqIn)

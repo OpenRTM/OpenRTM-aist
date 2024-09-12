@@ -35,7 +35,7 @@
 # - OPENRTM_IDLC: IDL command
 # - OPENRTM_IDLFLAGS: IDL optins
 
-message(STATUS "OpenRTMConfig.cmake found.")
+message(STATUS "OpenRTMConfig.cmake(version 2.0) found.")
 message(STATUS "Configrued by configuration mode.")
 
 
@@ -51,8 +51,6 @@ set(OPENRTM_DIR @CMAKE_INSTALL_PREFIX@)
 
 # OpenRTM-aist specific directory
 set(COIL_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_COIL_INCLUDE_DIR@)
-set(OPENRTM_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_INCLUDE_DIR@)
-set(OPENRTM_LIB_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_LIB_DIR@)
 set(OPENRTM_DATA_DIR @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_SHARE_DIR@)
 
 # OpenRTM-aist version
@@ -64,7 +62,7 @@ set(OPENRTM_SHORT_VERSION @RTM_SHORT_VERSION@)
 
 # OpenRTM-aist's CORBA related settings
 set(OPENRTM_ORB RtORB)
-set(OPENRTM_IDL_WRAPPER rtm-skelwrapper)
+set(OPENRTM_IDL_WRAPPER rtm-skelwrapper2)
 set(OPENRTM_IDL_WRAPPER_FLAGS --include-dir= --skel-suffix=Skel --stub-suffix=Stub)
 set(OPENRTM_IDLC @IDL_COMPILE_COMMAND@)
 set(OPENRTM_IDLFLAGS --skeleton-impl -I${OPENRTM_INCLUDE_DIR}/rtm/idl)

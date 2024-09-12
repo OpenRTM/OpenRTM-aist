@@ -2,10 +2,10 @@
 #define RTC_BYTEDATA_H
 
 
-#include "ByteDataStreamBase.h"
 
 namespace RTC
 {
+    class ByteDataStreamBase;
     /*!
      * @if jp
      * @class ByteData

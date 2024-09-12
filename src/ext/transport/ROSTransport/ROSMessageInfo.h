@@ -168,15 +168,7 @@ namespace RTC
      *
      * @endif
      */
-    inline void addInfo(const std::string &id, ROSMessageInfoBase* info)
-    {
-        auto data = m_data.find(id);
-        if (data != m_data.end())
-        {
-            data->second.deleteObject();
-        }
-        m_data[id] = ROSMessageInfoEntry(info, [](ROSMessageInfoBase*& obj) { delete obj; });
-    }
+    void addInfo(const std::string &id, ROSMessageInfoBase* info);
     /*!
      * @if jp
      *

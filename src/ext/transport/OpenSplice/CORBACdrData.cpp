@@ -18,8 +18,10 @@
 #pragma warning(pop)
 #endif
 
+#ifdef DDS_USE_EXPLICIT_TEMPLATES
 #if DDS_USE_EXPLICIT_TEMPLATES
 template class DDS_DCPSUFLSeq < DDS::Octet, struct _data_seq_uniq_>;
+#endif
 #endif
 
 

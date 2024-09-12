@@ -1,13 +1,13 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
+// <rtc-template block="description">
 /*!
  * @file  ConsoleInTest.cpp
- * @brief Console input component
- * @date $Date$
+ * @brief Console input component (test code)
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- * $Id$
  */
+// </rtc-template>
 
 #include "ConsoleInTest.h"
 
@@ -82,72 +82,65 @@ RTC::ReturnCode_t ConsoleInTest::onFinalize()
 }
 */
 
-/*
-RTC::ReturnCode_t ConsoleInTest::onStartup(RTC::UniqueId ec_id)
+
+//RTC::ReturnCode_t ConsoleInTest::onStartup(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleInTest::onShutdown(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleInTest::onActivated(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleInTest::onDeactivated(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+RTC::ReturnCode_t ConsoleInTest::onExecute(RTC::UniqueId /*ec_id*/)
 {
   return RTC::RTC_OK;
 }
-*/
-
-/*
-RTC::ReturnCode_t ConsoleInTest::onShutdown(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
 
-RTC::ReturnCode_t ConsoleInTest::onActivated(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
+//RTC::ReturnCode_t ConsoleInTest::onAborting(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
 
-RTC::ReturnCode_t ConsoleInTest::onDeactivated(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
+//RTC::ReturnCode_t ConsoleInTest::onError(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
 
-RTC::ReturnCode_t ConsoleInTest::onExecute(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
+//RTC::ReturnCode_t ConsoleInTest::onReset(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
-/*
-RTC::ReturnCode_t ConsoleInTest::onAborting(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleInTest::onError(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleInTest::onStateUpdate(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
-/*
-RTC::ReturnCode_t ConsoleInTest::onReset(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleInTest::onStateUpdate(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
-
-/*
-RTC::ReturnCode_t ConsoleInTest::onRateChanged(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleInTest::onRateChanged(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
 
 bool ConsoleInTest::runTest()
@@ -167,6 +160,4 @@ extern "C"
                              RTC::Delete<ConsoleInTest>);
   }
   
-};
-
-
+}

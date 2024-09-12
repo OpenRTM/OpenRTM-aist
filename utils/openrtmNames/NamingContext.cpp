@@ -390,6 +390,7 @@ namespace RTM
 
       for (const auto& ob : m_objects) {
         all[i] = ob->get_binding();
+        i++;
       }
     }
 

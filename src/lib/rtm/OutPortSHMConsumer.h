@@ -323,9 +323,9 @@ protected:
     int m_memory_size;
     bool m_endian;
 
-	CdrBufferBase* m_buffer;
-	ConnectorListenersBase* m_listeners{nullptr};
-	ConnectorInfo m_profile;
+    CdrBufferBase* m_buffer;
+    ConnectorListenersBase* m_listeners{nullptr};
+    ConnectorInfo m_profile;
   };
 } // namespace RTC
 

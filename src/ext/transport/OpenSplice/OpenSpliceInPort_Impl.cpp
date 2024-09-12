@@ -87,6 +87,7 @@ namespace RTC
          * @param datatype データ型名
          * @param idlpath データ型を定義したIDLファイルのパス
          * @param topic トピック名
+         * @param prop 設定プロパティ
          * @param endian true：リトルエンディアン、false：ビッグエンディアン
          * @param corbamode
          * @return true：初期化成功、false：問題発生
@@ -98,13 +99,14 @@ namespace RTC
          * @param datatype
          * @param idlpath
          * @param topic
+         * @param prop 
          * @param endian
          * @param corbamode
          * @return
          *
          * @endif
          */
-        bool init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, bool endian = true, bool corbamode = true) override;
+        bool init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian = true, bool corbamode = true) override;
         /*!
          * @if jp
          * @brief 終了処理
@@ -126,6 +128,7 @@ namespace RTC
         std::string m_idlPath;
         bool m_corbamode;
         DDS::DataReaderListener_var m_listener;
+        coil::Properties m_prop;
     };
 
     /*!
@@ -275,6 +278,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode
      * @return true：初期化成功、false：問題発生
@@ -286,13 +290,14 @@ namespace RTC
      * @param datatype
      * @param idlpath
      * @param topic
+     * @param prop 
      * @param endian
      * @param corbamode
      * @return
      *
      * @endif
      */
-    bool OpenSpliceInPort_impl::init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, bool endian, bool corbamode)
+    bool OpenSpliceInPort_impl::init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian, bool corbamode)
     {
 
         m_topic = topic;
@@ -300,6 +305,7 @@ namespace RTC
         m_endian = endian;
         m_idlPath = idlpath;
         m_corbamode = corbamode;
+        m_prop = prop;
 
         
         OpenSpliceManager& topicmgr = OpenSpliceManager::instance();
@@ -311,21 +317,16 @@ namespace RTC
         }
         
         
-        if (!topicmgr.createTopic(topic, m_dataType))
+        if (!topicmgr.createTopic(topic, m_dataType, m_prop))
         {
             return false;
         }
         
-
-        if (!topicmgr.createSubscriber())
-        {
-            return false;
-        }
 
         m_listener = new SubListener(inportlistener, m_corbamode);
 
         
-        m_reader = topicmgr.createReader(m_topic, m_listener.in());
+        m_reader = topicmgr.createReader(m_topic, m_listener.in(), m_prop);
     
         if (!OpenSpliceManager::checkHandle(m_reader.in(), "createReader"))
         {
@@ -446,6 +447,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode 
      * @return OpenSpliceInPort_implオブジェクト
@@ -457,16 +459,21 @@ namespace RTC
      * @param datatype
      * @param idlpath
      * @param topic
+     * @param prop 
      * @param endian
      * @param corbamode
      * @return
      *
      * @endif
      */
-    OpenSpliceInPortBase* createOpenSpliceInPort(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, bool endian, bool corbamode)
+    OpenSpliceInPortBase* createOpenSpliceInPort(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian, bool corbamode)
     {
         OpenSpliceInPort_impl* subscriber = new OpenSpliceInPort_impl();
-        subscriber->init(inportlistener, datatype, idlpath, topic, endian, corbamode);
+        if (!subscriber->init(inportlistener, datatype, idlpath, topic, prop, endian, corbamode))
+        {
+          delete subscriber;
+          return nullptr;
+        }
 
         return subscriber;
     }

@@ -58,9 +58,17 @@ namespace RTC
     m_downloadAllowed = coil::toBool(prop[ALLOW_URL], "yes", "no", false);
     m_initFuncSuffix  = prop[INITFUNC_SFX];
     m_initFuncPrefix  = prop[INITFUNC_PFX];
-    coil::vstring langs(coil::split(prop["manager.supported_languages"], ","));
+
+    if (coil::toBool(prop["manager.is_master"], "YES", "NO", false))
+    {
+      m_supported_languages = coil::split(prop["manager.supported_languages"], ",");
+    }
+    else
+    {
+      m_supported_languages.push_back("C++");
+    }
     
-    for (auto& lang : langs)
+    for (auto& lang : m_supported_languages)
     {
         m_loadfailmods[lang] = coil::vstring();
     }
@@ -119,7 +127,10 @@ namespace RTC
       }
     else
       {
-        file_path = findFile(file_name, m_loadPath);
+        coil::vstring paths(coil::split(Manager::instance().getConfig()["manager.modules.C++.load_paths"], ","));
+        paths.insert(paths.end(), m_loadPath.begin(), m_loadPath.end());
+
+        file_path = findFile(file_name, paths);
       }
 
     // Now file_name is valid full path to moduleW
@@ -321,11 +332,11 @@ namespace RTC
 
     // getting loadable module file path list.
     coil::Properties& gprop(Manager::instance().getConfig());
-    coil::vstring langs(coil::split(gprop["manager.supported_languages"], ","));
+
     RTC_DEBUG(("langs: %s", gprop["manager.supported_languages"].c_str()));
 
     // for each languages
-    for (auto & lang : langs)
+    for (auto & lang : m_supported_languages)
       {
         // 1. getting loadable files list
         coil::vstring modules(0);

@@ -157,7 +157,7 @@ namespace coil
   int SharedMemory::open(std::string shm_address, unsigned long long memory_size)
   {
     m_shm_address = std::move(shm_address);
-	m_memory_size = memory_size;
+    m_memory_size = memory_size;
 
 
     m_fd = shm_open(m_shm_address.c_str(), O_RDWR|O_CREAT, 0);
@@ -199,14 +199,14 @@ namespace coil
    */
   int SharedMemory::write(const char *data, const unsigned long long pos, const unsigned long long size)
   {
-	  if (!created())
-	  {
-		  return -1;
-	  }
+    if (!created())
+    {
+      return -1;
+    }
 
-	  memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
+    memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
     
-	  return 0;
+    return 0;
   }
 
   /*!
@@ -232,14 +232,14 @@ namespace coil
    */
   int SharedMemory::read(char* data, const unsigned long long pos, const unsigned long long size)
   {
-	  if (!created())
-	  {
-		  return -1;
-	  }
+    if (!created())
+    {
+      return -1;
+    }
 
-	  memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
+    memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
 
-	  return 0;
+    return 0;
   }
 
   /*!
@@ -266,11 +266,11 @@ namespace coil
     
     if (created())
     {
-	::close(m_fd);
+        ::close(m_fd);
     }
     else
     {
-	return -1;
+        return -1;
     }
     return 0;
 
@@ -296,7 +296,7 @@ namespace coil
    */
   unsigned long long SharedMemory::get_size()
   {
-	return m_memory_size;
+    return m_memory_size;
   }
   /*!
    * @if jp
@@ -319,7 +319,7 @@ namespace coil
    */
   std::string SharedMemory::get_addresss()
   {
-	return m_shm_address;
+    return m_shm_address;
   }
   /*!
    * @if jp
@@ -342,7 +342,7 @@ namespace coil
    */
   char *SharedMemory::get_data()
   {
-	return m_shm;
+    return m_shm;
   }
 
 
@@ -368,8 +368,8 @@ namespace coil
    */
   int SharedMemory::unlink()
   {
-	shm_unlink(m_shm_address.c_str());
-	return 0;
+     shm_unlink(m_shm_address.c_str());
+     return 0;
   }
 
 
@@ -394,7 +394,7 @@ namespace coil
   */
   bool SharedMemory::created()
   {
-	return m_fd >= 0;
+    return m_fd >= 0;
   }
 
 

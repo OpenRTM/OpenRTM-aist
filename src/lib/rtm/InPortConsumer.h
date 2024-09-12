@@ -143,7 +143,7 @@ namespace RTC
      *
      * @endif
      */
-	virtual DataPortStatus put(ByteData& data) = 0;
+    virtual DataPortStatus put(ByteData& data) = 0;
 
     /*!
      * @if jp

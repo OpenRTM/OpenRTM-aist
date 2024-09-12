@@ -4,7 +4,6 @@ if(OpenRTM_aist_BINARY_DIR)
   set(srcs src/SeqOut.cpp include/SeqOut/SeqOut.h)
   examples_build(SeqOut SRCS "${srcs}" MAIN src/SeqOutComp.cpp
 		EXTERNAL_INCLUDE PRIVATE include/SeqOut)
-  install(FILES rtc.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
   install(FILES component.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
 else(OpenRTM_aist_BINARY_DIR)
 

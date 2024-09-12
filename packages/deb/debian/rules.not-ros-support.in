@@ -1,0 +1,183 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+INSTALL_PREFIX = @CMAKE_INSTALL_PREFIX@
+RTM_LIB_DIR=@INSTALL_RTM_LIB_DIR@
+RTM_EXT_DIR=@INSTALL_RTM_EXT_DIR@
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+# Multiarch support
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# short version number
+SHORT_VER := $(shell dpkg-parsechangelog | sed -n 's/^Version: //p' | cut -b 1-3)
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+TARGET = $(CURDIR)/debian/openrtm2/usr
+TARGET_dev = $(CURDIR)/debian/openrtm2-dev/usr
+TARGET_idl = $(CURDIR)/debian/openrtm2-idl/usr
+TARGET_example = $(CURDIR)/debian/openrtm2-example/usr
+TARGET_doc = $(CURDIR)/debian/openrtm2-doc/usr
+TARGET_naming = $(CURDIR)/debian/openrtm2-naming/usr
+
+#Architecture 
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp:
+
+	# Add here commands to compile the arch part of the package.
+	#$(MAKE) 
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp:
+
+	# Add here commands to compile the indep part of the package.
+	#$(MAKE) doc
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
+
+	# Add here commands to clean up after the build process.
+	# -$(MAKE) distclean
+	#rm -f config.sub config.guess
+
+	dh_clean 
+
+install: install-indep install-arch
+install-indep:
+	dh_testdir
+	dh_testroot
+	dh_clean -k -i 
+	dh_installdirs -i
+
+	# Add here commands to install the indep part of the package into
+	# debian/<package>-doc.
+	#INSTALLDOC#
+	# for openrtm2-doc package
+	(mkdir -p $(TARGET_doc)/share/openrtm-$(SHORT_VER))
+	(cp -r $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/doc $(TARGET_doc)/share/openrtm-$(SHORT_VER))	
+	dh_install -i
+
+install-arch:
+	dh_testdir
+	dh_testroot
+	dh_clean -k -a
+	dh_installdirs -a
+
+	# Add here commands to install the arch part of the package into 
+	# debian/tmp.
+
+	# for openrtm2 package
+	(mkdir -p $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtcd2 $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtcprof2 $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-config $(TARGET)/bin)
+	(cp -r $(INSTALL_PREFIX)/etc $(TARGET))
+	(mkdir -p $(TARGET)/${RTM_EXT_DIR})
+	(cp -R $(INSTALL_PREFIX)/${RTM_LIB_DIR}/*.so* $(TARGET)/${RTM_LIB_DIR})
+	(cp $(INSTALL_PREFIX)/${RTM_LIB_DIR}/*.a $(TARGET)/${RTM_LIB_DIR})
+	(rm $(TARGET)/${RTM_LIB_DIR}/libhrtm*)
+	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR} $(TARGET)/${RTM_LIB_DIR})
+	(rm -r $(TARGET)/${RTM_EXT_DIR}/cmake)
+	(rm -r $(TARGET)/${RTM_EXT_DIR}/py_helper)
+	(cp -r $(INSTALL_PREFIX)/${RTM_LIB_DIR}/pkgconfig $(TARGET)/${RTM_LIB_DIR})
+
+	# for openrtm2-naming package
+	(mkdir -p $(TARGET_naming)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-naming $(TARGET_naming)/bin)
+
+	# for openrtm2-dev package
+	(mkdir -p $(TARGET_dev)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-skelwrapper $(TARGET_dev)/bin)
+	(cp -r $(INSTALL_PREFIX)/include $(TARGET_dev))
+	(rm -r $(TARGET_dev)/include/openrtm-$(SHORT_VER)/hrtm)
+	(mkdir -p $(TARGET_dev)/${RTM_EXT_DIR})
+	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/cmake $(TARGET_dev)/${RTM_EXT_DIR})
+	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/py_helper $(TARGET_dev)/${RTM_EXT_DIR})
+
+	# for openrtm2-idl package
+	(mkdir -p $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
+	(mv $(TARGET_dev)/include/openrtm-$(SHORT_VER)/rtm/idl/*.idl $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
+	(mkdir -p $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
+	(cp $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl/* $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
+	(mkdir -p $(CURDIR)/debian/openrtm2-idl/etc/profile.d)
+	(echo "export RTM_IDL_DIR2=/usr/share/openrtm-$(SHORT_VER)/idl" > $(CURDIR)/debian/openrtm2-idl/etc/profile.d/openrtm2-idl.sh)
+
+	# for openrtm2-example package
+	(mkdir -p $(TARGET_example)/share/openrtm-$(SHORT_VER))
+	(cp -R $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/components $(TARGET_example)/share/openrtm-$(SHORT_VER))
+
+	dh_install -a
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
+binary-common:
+	dh_testdir
+	dh_testroot
+#	dh_installchangelogs ChangeLog
+#	dh_installdocs
+	dh_installexamples
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate	
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress 
+	dh_fixperms
+#	dh_perl
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+# Build architecture independant packages using the common target.
+binary-indep: build-indep install-indep
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: build-arch install-arch
+	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary install install-indep install-arch 
+

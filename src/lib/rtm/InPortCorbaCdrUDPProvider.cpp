@@ -38,7 +38,6 @@ namespace RTC
 #ifdef ORB_IS_OMNIORB
     PortableServer::ObjectId_var oid = ::RTC::Manager::instance().theShortCutPOA()->activate_object(this);
 #endif
-	
     m_objref = this->_this();
     
     // set InPort's reference
@@ -183,43 +182,43 @@ namespace RTC
   * @endif
   */
   void
-	  InPortCorbaCdrUDPProvider::convertReturn(BufferStatus status,
-		  ByteData& data)
+  InPortCorbaCdrUDPProvider::convertReturn(BufferStatus status,
+                                           ByteData& data)
   {
-	  switch (status)
-	  {
-	  case BufferStatus::OK:
-		  onBufferWrite(data);
-		  break;
+    switch (status)
+    {
+      case BufferStatus::OK:
+        onBufferWrite(data);
+         break;
 
-	  case BufferStatus::BUFFER_ERROR:
-		  onReceiverError(data);
-		  break;
+      case BufferStatus::BUFFER_ERROR:
+        onReceiverError(data);
+        break;
 
-	  case BufferStatus::FULL:
-		  onBufferFull(data);
-		  onReceiverFull(data);
-		  break;
+      case BufferStatus::FULL:
+        onBufferFull(data);
+        onReceiverFull(data);
+        break;
 
-	  case BufferStatus::EMPTY:
-		  // never come here
-		  break;
+      case BufferStatus::EMPTY:
+        // never come here
+        break;
 
-	  case BufferStatus::PRECONDITION_NOT_MET:
-		  onReceiverError(data);
-		  break;
+      case BufferStatus::PRECONDITION_NOT_MET:
+        onReceiverError(data);
+        break;
 
-	  case BufferStatus::TIMEOUT:
-		  onBufferWriteTimeout(data);
-		  onReceiverTimeout(data);
-		  break;
+      case BufferStatus::TIMEOUT:
+        onBufferWriteTimeout(data);
+        onReceiverTimeout(data);
+        break;
     case BufferStatus::NOT_SUPPORTED: /* FALLTHROUGH */
     default:
       return;
 
-	  }
+    }
 
-	  onReceiverError(data);
+    onReceiverError(data);
   }
 
 

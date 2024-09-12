@@ -127,7 +127,7 @@ namespace CORBA_RTCUtil
         eclist = rtc->get_participating_contexts();
         if (pec_id >= static_cast<CORBA::Long>(eclist->length()))
           { return RTC::ExecutionContext::_nil(); }
-		if (CORBA::is_nil(eclist[static_cast<CORBA::ULong>(pec_id)]))
+        if (CORBA::is_nil(eclist[static_cast<CORBA::ULong>(pec_id)]))
           { return RTC::ExecutionContext::_nil(); }
 #ifdef ORB_IS_TAO
         return RTC::ExecutionContext::_duplicate(eclist[(CORBA::ULong)pec_id].in());
@@ -1344,7 +1344,7 @@ namespace CORBA_RTCUtil
     SDOPackage::Configuration_var conf = rtc->get_configuration();
     SDOPackage::ConfigurationSet_var confset = conf->get_active_configuration_set();
 #ifdef ORB_IS_TAO
-	return std::string(confset->id);
+    return std::string(confset->id);
 #else
     return static_cast<char*>(confset->id);
 #endif

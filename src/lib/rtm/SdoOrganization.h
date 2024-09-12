@@ -833,7 +833,7 @@ namespace SDOPackage
       {
         CORBA::String_var id(sdo->get_sdo_id());
 
-	return m_id == (const char*)id;
+        return m_id == (const char*)id;
       }
       std::string m_id;
     };  // struct sdo_id

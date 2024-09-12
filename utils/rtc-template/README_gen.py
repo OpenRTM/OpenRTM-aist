@@ -191,7 +191,7 @@ class README_gen(gen_base.gen_base):
 	def __init__(self, data):
 		self.data = data.copy()
 		self.data['fname'] = "README." + self.data['basicInfo']['name']
-		self.data['version'] = os.popen("rtm-config --version", "r").read()
+		self.data['version'] = os.popen("rtm2-config --version", "r").read()
 		self.data['date'] = time.asctime()
 		
 		self.tags = {}

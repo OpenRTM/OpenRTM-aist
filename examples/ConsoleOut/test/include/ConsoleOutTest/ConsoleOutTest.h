@@ -1,13 +1,13 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
+// <rtc-template block="description">
 /*!
  * @file  ConsoleOutTest.h
- * @brief Console output component
- * @date  $Date$
+ * @brief Console output component (test code)
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- * $Id$
  */
+// </rtc-template>
 
 #ifndef CONSOLEOUT_TEST__H
 #define CONSOLEOUT_TEST_H
@@ -18,7 +18,6 @@
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
-#include "BasicDataTypeSVC_impl.h"
 
 // </rtc-template>
 
@@ -116,7 +115,7 @@ class ConsoleOutTest
    * 
    * 
    */
-   RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
 
   /***
    *
@@ -128,7 +127,7 @@ class ConsoleOutTest
    * 
    * 
    */
-   RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
 
   /***
    *

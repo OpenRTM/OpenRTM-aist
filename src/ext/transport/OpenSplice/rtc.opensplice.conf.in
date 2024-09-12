@@ -1,0 +1,12 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_OPENSPLICE_DIR@
+manager.preload.modules: OpenSpliceTransport@CMAKE_SHARED_LIBRARY_SUFFIX@
+
+manager.components.preactivation: ConsoleOut0, ConsoleIn0
+manager.components.preconnect: ConsoleOut0.in?interface_type=opensplice, ConsoleIn0.out?interface_type=opensplice
+
+opensplice.uri: file://@CMAKE_INSTALL_PREFIX@/@INSTALL_SAMPLEQOSPROFILE_DIR@/OpenSpliceQoSExample.xml
+opensplice.profile: testProfile

@@ -25,6 +25,7 @@ set(RTC_CORBA_CXXMAPPING11 ON)
 set(RTM_OMNIORB_40 OFF)
 set(RTM_OMNIORB_41 OFF)
 set(RTM_OMNIORB_42 OFF)
+set(RTM_OMNIORB_43 OFF)
 # RTM_PACKAGE options
 set(RTM_PACKAGE OFF)
 set(RTM_PACKAGE_BUGREPORT OFF)
@@ -72,8 +73,10 @@ elseif(CORBA MATCHES "omniORB")
 		set(RTM_OMNIORB_40 ON)
 	elseif(OMNI_VERSION MATCHES "41")
 		set(RTM_OMNIORB_41 ON)
-	else()
+	elseif(OMNI_VERSION MATCHES "42")
 		set(RTM_OMNIORB_42 ON)
+	else()
+		set(RTM_OMNIORB_43 ON)
 	endif()
 	set (ORB_IS_OMNIORB ON)
 elseif(CORBA MATCHES "TAO")
@@ -158,6 +161,7 @@ set(rtm_headers
 	ConfigurationListener.h
 	OutPortPullConnector.h
 	LogstreamFile.h
+	LogstreamBase.h
 	RTCUtil.h
 	CdrRingBuffer.h
 	InPortCorbaCdrProvider.h

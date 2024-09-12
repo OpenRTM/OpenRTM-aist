@@ -754,6 +754,15 @@ namespace RTC
 
     /*!
      * @if jp
+     * @brief サポートするRTCの実装言語
+     * @else
+     * @brief 
+     * @endif
+     */
+    coil::vstring m_supported_languages;
+
+    /*!
+     * @if jp
      * @brief モジュールアンロードファンクタ
      * @else
      * @brief Module unloading functor
@@ -771,7 +780,7 @@ namespace RTC
     };
 
     vProperties m_modprofs;
-	std::map<std::string, coil::vstring> m_loadfailmods;
+    std::map<std::string, coil::vstring> m_loadfailmods;
 
   };   // class ModuleManager
 } // namespace RTC
