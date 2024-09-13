@@ -19,6 +19,8 @@ export DH_OPTIONS
 INSTALL_PREFIX = @CMAKE_INSTALL_PREFIX@
 RTM_LIB_DIR=@INSTALL_RTM_LIB_DIR@
 RTM_EXT_DIR=@INSTALL_RTM_EXT_DIR@
+ROS2TRANSPORT_CMAKE_DIR=@INSTALL_ROS2TRANSPORT_CMAKE_DIR@
+ROSTRANSPORT_CMAKE_DIR=@INSTALL_ROSTRANSPORT_CMAKE_DIR@
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -39,13 +41,14 @@ else
 	CFLAGS += -O2
 endif
 
-TARGET = $(CURDIR)/debian/openrtm-aist/usr
-TARGET_ros = $(CURDIR)/debian/openrtm-aist-ros/usr
-TARGET_ros2 = $(CURDIR)/debian/openrtm-aist-ros2/usr
-TARGET_dev = $(CURDIR)/debian/openrtm-aist-dev/usr
-TARGET_idl = $(CURDIR)/debian/openrtm-aist-idl/usr
-TARGET_example = $(CURDIR)/debian/openrtm-aist-example/usr
-TARGET_doc = $(CURDIR)/debian/openrtm-aist-doc/usr
+TARGET = $(CURDIR)/debian/openrtm2/usr
+TARGET_ros = $(CURDIR)/debian/openrtm2-ros-tp/usr
+TARGET_ros2 = $(CURDIR)/debian/openrtm2-ros2-tp/usr
+TARGET_dev = $(CURDIR)/debian/openrtm2-dev/usr
+TARGET_idl = $(CURDIR)/debian/openrtm2-idl/usr
+TARGET_example = $(CURDIR)/debian/openrtm2-example/usr
+TARGET_doc = $(CURDIR)/debian/openrtm2-doc/usr
+TARGET_naming = $(CURDIR)/debian/openrtm2-naming/usr
 
 #Architecture 
 build: build-arch build-indep
@@ -85,7 +88,7 @@ install-indep:
 	# Add here commands to install the indep part of the package into
 	# debian/<package>-doc.
 	#INSTALLDOC#
-	# for openrtm-aist-doc package
+	# for openrtm2-doc package
 	(mkdir -p $(TARGET_doc)/share/openrtm-$(SHORT_VER))
 	(cp -r $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/doc $(TARGET_doc)/share/openrtm-$(SHORT_VER))	
 	dh_install -i
@@ -93,20 +96,18 @@ install-indep:
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s 
-	dh_installdirs -s
+	dh_clean -k -a
+	dh_installdirs -a
 
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
 
-	# for openrtm-aist package
+	# for openrtm2 package
 	(mkdir -p $(TARGET)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtcd $(TARGET)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtcprof $(TARGET)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtm-config $(TARGET)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtm-naming $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtcd2 $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtcprof2 $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-config $(TARGET)/bin)
 	(cp -r $(INSTALL_PREFIX)/etc $(TARGET))
-	#(mkdir -p $(TARGET)/lib/$(DEB_HOST_MULTIARCH))
 	(mkdir -p $(TARGET)/${RTM_EXT_DIR})
 	(cp -R $(INSTALL_PREFIX)/${RTM_LIB_DIR}/*.so* $(TARGET)/${RTM_LIB_DIR})
 	(cp $(INSTALL_PREFIX)/${RTM_LIB_DIR}/*.a $(TARGET)/${RTM_LIB_DIR})
@@ -117,39 +118,45 @@ install-arch:
 	(rm -r $(TARGET)/${RTM_EXT_DIR}/transport)
 	(cp -r $(INSTALL_PREFIX)/${RTM_LIB_DIR}/pkgconfig $(TARGET)/${RTM_LIB_DIR})
 
-	# for openrtm-aist-ros package
+	# for openrtm2-naming package
+	(mkdir -p $(TARGET_naming)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-naming $(TARGET_naming)/bin)
+
+	# for openrtm2-ros package
 	(mkdir -p $(TARGET_ros)/${RTM_EXT_DIR}/transport)
 	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/ROSTransport.so $(TARGET_ros)/${RTM_EXT_DIR}/transport)
+	(mkdir -p $(TARGET_ros)/${ROSTRANSPORT_CMAKE_DIR})
+	(cp -r $(INSTALL_PREFIX)/${ROSTRANSPORT_CMAKE_DIR}/* $(TARGET_ros)/${ROSTRANSPORT_CMAKE_DIR})
 
-	# for openrtm-aist-ros2 package
+	# for openrtm2-ros2 package
 	(mkdir -p $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
 	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/ROS2*.so $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
 	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/Fast*.so $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
+	(mkdir -p $(TARGET_ros2)/${ROS2TRANSPORT_CMAKE_DIR})
+	(cp -r $(INSTALL_PREFIX)/${ROS2TRANSPORT_CMAKE_DIR}/* $(TARGET_ros2)/${ROS2TRANSPORT_CMAKE_DIR})
 
-	# for openrtm-dev package
+	# for openrtm2-dev package
 	(mkdir -p $(TARGET_dev)/bin)
-	(cp $(INSTALL_PREFIX)/bin/rtm-skelwrapper $(TARGET_dev)/bin)
+	(cp $(INSTALL_PREFIX)/bin/rtm2-skelwrapper $(TARGET_dev)/bin)
 	(cp -r $(INSTALL_PREFIX)/include $(TARGET_dev))
 	(rm -r $(TARGET_dev)/include/openrtm-$(SHORT_VER)/hrtm)
 	(mkdir -p $(TARGET_dev)/${RTM_EXT_DIR})
 	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/cmake $(TARGET_dev)/${RTM_EXT_DIR})
 	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/py_helper $(TARGET_dev)/${RTM_EXT_DIR})
-	(cp -r $(INSTALL_PREFIX)/${RTM_LIB_DIR}/pkgconfig $(TARGET_dev)/${RTM_LIB_DIR})
-	(rm $(TARGET_dev)/${RTM_LIB_DIR}/pkgconfig/openrtm-aist.pc)
 
-	# for openrtm-aist-idl package
+	# for openrtm2-idl package
 	(mkdir -p $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
-	(mv $(CURDIR)/debian/openrtm-aist-dev/usr/include/openrtm-$(SHORT_VER)/rtm/idl/*.idl $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
+	(mv $(TARGET_dev)/include/openrtm-$(SHORT_VER)/rtm/idl/*.idl $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl)
 	(mkdir -p $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
 	(cp $(TARGET_idl)/include/openrtm-$(SHORT_VER)/rtm/idl/* $(TARGET_idl)/share/openrtm-$(SHORT_VER)/idl)
-	(mkdir -p $(CURDIR)/debian/openrtm-aist-idl/etc/profile.d)
-	(echo "export RTM_IDL_DIR=/usr/share/openrtm-$(SHORT_VER)/idl" > $(CURDIR)/debian/openrtm-aist-idl/etc/profile.d/openrtm-aist-idl.sh)
+	(mkdir -p $(CURDIR)/debian/openrtm2-idl/etc/profile.d)
+	(echo "export RTM_IDL_DIR2=/usr/share/openrtm-$(SHORT_VER)/idl" > $(CURDIR)/debian/openrtm2-idl/etc/profile.d/openrtm2-idl.sh)
 
-	# for openrtm-aist-example package
+	# for openrtm2-example package
 	(mkdir -p $(TARGET_example)/share/openrtm-$(SHORT_VER))
 	(cp -R $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/components $(TARGET_example)/share/openrtm-$(SHORT_VER))
 
-	dh_install -s
+	dh_install -a
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
 # in another 'make' thread.
@@ -187,7 +194,7 @@ binary-indep: build-indep install-indep
 
 # Build architecture dependant packages using the common target.
 binary-arch: build-arch install-arch
-	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install install-indep install-arch 

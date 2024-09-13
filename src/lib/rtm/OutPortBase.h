@@ -771,24 +771,24 @@ namespace RTC
     ReturnCode_t
     connect(ConnectorProfile& connector_profile) override;
 
-	/*!
-	* @if jp
-	* @brief リスナホルダを取得する
-	*
-	* InPortBaseが保持するリスナホルダを返す。
-	*
-	* @return ConnectorListeners
-	*
-	* @else
-	* @brief Getting listeners holder
-	*
-	* This operation returns listeners holder.
-	*
-	* @return ConnectorListeners
-	*
-	* @endif
-	*/
-	virtual ConnectorListenersBase* getListeners();
+    /*!
+     * @if jp
+     * @brief リスナホルダを取得する
+     *
+     * InPortBaseが保持するリスナホルダを返す。
+     *
+     * @return ConnectorListeners
+     *
+     * @else
+     * @brief Getting listeners holder
+     *
+     * This operation returns listeners holder.
+     *
+     * @return ConnectorListeners
+     *
+     * @endif
+     */
+    virtual ConnectorListenersBase* getListeners();
 
 
   protected:

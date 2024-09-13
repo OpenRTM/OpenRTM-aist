@@ -201,15 +201,7 @@ namespace RTC
      *
      * @endif
      */
-    inline void addInfo(const std::string &id, OpenSpliceMessageInfoBase* info)
-    {
-        auto data = m_data.find(id);
-        if (data != m_data.end())
-        {
-            data->second.deleteObject();
-        }
-        m_data[id] = OpenSpliceMessageInfoEntry(info, [](OpenSpliceMessageInfoBase*& obj) { delete obj; });
-    }
+    void addInfo(const std::string &id, OpenSpliceMessageInfoBase* info);
     /*!
      * @if jp
      *
@@ -389,7 +381,7 @@ namespace RTC
   class __declspec(dllimport) GlobalOpenSpliceMessageInfoList
 #endif
 #else
-  class GlobalOpenSpliceMessageInfo
+  class GlobalOpenSpliceMessageInfoList
 #endif
       : public OpenSpliceMessageInfoList,
       public coil::Singleton<GlobalOpenSpliceMessageInfoList >

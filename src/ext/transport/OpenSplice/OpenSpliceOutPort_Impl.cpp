@@ -18,7 +18,7 @@
 
 
 
-#include "OpenSpliceOutPort_impl.h"
+#include "OpenSpliceOutPort_Impl.h"
 #include "OpenSpliceManager.h"
 #include <iostream>
 
@@ -147,6 +147,7 @@ namespace RTC
          * @param datatype データ型名
          * @param idlpath データ型を定義したIDLファイルのパス
          * @param topic トピック名
+         * @param prop 設定プロパティ
          * @param endian true：リトルエンディアン、false：ビッグエンディアン
          * @param corbamode true：送信データの先頭に4bitのヘッダーを付加する
          * @return true：初期化成功、false：問題発生
@@ -157,13 +158,14 @@ namespace RTC
          * @param datatype
          * @param idlpath
          * @param topic
+         * @param prop 
          * @param endian
          * @param corbamode
          * @return
          *
          * @endif
          */
-        bool init(std::string& datatype, std::string& idlpath, std::string& topic, bool endian = true, bool corbamode = true) override;
+        bool init(std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian = true, bool corbamode = true) override;
         /*!
          * @if jp
          * @brief データ送信
@@ -203,6 +205,7 @@ namespace RTC
         std::string m_idlPath;
         bool m_corbamode;
         DDS::DataWriterListener_var m_listener;
+        coil::Properties m_prop;
     };
 
 
@@ -270,6 +273,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode true：送信データの先頭に4bitのヘッダーを付加する
      * @return true：初期化成功、false：問題発生
@@ -280,42 +284,38 @@ namespace RTC
      * @param datatype
      * @param idlpath
      * @param topic
+     * @param prop 
      * @param endian
      * @param corbamode
      * @return
      *
      * @endif
      */
-    bool OpenSpliceOutPort_impl::init(std::string& datatype, std::string& idlpath, std::string& topic, bool endian, bool corbamode)
+    bool OpenSpliceOutPort_impl::init(std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian, bool corbamode)
     {
         m_topic = topic;
         m_dataType = datatype;
         m_endian = endian;
         m_idlPath = idlpath;
         m_corbamode = corbamode;
+        m_prop = prop;
 
         
         OpenSpliceManager& topicmgr = OpenSpliceManager::instance();
 
-        
         if (!topicmgr.registerType(m_dataType, m_idlPath))
         {
             return false;
         }
         
-        if (!topicmgr.createTopic(topic, m_dataType))
+        if (!topicmgr.createTopic(topic, m_dataType, m_prop))
         {
             return false;
         }
 
-        if (!topicmgr.createPublisher())
-        {
-            return false;
-        }
-
-       	m_listener = new PubListener();
-
-        DDS::DataWriter_var writer = topicmgr.createWriter(m_topic, m_listener.in());
+        m_listener = new PubListener();
+        
+        DDS::DataWriter_var writer = topicmgr.createWriter(m_topic, m_listener.in(), m_prop);
 
         if (!OpenSpliceManager::checkHandle(writer.in(), "createWriter"))
         {
@@ -480,6 +480,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode true：送信データの先頭に4bitのヘッダーを付加する
      * @return OpenSpliceOutPort_implオブジェクト
@@ -490,16 +491,21 @@ namespace RTC
      * @param datatype
      * @param idlpath
      * @param topic
+     * @param prop
      * @param endian
      * @param corbamode
      * @return
      *
      * @endif
      */
-    OpenSpliceOutPortBase* createOpenSpliceOutPort(std::string& datatype, std::string& idlpath, std::string& topic, bool endian, bool corbamode)
+    OpenSpliceOutPortBase* createOpenSpliceOutPort(std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian, bool corbamode)
     {
         OpenSpliceOutPort_impl* publisher = new OpenSpliceOutPort_impl();
-        publisher->init(datatype, idlpath, topic, endian, corbamode);
+        if (!publisher->init(datatype, idlpath, topic, prop, endian, corbamode))
+        {
+          delete publisher;
+          return nullptr;
+        }
 
         return publisher;
     }

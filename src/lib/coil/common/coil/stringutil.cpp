@@ -33,8 +33,8 @@
 #include <coil/OS.h>
 
 #ifdef __QNX__
-using std::toupper;
 using std::isalpha;
+using std::toupper;
 #endif
 
 namespace coil
@@ -46,11 +46,11 @@ namespace coil
    * @brief string to wstring conversion
    * @endif
    */
-  std::wstring string2wstring(const std::string& str)
+  std::wstring string2wstring(const std::string &str)
   {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-    int buff_size = MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, (wchar_t*)nullptr, 0);
-    wchar_t* ret = new wchar_t[buff_size];
+    int buff_size = MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, (wchar_t *)nullptr, 0);
+    wchar_t *ret = new wchar_t[buff_size];
     MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, ret, buff_size);
     std::wstring wstr(ret, ret + buff_size - 1);
     delete[] ret;
@@ -68,17 +68,17 @@ namespace coil
    * @brief wstring to string conversion
    * @endif
    */
-  std::string wstring2string(const std::wstring& wstr)
+  std::string wstring2string(const std::wstring &wstr)
   {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-      int buff_size = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, (char*)nullptr, 0, nullptr, nullptr);
-      CHAR* ret = new CHAR[buff_size];
-      WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, ret, buff_size, nullptr, nullptr);
-      std::string str(ret, ret + buff_size - 1);
-      delete[] ret;
+    int buff_size = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, (char *)nullptr, 0, nullptr, nullptr);
+    CHAR *ret = new CHAR[buff_size];
+    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, ret, buff_size, nullptr, nullptr);
+    std::string str(ret, ret + buff_size - 1);
+    delete[] ret;
 #else
-      std::string str(wstr.length(), ' ');
-      std::copy(wstr.begin(), wstr.end(), str.begin());
+    std::string str(wstr.length(), ' ');
+    std::copy(wstr.begin(), wstr.end(), str.begin());
 #endif
     return str;
   }
@@ -92,9 +92,8 @@ namespace coil
    */
   std::string toUpper(std::string str) noexcept
   {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char x){
-      return static_cast<char>(std::toupper(x));
-    });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char x)
+                   { return static_cast<char>(std::toupper(x)); });
     return str;
   }
 
@@ -107,9 +106,8 @@ namespace coil
    */
   std::string toLower(std::string str) noexcept
   {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char x){
-      return static_cast<char>(std::tolower(x));
-    });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char x)
+                   { return static_cast<char>(std::tolower(x)); });
     return str;
   }
 
@@ -120,30 +118,30 @@ namespace coil
    * @brief Read a line from input stream
    * @endif
    */
-  std::string getlinePortable(std::istream& istr)
+  std::string getlinePortable(std::istream &istr)
   {
     char c;
     std::stringstream s;
 
     while (istr.get(c))
+    {
+      if (c == '\n')
       {
-        if (c == '\n')
-          {
-            break;
-          }
-        else if (c == '\r')
-          {
-            if (istr.peek() == '\n')
-              {
-                istr.ignore();
-              }
-            break;
-          }
-        else
-          {
-            s << c;
-          }
+        break;
       }
+      else if (c == '\r')
+      {
+        if (istr.peek() == '\n')
+        {
+          istr.ignore();
+        }
+        break;
+      }
+      else
+      {
+        s << c;
+      }
+    }
     return s.str();
   }
 
@@ -154,16 +152,22 @@ namespace coil
    * @brief Check whether the character is escaped or not
    * @endif
    */
-  bool isEscaped(const std::string& str, std::string::size_type pos)
+  bool isEscaped(const std::string &str, std::string::size_type pos)
   {
-    if (pos == 0) { return false; }
+    if (pos == 0)
+    {
+      return false;
+    }
     --pos;
     size_t i = 0;
-    for ( ; str[pos] == '\\'; ++i)
+    for (; str[pos] == '\\'; ++i)
+    {
+      if (pos == 0)
       {
-        if (pos == 0) { break; }
-        --pos;
+        break;
       }
+      --pos;
+    }
     // If the number of \ is odd, delimiter is escaped.
     return (i % 2) == 1;
   }
@@ -175,11 +179,12 @@ namespace coil
    * @brief Escape string
    * @endif
    */
-  std::string escape(const std::string& str)
+  std::string escape(const std::string &str)
   {
     std::string ret;
-    ret.reserve(str.length()*2);
-    std::for_each(str.begin(), str.end(), [&ret](char c) {
+    ret.reserve(str.length() * 2);
+    std::for_each(str.begin(), str.end(), [&ret](char c)
+                  {
       switch (c)
       {
         case '\t': ret += "\\t"; break;
@@ -188,10 +193,9 @@ namespace coil
         case '\r': ret += "\\r"; break;
         case '\\': ret += "\\\\"; break;
         default: ret += c; break;
-      }
-    });
+      } });
     return ret;
-   }
+  }
 
   /*!
    * @if jp
@@ -205,30 +209,44 @@ namespace coil
     std::string::size_type wp{0};
     bool is_escaped{false};
 
-    for(std::string::size_type rp{0}; rp < str.length(); ++rp)
+    for (std::string::size_type rp{0}; rp < str.length(); ++rp)
+    {
+      if (!is_escaped)
       {
-        if (!is_escaped)
-          {
-            if (str[rp] != '\\')
-              str[wp++] = str[rp];
-            else
-              is_escaped = true;
-          }
+        if (str[rp] != '\\')
+          str[wp++] = str[rp];
         else
-          {
-            is_escaped = false;
-            switch (str[rp])
-            {
-              case 't':  str[wp++] = '\t'; break;
-              case 'n':  str[wp++] = '\n'; break;
-              case 'f':  str[wp++] = '\f'; break;
-              case 'r':  str[wp++] = '\r'; break;
-              case '\"': str[wp++] = '\"'; break;
-              case '\'': str[wp++] = '\''; break;
-              default: str[wp++] = str[rp]; break;
-            }
-          }
+          is_escaped = true;
       }
+      else
+      {
+        is_escaped = false;
+        switch (str[rp])
+        {
+        case 't':
+          str[wp++] = '\t';
+          break;
+        case 'n':
+          str[wp++] = '\n';
+          break;
+        case 'f':
+          str[wp++] = '\f';
+          break;
+        case 'r':
+          str[wp++] = '\r';
+          break;
+        case '\"':
+          str[wp++] = '\"';
+          break;
+        case '\'':
+          str[wp++] = '\'';
+          break;
+        default:
+          str[wp++] = str[rp];
+          break;
+        }
+      }
+    }
     str.resize(wp);
     return str;
   }
@@ -243,7 +261,8 @@ namespace coil
   std::string eraseBlank(std::string str) noexcept
   {
     str.erase(std::remove_if(str.begin(), str.end(),
-                [](unsigned char x){ return std::isblank(x); }),
+                             [](unsigned char x)
+                             { return std::isblank(x); }),
               str.end());
     return str;
   }
@@ -303,16 +322,19 @@ namespace coil
    * @brief Replace string
    * @endif
    */
-  std::string replaceString(std::string str, const std::string& from,
-                            const std::string& to)
+  std::string replaceString(std::string str, const std::string &from,
+                            const std::string &to)
   {
-    if (from.empty()) { return str; }
+    if (from.empty())
+    {
+      return str;
+    }
     for (std::string::size_type pos{str.find(from, 0)};
          pos != std::string::npos;
          pos = str.find(from, pos + to.length()))
-      {
-        str.replace(pos, from.length(), to);
-      }
+    {
+      str.replace(pos, from.length(), to);
+    }
     return str;
   }
 
@@ -323,26 +345,38 @@ namespace coil
    * @brief Split string by delimiter
    * @endif
    */
-  vstring split(const std::string& input,
-                const std::string& delimiter,
+  vstring split(const std::string &input,
+                const std::string &delimiter,
                 bool ignore_empty)
   {
-    if (input.empty()) { return {}; }
-    if (delimiter.empty()) { return {eraseBothEndsBlank(input)}; }
+    if (input.empty())
+    {
+      return {};
+    }
+    if (delimiter.empty())
+    {
+      return {eraseBothEndsBlank(input)};
+    }
 
     vstring results;
     std::string::size_type pos{0};
     for (auto found_pos = input.find(delimiter, pos);
          found_pos != std::string::npos;
          found_pos = input.find(delimiter, pos))
+    {
+      std::string str{eraseBothEndsBlank(input.substr(pos, found_pos - pos))};
+      if (!(ignore_empty && str.empty()))
       {
-        std::string str{eraseBothEndsBlank(input.substr(pos, found_pos - pos))};
-        if (!(ignore_empty && str.empty())) { results.emplace_back(std::move(str)); }
-        pos = found_pos + delimiter.length();
+        results.emplace_back(std::move(str));
       }
+      pos = found_pos + delimiter.length();
+    }
 
     std::string str{eraseBothEndsBlank(input.substr(pos))};
-    if (!(ignore_empty && str.empty())) { results.emplace_back(std::move(str)); }
+    if (!(ignore_empty && str.empty()))
+    {
+      results.emplace_back(std::move(str));
+    }
     return results;
   }
 
@@ -373,14 +407,15 @@ namespace coil
    * @brief Include if a string is included in string list
    * @endif
    */
-  bool includes(const vstring& list, std::string value, bool ignore_case)
+  bool includes(const vstring &list, std::string value, bool ignore_case)
   {
-    std::string const& v{ignore_case ? toLower(std::move(value)) : value};
-    for (auto const& str : list)
-      {
-        std::string const& x{ignore_case ? toLower(str) : str};
-        if (v == x) return true;
-      }
+    std::string const &v{ignore_case ? toLower(std::move(value)) : value};
+    for (auto const &str : list)
+    {
+      std::string const &x{ignore_case ? toLower(str) : str};
+      if (v == x)
+        return true;
+    }
     return false;
   }
 
@@ -391,7 +426,7 @@ namespace coil
    * @brief Include if a string is included in string list
    * @endif
    */
-  bool includes(const std::string& list, std::string value, bool ignore_case)
+  bool includes(const std::string &list, std::string value, bool ignore_case)
   {
     return includes(split(list, ","), std::move(value), ignore_case);
   }
@@ -403,14 +438,15 @@ namespace coil
    * @brief Investigate whether the given string is absolute path or not
    * @endif
    */
-  bool isAbsolutePath(const std::string& str)
+  bool isAbsolutePath(const std::string &str)
   {
     static std::regex const path{
-      "(?:"
-        "^/" // UNIX absolute path
+        "(?:"
+        "^/"                  // UNIX absolute path
         R"(|^[a-zA-Z]{1}:\\)" // Windows absolute path
-        R"(|^\\\\)" // Windows network file path
-      ")"} ;
+        R"(|^[a-zA-Z]{1}:/)"  // Windows absolute path
+        R"(|^\\\\)"           // Windows network file path
+        ")"};
     return std::regex_search(str, path);
   }
 
@@ -421,7 +457,7 @@ namespace coil
    * @brief Investigate whether the given string is URL or not
    * @endif
    */
-  bool isURL(const std::string& str)
+  bool isURL(const std::string &str)
   {
     static std::regex const url{R"(\w://)"};
     return std::regex_search(str, url);
@@ -444,124 +480,139 @@ namespace coil
     std::string anArg;
 
     for (size_t i(0); i < args.size(); ++i)
+    {
+      if (args[i] == ' ' || args[i] == '\t')
       {
-        if (args[i] == ' ' || args[i] == '\t')
-          {
-            // skip escaped spaces and/or spces in quotation
-            if (inEscape || inDquote || inSquote)
-              {
-                anArg.push_back(args[i]);
-                continue;
-              }
-            // skip spaces between args
-            if (!inArg) { continue; }
-            // end of arg
-            if (inArg)
-              {
-                ret.push_back(anArg);
-                anArg.clear();
-                inArg = false; // exit arg
-                continue;
-              }
-          }
-        inArg = true;
+        // skip escaped spaces and/or spces in quotation
+        if (inEscape || inDquote || inSquote)
+        {
+          anArg.push_back(args[i]);
+          continue;
+        }
+        // skip spaces between args
+        if (!inArg)
+        {
+          continue;
+        }
+        // end of arg
+        if (inArg)
+        {
+          ret.push_back(anArg);
+          anArg.clear();
+          inArg = false; // exit arg
+          continue;
+        }
+      }
+      inArg = true;
 
-        if (args[i] == '\\')
-          {
-            if (inEscape) { anArg.push_back(args[i]); }
-            inEscape = !inEscape;
-            continue;
-          }
-
-        if (args[i] == '\"')
-          { // escaped (") is stored in arg in any cases
-            if (inEscape)
-              {
-                inEscape = false;
-                if (inSquote) { anArg.push_back('\\'); }
-                anArg.push_back(args[i]);
-                continue;
-              }
-            // (") in S-quote is stored in arg
-            if (inSquote)
-              {
-                anArg.push_back(args[i]);
-                continue;
-              }
-            // inDquote: enter(false->true), exit(true->false)
-            inDquote = !inDquote;
-            continue;
-          }
-
-        if (args[i] == '\'')
-          { // escaped (') is stored in arg in any cases
-            if (inEscape)
-              {
-                inEscape = false;
-                if (inDquote) { anArg.push_back('\\'); }
-                anArg.push_back(args[i]);
-                continue;
-              }
-            // (') in S-quote is stored in arg
-            if (inDquote)
-              {
-                anArg.push_back(args[i]);
-                continue;
-              }
-            // inSquote: enter(false->true), exit(true->false)
-            inSquote = !inSquote;
-            continue;
-          }
-
-        // here arg[i] != (' ') or (\t) or (") or (')
+      if (args[i] == '\\')
+      {
         if (inEscape)
-          {
-            inEscape = false;
-            if (inDquote || inSquote) { anArg.push_back('\\'); }
-          }
-        anArg.push_back(args[i]);
+        {
+          anArg.push_back(args[i]);
+        }
+        inEscape = !inEscape;
         continue;
       }
+
+      if (args[i] == '\"')
+      { // escaped (") is stored in arg in any cases
+        if (inEscape)
+        {
+          inEscape = false;
+          if (inSquote)
+          {
+            anArg.push_back('\\');
+          }
+          anArg.push_back(args[i]);
+          continue;
+        }
+        // (") in S-quote is stored in arg
+        if (inSquote)
+        {
+          anArg.push_back(args[i]);
+          continue;
+        }
+        // inDquote: enter(false->true), exit(true->false)
+        inDquote = !inDquote;
+        continue;
+      }
+
+      if (args[i] == '\'')
+      { // escaped (') is stored in arg in any cases
+        if (inEscape)
+        {
+          inEscape = false;
+          if (inDquote)
+          {
+            anArg.push_back('\\');
+          }
+          anArg.push_back(args[i]);
+          continue;
+        }
+        // (') in S-quote is stored in arg
+        if (inDquote)
+        {
+          anArg.push_back(args[i]);
+          continue;
+        }
+        // inSquote: enter(false->true), exit(true->false)
+        inSquote = !inSquote;
+        continue;
+      }
+
+      // here arg[i] != (' ') or (\t) or (") or (')
+      if (inEscape)
+      {
+        inEscape = false;
+        if (inDquote || inSquote)
+        {
+          anArg.push_back('\\');
+        }
+      }
+      anArg.push_back(args[i]);
+      continue;
+    }
     ret.push_back(anArg);
     return ret;
   }
 
-  bool isIPv4(const std::string& str)
+  bool isIPv4(const std::string &str)
   {
     // IPv4 address must be dotted-decimal format.
     // not support: 0x1.0x1.0x1.0x1, 01.01.01.01, 100.100000
     static std::regex const ipv4{
-      "(?:(?:"
+        "(?:(?:"
         R"(\d)"        // x
         R"(|[1-9]\d)"  // Xx
         R"(|1\d\d)"    // 1xx
         R"(|2[0-4]\d)" // 2Xx
         R"(|25[0-5])"  // 25x
-      ")\\.){3}" // <num>.<num>.<num>.
-      "(?:"
+        ")\\.){3}"     // <num>.<num>.<num>.
+        "(?:"
         R"(\d)"        // x
         R"(|[1-9]\d)"  // Xx
         R"(|1\d\d)"    // 1xx
         R"(|2[0-4]\d)" // 2Xx
         R"(|25[0-5])"  // 25X
-      ")"}; // <num>
+        ")"};          // <num>
     return std::regex_match(str, ipv4);
   }
 
-  bool isIPv6(const std::string& str)
+  bool isIPv6(const std::string &str)
   {
     // IPv6 address must be
     // 1111:1111:1111:1111:1111:1111:1111:1111
     static std::regex const ipv6{
-      "(?:[0-9a-fA-F]{1,4}:){7}" // xxxx:xxxx: ...
-      "[0-9a-fA-F]{1,4}"}; // xxxx
+        "(?:[0-9a-fA-F]{1,4}:){7}" // xxxx:xxxx: ...
+        "[0-9a-fA-F]{1,4}"};       // xxxx
     return std::regex_match(str, ipv6);
   }
 
-  bool isIPPort(const std::string& str)
+  bool isIPPort(const std::string &str)
   {
     static std::regex const port{
-      "(?:"
+        "(?:"
         R"(\d)"            // x
         R"(|[1-9]\d{1,3})" // Xx, Xxx, Xxxx
         R"(|[1-5]\d{4})"   // Xxxxx
@@ -569,7 +620,7 @@ namespace coil
         R"(|65[0-4]\d{2})" // 65Xxx
         R"(|655[0-2]\d)"   // 655Xx
         R"(|6553[0-5])"    // 6553X
-      ")"};
+        ")"};
     return std::regex_match(str, port);
   }
 
@@ -603,34 +654,52 @@ namespace coil
    *
    * @endif
    */
-  coil::mapstring urlparam2map(const std::string& str)
+  coil::mapstring urlparam2map(const std::string &str)
   {
     std::string::size_type qpos = str.find('?');
-    if (qpos == std::string::npos) { qpos = 0; }
-    else { ++qpos; }
+    if (qpos == std::string::npos)
+    {
+      qpos = 0;
+    }
+    else
+    {
+      ++qpos;
+    }
     coil::vstring params = coil::split(str.substr(qpos), "&");
 
     std::map<std::string, std::string> retmap;
-    for (auto & param : params)
+    for (auto &param : params)
+    {
+      if (coil::eraseBothEndsBlank(param).empty())
       {
         if (coil::eraseBothEndsBlank(param).empty())
-          {
-            continue;
-          }
+        {
+          continue;
+        }
         std::string::size_type pos = param.find('=');
         if (pos != std::string::npos)
+        {
+          const std::string key{param.substr(0, pos)};
+          if (!coil::eraseBothEndsBlank(key).empty())
           {
-            const std::string key{param.substr(0, pos)};
-            if (!coil::eraseBothEndsBlank(key).empty())
-              {
-                retmap[key] = param.substr(pos + 1);
-              }
+            retmap[key] = param.substr(pos + 1);
           }
+        }
         else
-          {
-            retmap[param] = std::string("");
-          }
+        {
+          retmap[param] = std::string("");
+        }
       }
+      std::string::size_type pos = param.find('=');
+      if (pos != std::string::npos)
+      {
+        const std::string key{param.substr(0, pos)};
+        if (!coil::eraseBothEndsBlank(key).empty())
+        {
+          retmap[key] = param.substr(pos + 1);
+        }
+      }
+    }
     return retmap;
   }
 
@@ -641,10 +710,13 @@ namespace coil
    * @brief Convert the given string to std::string.
    * @endif
    */
-  template<>
-  bool stringTo<std::string>(std::string& val, const char* str)
+  template <>
+  bool stringTo<std::string>(std::string &val, const char *str)
   {
-    if (str == nullptr) { return false; }
+    if (str == nullptr)
+    {
+      return false;
+    }
     val = str;
     return true;
   }
@@ -657,25 +729,28 @@ namespace coil
    * @endif
    */
   template <>
-  bool stringTo<bool>(bool& val, const char* str)
+  bool stringTo<bool>(bool &val, const char *str)
   {
-    if (str == nullptr) { return false; }
+    if (str == nullptr)
+    {
+      return false;
+    }
     std::string boolstr{coil::normalize(str)};
     if (boolstr == "true" || boolstr == "1" ||
-        boolstr == "yes"  || boolstr == "on")
-      {
-        val = true;
-        return true;
-      }
+        boolstr == "yes" || boolstr == "on")
+    {
+      val = true;
+      return true;
+    }
     else if (boolstr == "false" || boolstr == "0" ||
-             boolstr == "no"    || boolstr == "off")
-      {
-        val = false;
-        return true;
-      }
+             boolstr == "no" || boolstr == "off")
+    {
+      val = false;
+      return true;
+    }
     else
-      {
-      }
+    {
+    }
     return false;
   }
 
@@ -686,15 +761,18 @@ namespace coil
    * @brief Convert the given string to std::chrono::duratoin<double>.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::duration<double>>(std::chrono::duration<double>& val,
-                                               const char* str)
+  template <>
+  bool stringTo<std::chrono::duration<double>>(std::chrono::duration<double> &val,
+                                               const char *str)
   {
     double num;
-    if (stringTo(num, str)) {
+    if (stringTo(num, str))
+    {
       val = std::chrono::duration<double>(num);
       return true;
-    } else {
+    }
+    else
+    {
       return false;
     }
   }
@@ -706,14 +784,17 @@ namespace coil
    * @brief Convert the given string to std::chrono::duratoin<>.
    * @endif
    */
-  template<typename duration>
-  bool stringToDuration(duration& val, const char* str)
+  template <typename duration>
+  bool stringToDuration(duration &val, const char *str)
   {
     std::chrono::duration<double> val_d;
-    if (stringTo(val_d, str)) {
+    if (stringTo(val_d, str))
+    {
       val = std::chrono::duration_cast<duration>(val_d);
       return true;
-    } else {
+    }
+    else
+    {
       return false;
     }
   }
@@ -725,9 +806,9 @@ namespace coil
    * @brief Convert the given string to std::chrono::nanoseconds.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::nanoseconds>(std::chrono::nanoseconds& val,
-                                          const char* str)
+  template <>
+  bool stringTo<std::chrono::nanoseconds>(std::chrono::nanoseconds &val,
+                                          const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -739,9 +820,9 @@ namespace coil
    * @brief Convert the given string to std::chrono::microseconds.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::microseconds>(std::chrono::microseconds& val,
-                                           const char* str)
+  template <>
+  bool stringTo<std::chrono::microseconds>(std::chrono::microseconds &val,
+                                           const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -753,9 +834,9 @@ namespace coil
    * @brief Convert the given string to std::chrono::milliseconds.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::milliseconds>(std::chrono::milliseconds& val,
-                                           const char* str)
+  template <>
+  bool stringTo<std::chrono::milliseconds>(std::chrono::milliseconds &val,
+                                           const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -767,9 +848,9 @@ namespace coil
    * @brief Convert the given string to std::chrono::seconds.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::seconds>(std::chrono::seconds& val,
-                                      const char* str)
+  template <>
+  bool stringTo<std::chrono::seconds>(std::chrono::seconds &val,
+                                      const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -781,9 +862,9 @@ namespace coil
    * @brief Convert the given string to std::chrono::minutes.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::minutes>(std::chrono::minutes& val,
-                                      const char* str)
+  template <>
+  bool stringTo<std::chrono::minutes>(std::chrono::minutes &val,
+                                      const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -795,8 +876,8 @@ namespace coil
    * @brief Convert the given string to std::chrono::hours.
    * @endif
    */
-  template<>
-  bool stringTo<std::chrono::hours>(std::chrono::hours& val, const char* str)
+  template <>
+  bool stringTo<std::chrono::hours>(std::chrono::hours &val, const char *str)
   {
     return stringToDuration(val, str);
   }
@@ -813,10 +894,12 @@ namespace coil
     std::unordered_set<std::string> set{std::make_move_iterator(sv.begin()),
                                         std::make_move_iterator(sv.end()),
                                         sv.size()};
-#if (defined(__GNUC__) && (__GNUC__ < 5) && !defined(__clang__))    \
-    || (defined(_MSC_VER) && (_MSC_VER < 1900))
+#if (defined(__GNUC__) && (__GNUC__ < 5) && !defined(__clang__)) || (defined(_MSC_VER) && (_MSC_VER < 1900))
     sv.clear();
-    for (auto&& itr : set) { sv.emplace_back(std::move(itr)); }
+    for (auto &&itr : set)
+    {
+      sv.emplace_back(std::move(itr));
+    }
 #else
     sv.assign(std::make_move_iterator(set.begin()),
               std::make_move_iterator(set.end()));
@@ -831,15 +914,18 @@ namespace coil
    * @brief Create CSV file from the given string list
    * @endif
    */
-  std::string flatten(vstring sv, const std::string& delimiter)
+  std::string flatten(vstring sv, const std::string &delimiter)
   {
-    if (sv.empty()) { return ""; }
+    if (sv.empty())
+    {
+      return "";
+    }
 
     std::string str = std::string();
     for (size_t i(0), len(sv.size() - 1); i < len; ++i)
-      {
-        str += sv[i] + delimiter;
-      }
+    {
+      str += sv[i] + delimiter;
+    }
     return str + sv.back();
   }
 
@@ -850,27 +936,27 @@ namespace coil
    * @brief Convert the given string list into the argument list
    * @endif
    */
-  Argv::Argv(const vstring& args)
+  Argv::Argv(const vstring &args)
   {
     // make m_args.
     m_args.reserve(args.size());
-    for (auto&& arg : args)
-      {
-        m_args.emplace_back(arg.c_str(), arg.c_str() + arg.size() + 1);
-      }
+    for (auto &&arg : args)
+    {
+      m_args.emplace_back(arg.c_str(), arg.c_str() + arg.size() + 1);
+    }
     // make m_argv.
     m_argv.reserve(m_args.size() + 1);
-    for(auto&& arg : m_args)
-      {
-        m_argv.emplace_back(arg.data());
-      }
+    for (auto &&arg : m_args)
+    {
+      m_argv.emplace_back(arg.data());
+    }
     m_argv.emplace_back(nullptr);
   }
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900) // Visual Studio 2013
-  Argv::Argv(Argv&& x) noexcept { *this = std::move(x); }
+  Argv::Argv(Argv &&x) noexcept { *this = std::move(x); }
 
-  Argv& Argv::operator=(Argv&& x) noexcept
+  Argv &Argv::operator=(Argv &&x) noexcept
   {
     m_argv = std::move(x.m_argv);
     m_args = std::move(x.m_args);
@@ -880,15 +966,14 @@ namespace coil
 
   Argv::~Argv() = default; // No inline for gcc warning, too big.
 
-
-    /*!
+  /*!
    * @if jp
    * @brief 指定された書式に変換
    * @else
    * @brief Convert it into a format given with an argumen
    * @endif
    */
-  std::string sprintf(char const * __restrict fmt, ...)
+  std::string sprintf(char const *__restrict fmt, ...)
   {
     std::array<char, 1024> str;
     va_list ap;
@@ -903,27 +988,26 @@ namespace coil
     return &str[0];
   }
 
-
   /*!
-  * @if jp
-  * @brief 文字列中の環境変数を置き換える
-  *
-  * 文字列中に${}で囲まれた文字列がある場合に、環境変数と置き換える
-  * 例：${RTM_ROOT}\bin -> C:\Program Files (x86)\OpenRTM-aist\1.1.2\
-  *
-  * @param str 置き換え前の文字列
-  * @return 置き換え後の文字列
-  *
-  * @else
-  * @brief
-  *
-  * @param str
-  * @return
-  *
-  * @return
-  *
-  * @endif
-  */
+   * @if jp
+   * @brief 文字列中の環境変数を置き換える
+   *
+   * 文字列中に${}で囲まれた文字列がある場合に、環境変数と置き換える
+   * 例：${RTM_ROOT}\bin -> C:\Program Files (x86)\OpenRTM-aist\1.1.2\
+   *
+   * @param str 置き換え前の文字列
+   * @return 置き換え後の文字列
+   *
+   * @else
+   * @brief
+   *
+   * @param str
+   * @return
+   *
+   * @return
+   *
+   * @endif
+   */
   std::string replaceEnv(std::string str)
   {
     static std::regex const e{R"(\$\{(\w+)\})"}; // ${xxx}

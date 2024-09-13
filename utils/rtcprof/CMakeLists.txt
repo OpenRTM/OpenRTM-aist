@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5.1)
-set(target rtcprof)
+set(target rtcprof2)
 project (${target}
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)

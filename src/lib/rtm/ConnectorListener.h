@@ -531,7 +531,7 @@ namespace RTC
      */
     ~ConnectorDataListenerT() override
     {
-        delete m_cdr;
+        SerializerFactory::instance().deleteObject(m_cdr);
     }
 
     /*!

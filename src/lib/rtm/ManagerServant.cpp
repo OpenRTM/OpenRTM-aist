@@ -323,65 +323,37 @@ namespace RTM
 
   std::string ManagerServant::getParameterByModulename(const std::string& param_name, std::string &module_name)
   {
-        size_t pos0 = module_name.find("&" + param_name + "=");
-        size_t pos1 = module_name.find("?" + param_name + "=");
+    size_t param_start = module_name.find(param_name + "=");
 
-        if (pos0 == std::string::npos && pos1 == std::string::npos)
-          {
-            return "";
-          }
+    if (param_start == std::string::npos)
+      { // no specified param
+        return "";
+      }
 
-        size_t pos = 0;
-        if (pos0 == std::string::npos)
-          {
-            pos = pos1;
-          }
-        else
-          {
-            pos = pos0;
-        }
+    size_t param_end = module_name.find("&", param_start);
 
-        std::string paramstr;
-        size_t endpos = module_name.find('&', pos + 1);
+    if (param_end == std::string::npos)
+      { // param is end of param list
+        param_end = module_name.length();
+      }
 
-
-        if (endpos == std::string::npos)
-          {
-            endpos = module_name.find('?', pos + 1);
-
-            if (endpos == std::string::npos)
-              {
-                paramstr = module_name.substr((pos + 1));
-                
-              }
-            else
-              {
-                paramstr = module_name.substr((pos + 1), endpos);
-              }
-          }
-        else
-          {
-            paramstr = module_name.substr((pos + 1), endpos);
-          }
-        RTC_VERBOSE(("%s arg: %s", param_name.c_str(), paramstr.c_str()));
-        
-        size_t eqpos = paramstr.find('=');
-
-        paramstr = paramstr.substr(eqpos + 1);
-
-
-        RTC_DEBUG(("%s is %s", param_name.c_str(), paramstr.c_str()));
-
-        if (endpos == std::string::npos)
-          {
-            module_name = module_name.substr(0, pos);
-          }
-        else
-          {
-            module_name = module_name.substr(0, pos) + module_name.substr(endpos);
-          }
-
-        return paramstr;
+    // extract param's value
+    // module_name?....param_name=param_value
+    //   substr(       ^   arg1  ^    arg2  ^ )
+    std::string param_value =
+      module_name.substr(param_start + param_name.length() + 1,
+                         param_end - param_start - param_name.length() - 1);
+    RTC_DEBUG(("%s is %s", param_name.c_str(), param_value.c_str()));
+    // remove specified param
+    if (module_name[param_start - 1] == '?')
+      { // module_name?{param_name=param_value}: remove {}
+        module_name.erase(param_start, param_end - param_start + 1);
+      }
+    if (module_name[param_start - 1] == '&')
+      { // module_name?other_param...{&param_name=param_value}: remove {}
+        module_name.erase(param_start - 1, param_end - param_start + 1);
+      }
+    return param_value;
   }
   
   /*!
@@ -398,8 +370,16 @@ namespace RTM
     std::string create_arg(module_name);
     if (create_arg.empty()) // invalid arg
       {
+        RTC_ERROR(("RTC name is empty."));
         return RTC::RTObject::_nil();
       }
+
+    if (coil::eraseHeadBlank(create_arg).find("?") == 0)
+      {
+        RTC_ERROR(("RTC name is empty."));
+        return RTC::RTObject::_nil();
+      }
+
     coil::vstring tmp = coil::split(create_arg, "&");
     if (tmp.back().empty())
       {
@@ -413,16 +393,17 @@ namespace RTM
 
     RTC::RTObject_var rtobj;
     // create component by address
-    rtobj = createComponentByAddress(create_arg);
+    std::string manager_address;
+    rtobj = createComponentByAddress(create_arg, manager_address);
     if (!CORBA::is_nil(rtobj)) { return rtobj._retn(); }
+    else if (!manager_address.empty()) { return RTC::RTObject::_nil(); }
 
     // create component by manager's name
-    rtobj = createComponentByManagerName(create_arg);
+    std::string manager_name;
+    rtobj = createComponentByManagerName(create_arg, manager_name);
     if (!CORBA::is_nil(rtobj)) { return rtobj._retn(); }
+    else if (!manager_name.empty()) { return RTC::RTObject::_nil(); }
 
-
-    getParameterByModulename("manager_address", create_arg);
-    std::string manager_name = getParameterByModulename("manager_name", create_arg);
 
 
     CompParam comp_param(create_arg);
@@ -461,8 +442,17 @@ namespace RTM
 
         if (manager_name.empty())
           {
-            create_arg = create_arg + "&manager_name=manager_%p";
-            rtobj = createComponentByManagerName(create_arg);
+            if (create_arg.find("?") == std::string::npos)
+              {
+                create_arg += "?";
+              }
+            else
+              {
+                create_arg += "&";
+              }
+            create_arg += "manager_name=manager_%p";
+
+            rtobj = createComponentByManagerName(create_arg, manager_name);
             if (!CORBA::is_nil(rtobj)) { return rtobj._retn(); }
           }
         return RTC::RTObject::_nil();
@@ -1185,7 +1175,7 @@ namespace RTM
    * @endif
    */
   RTC::RTObject_ptr
-  ManagerServant::createComponentByManagerName(const std::string& create_arg)
+  ManagerServant::createComponentByManagerName(std::string& create_arg, std::string& mgrstr)
   {
     RTC_TRACE(("createComponentByManagerName(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
@@ -1195,7 +1185,7 @@ namespace RTM
                    p.first.c_str(), p.second.c_str()));
       }
 
-    std::string mgrstr = param["manager_name"];
+    mgrstr = param["manager_name"];
     if (mgrstr.empty())
       {
         RTC_WARN(("No manager_name found: %s", mgrstr.c_str()));
@@ -1228,8 +1218,18 @@ namespace RTM
           }
 
         std::string lang_path_key("manager.modules.");
-        lang_path_key += lang + ".load_path";
-        rtcd_cmd += " -o \"manager.modules.load_path:" + coil::escape(prop["manager.modules.load_path"]) + "," + coil::escape(prop[lang_path_key]) + "\"";
+        lang_path_key += lang + ".load_paths";
+        if (param.find("config_file") != param.end())
+          {
+            rtcd_cmd += " -f \"" + coil::escape(param["config_file"]) + "\"";
+          }
+        else if (prop.findNode("config_file"))
+          {
+            rtcd_cmd += " -f \"" + coil::escape(prop["config_file"]) + "\"";
+          }
+
+        rtcd_cmd += " -o \"manager.modules.load_path:" + coil::escape(prop["manager.modules.load_path"]) + "\"";
+        rtcd_cmd += " -o \"" + lang_path_key + ":" + coil::escape(prop[lang_path_key]) + "\"";
         
         rtcd_cmd += " -o \"manager.is_master:NO\"";
         rtcd_cmd += " -o \"manager.corba_servant:YES\"";
@@ -1319,6 +1319,7 @@ namespace RTM
     getParameterByModulename("manager_name", create_arg_str);
     RTC_DEBUG(("Creating component on %s",  mgrstr.c_str()));
     RTC_DEBUG(("arg: %s", create_arg_str.c_str()));
+    create_arg = create_arg_str;
     try
       {
         return mgrobj->create_component(create_arg_str.c_str());
@@ -1343,7 +1344,7 @@ namespace RTM
    * @endif
    */
   RTC::RTObject_ptr
-  ManagerServant::createComponentByAddress(const std::string& create_arg)
+  ManagerServant::createComponentByAddress(std::string& create_arg, std::string& mgrstr)
   {
     RTC_TRACE(("createComponentByAddress(%s)",create_arg.c_str()));
     coil::mapstring param = coil::urlparam2map(create_arg);
@@ -1353,7 +1354,7 @@ namespace RTM
                    p.first.c_str(), p.second.c_str()));
       }
 
-    std::string mgrstr = param["manager_address"];
+    mgrstr = param["manager_address"];
     if (mgrstr.empty())
       {
         RTC_WARN(("No manager_address found: %s", mgrstr.c_str()));
@@ -1392,6 +1393,15 @@ namespace RTM
             RTC_WARN(("rtcd command name not found. Default rtcd is used."));
             rtcd_cmd = "rtcd";
           }
+
+        if (param.find("config_file") != param.end())
+          {
+            rtcd_cmd += " -f \"" + coil::escape(param["config_file"]) + "\"";
+          }
+        else if (prop.findNode("config_file"))
+          {
+            rtcd_cmd += " -f \"" + coil::escape(prop["config_file"]) + "\"";
+          }
         rtcd_cmd += " -o \"corba.master_manager:" + mgrstr + "\"";
         rtcd_cmd += " -d ";
 
@@ -1426,6 +1436,7 @@ namespace RTM
         getParameterByModulename("manager_address", create_arg_str);
         RTC_DEBUG(("Creating component on %s",  mgrstr.c_str()));
         RTC_DEBUG(("arg: %s", create_arg.c_str()));
+        create_arg = create_arg_str;
         try
           {
             return mgrobj->create_component(create_arg_str.c_str());

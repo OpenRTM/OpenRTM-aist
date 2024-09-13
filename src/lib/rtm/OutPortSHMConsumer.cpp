@@ -61,8 +61,7 @@ namespace RTC
    */
   void OutPortSHMConsumer::init(coil::Properties&  /*prop*/)
   {
-	RTC_TRACE(("OutPortSHMConsumer::init()"));
-	
+    RTC_TRACE(("OutPortSHMConsumer::init()"));
   }
 
   /*!
@@ -96,11 +95,11 @@ namespace RTC
   bool OutPortSHMConsumer::setObject(CORBA::Object_ptr obj)
   {
     RTC_PARANOID(("setObject()"));
-	if (CorbaConsumer< ::OpenRTM::PortSharedMemory >::setObject(obj))
-	{
-		_ptr()->setInterface(m_shmem._this());
-		return true;
-	}
+    if (CorbaConsumer< ::OpenRTM::PortSharedMemory >::setObject(obj))
+    {
+      _ptr()->setInterface(m_shmem._this());
+      return true;
+    }
 
 
     return false;
@@ -121,32 +120,32 @@ namespace RTC
     try
       {
           
-            std::lock_guard<std::mutex> guard(m_mutex);
+        std::lock_guard<std::mutex> guard(m_mutex);
             
 
-            ::OpenRTM::PortStatus ret(_ptr()->get());
-			if (ret == ::OpenRTM::PORT_OK)
-			{
-				m_shmem.read(data);
+        ::OpenRTM::PortStatus ret(_ptr()->get());
+        if (ret == ::OpenRTM::PORT_OK)
+          {
+            m_shmem.read(data);
 
-				RTC_DEBUG(("get() successful"));
-                RTC_PARANOID(("CDR data length: %d", data.getDataLength()));
+            RTC_DEBUG(("get() successful"));
+            RTC_PARANOID(("CDR data length: %d", data.getDataLength()));
 
-				onReceived(data);
-				onBufferWrite(data);
+            onReceived(data);
+            onBufferWrite(data);
 
-				if (m_buffer->full())
-				{
-					RTC_INFO(("InPort buffer is full."));
-					onBufferFull(data);
-					onReceiverFull(data);
-				}
-				m_buffer->put(data);
-				m_buffer->advanceWptr();
-				m_buffer->advanceRptr();
+            if (m_buffer->full())
+              {
+                RTC_INFO(("InPort buffer is full."));
+                onBufferFull(data);
+                onReceiverFull(data);
+              }
+            m_buffer->put(data);
+            m_buffer->advanceWptr();
+            m_buffer->advanceRptr();
 
-				return DataPortStatus::PORT_OK;
-			}
+            return DataPortStatus::PORT_OK;
+          }
           
         return convertReturn(ret, data);
       }

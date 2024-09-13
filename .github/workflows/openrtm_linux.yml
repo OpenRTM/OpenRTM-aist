@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu_1804, ubuntu_2004, debian_10, code_analysis]
+        os: [ubuntu_2004, ubuntu_2204, code_analysis]
     steps:
     - uses: actions/checkout@v1
     - name: Build OpenRTM

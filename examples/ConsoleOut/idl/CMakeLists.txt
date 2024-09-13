@@ -5,18 +5,7 @@ macro(_IDL_OUTPUTS _idl _dir _result)
 endmacro(_IDL_OUTPUTS)
 
 macro(_COMPILE_IDL _idl_file)
-    if(NOT WIN32)
-        execute_process(COMMAND rtm-config --prefix OUTPUT_VARIABLE OPENRTM_DIR
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-        execute_process(COMMAND rtm-config --idlflags OUTPUT_VARIABLE OPENRTM_IDLFLAGS
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-        separate_arguments(OPENRTM_IDLFLAGS)
-        execute_process(COMMAND rtm-config --idlc OUTPUT_VARIABLE OPENRTM_IDLC
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-        set(_rtm_skelwrapper_command "rtm-skelwrapper")
-    else(NOT WIN32)
-        set(_rtm_skelwrapper_command "rtm-skelwrapper.py")
-    endif(NOT WIN32)
+
     get_filename_component(_idl ${_idl_file} NAME_WE)
     set(_idl_srcs_var ${_idl}_SRCS)
     _IDL_OUTPUTS(${_idl} ${CMAKE_CURRENT_BINARY_DIR} ${_idl_srcs_var})
@@ -26,9 +15,9 @@ macro(_COMPILE_IDL _idl_file)
     else(WIN32)
         set(_python_command "python3")
     endif(WIN32)
- 
+
     add_custom_command(OUTPUT ${${_idl_srcs_var}}
-        COMMAND ${_python_command} ${OPENRTM_DIR}/bin/${_rtm_skelwrapper_command} --include-dir= --skel-suffix=Skel --stub-suffix=Stub --idl-file=${_idl}.idl
+        COMMAND ${_python_command} ${OPENRTM_DIR}/bin/${OPENRTM_IDL_WRAPPER} ${OPENRTM_IDL_WRAPPER_FLAGS} --idl-file=${_idl}.idl
         COMMAND ${OPENRTM_IDLC} ${OPENRTM_IDLFLAGS} ${_idl_file}
         WORKING_DIRECTORY ${CURRENT_BINARY_DIR}
         DEPENDS ${_idl_file}

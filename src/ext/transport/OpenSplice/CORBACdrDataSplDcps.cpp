@@ -17,6 +17,11 @@
 #include <string.h>
 #include <iostream>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+
 v_copyin_result
 OpenSplice_OpenRTM_CORBACdrData_copyIn(
     c_base base,
@@ -89,3 +94,6 @@ OpenSplice_OpenRTM_CORBACdrData_copyOut(
     }
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

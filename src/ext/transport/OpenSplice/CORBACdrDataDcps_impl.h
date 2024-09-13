@@ -20,13 +20,13 @@ namespace OpenRTM_OpenSplice {
         ~CORBACdrDataTypeSupportMetaHolder () override;
     
     private:
-        ::DDS::OpenSplice::TypeSupportMetaHolder * clone();
+        ::DDS::OpenSplice::TypeSupportMetaHolder * clone() override;
     
-        ::DDS::OpenSplice::DataWriter * create_datawriter ();
+        ::DDS::OpenSplice::DataWriter * create_datawriter () override;
     
-        ::DDS::OpenSplice::DataReader * create_datareader ();
+        ::DDS::OpenSplice::DataReader * create_datareader () override;
     
-        ::DDS::OpenSplice::DataReaderView * create_view ();
+        ::DDS::OpenSplice::DataReaderView * create_view () override;
 
         ::DDS::String_var m_datatype;
         ::DDS::String_var m_descriptor;
@@ -259,7 +259,7 @@ namespace OpenRTM_OpenSplice {
                 DDS::OpenSplice::cxxCopyIn copyIn,
                 DDS::OpenSplice::cxxCopyOut copyOut,
                 DDS::OpenSplice::cxxReaderCopy readerCopy,
-                void *cdrMarshaler);
+                void *cdrMarshaler) override;
     
         static void* dataSeqAlloc (
             void * data_values,
