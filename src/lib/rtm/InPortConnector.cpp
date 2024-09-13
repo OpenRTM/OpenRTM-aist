@@ -46,7 +46,7 @@ namespace RTC
    */
   InPortConnector::~InPortConnector()
   {
-      delete m_cdr;
+      SerializerFactory::instance().deleteObject(m_cdr);
   }
 
   /*!

@@ -22,6 +22,8 @@
 #define LIBRARY_EXPORTS
 #include <rtm/ByteData.h>
 #undef LIBRARY_EXPORTS
+#include <coil/Properties.h>
+#include <string>
 
 
 
@@ -72,6 +74,7 @@ namespace RTC
          * @param datatype データ型名
          * @param idlpath データ型を定義したIDLファイルのパス
          * @param topic トピック名
+         * @param prop 設定プロパティ
          * @param endian true：リトルエンディアン、false：ビッグエンディアン
          * @param corbamode true：送信データの先頭に4bitのヘッダーを付加する
          * @return true：初期化成功、false：問題発生
@@ -82,13 +85,14 @@ namespace RTC
          * @param datatype 
          * @param idlpath 
          * @param topic 
+         * @param prop 
          * @param endian 
          * @param corbamode 
          * @return
          *
          * @endif
          */
-        virtual bool init(std::string& datatype, std::string& idlpath, std::string& topic, bool endian = true, bool corbamode = true) = 0;
+        virtual bool init(std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian = true, bool corbamode = true) = 0;
         /*!
          * @if jp
          * @brief データ送信
@@ -130,6 +134,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode true：送信データの先頭に4bitのヘッダーを付加する
      * @return OpenSpliceOutPort_implオブジェクト
@@ -140,13 +145,14 @@ namespace RTC
      * @param datatype 
      * @param idlpath 
      * @param topic 
+     * @param prop 
      * @param endian 
      * @param corbamode 
      * @return 
      *
      * @endif
      */
-    OpenSpliceOutPortBase* createOpenSpliceOutPort(std::string& datatype, std::string& idlpath, std::string& topic, bool endian = true, bool corbamode = true);
+    OpenSpliceOutPortBase* createOpenSpliceOutPort(std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties &prop, bool endian = true, bool corbamode = true);
 }
 
 

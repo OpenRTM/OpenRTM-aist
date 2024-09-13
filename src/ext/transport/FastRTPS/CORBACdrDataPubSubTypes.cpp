@@ -70,8 +70,8 @@ namespace RTC
                 endian = eprosima::fastcdr::Cdr::BIG_ENDIANNESS;
             }
             eprosima::fastcdr::Cdr ser(fastbuffer, endian,
-                eprosima::fastcdr::Cdr::DDS_CDR); // Object that serializes the data.
-            payload->encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
+                eprosima::fastcdr::DDS_CDR); // Object that serializes the data.
+	    payload->encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
             // Serialize encapsulation
             try
             {
@@ -87,7 +87,7 @@ namespace RTC
                 std::cout << "BadParamException:" << e.what() << std::endl;
                 return false;
             }
-            uint32_t data_size = p_type->getDataLength() + (uint32_t)ser.getSerializedDataLength();
+            uint32_t data_size = p_type->getDataLength() + (uint32_t)ser.get_serialized_data_length();
             try
             {
                 payload->reserve(data_size);
@@ -100,7 +100,7 @@ namespace RTC
             payload->length = data_size;
             if (payload->max_size >= data_size)
             {
-                memcpy(payload->data + ser.getSerializedDataLength(), p_type->getBuffer(), p_type->getDataLength());
+                memcpy(payload->data + ser.get_serialized_data_length(), p_type->getBuffer(), p_type->getDataLength());
             }
         }
         else
@@ -138,7 +138,7 @@ namespace RTC
             endian = eprosima::fastcdr::Cdr::BIG_ENDIANNESS;
         }
         eprosima::fastcdr::Cdr deser(fastbuffer, endian,
-                                      eprosima::fastcdr::Cdr::DDS_CDR); // Object that deserializes the data.
+                                      eprosima::fastcdr::DDS_CDR); // Object that deserializes the data.
                                               // Deserialize encapsulation.
         try
         {
@@ -158,9 +158,9 @@ namespace RTC
 
         if (!m_header_enable)
         {
-            if (payload->length >= (uint32_t)deser.getSerializedDataLength())
+            if (payload->length >= (uint32_t)deser.get_serialized_data_length())
             {
-                p_type->writeData(payload->data + deser.getSerializedDataLength(), payload->length - (uint32_t)deser.getSerializedDataLength());
+                p_type->writeData(payload->data + deser.get_serialized_data_length(), payload->length - (uint32_t)deser.get_serialized_data_length());
             }
         }
         else
@@ -201,7 +201,7 @@ namespace RTC
         
         if(CORBACdrData::getKeyMaxCdrSerializedSize()>16){
             m_md5.init();
-            m_md5.update(m_keyBuffer,(unsigned int)ser.getSerializedDataLength());
+            m_md5.update(m_keyBuffer,(unsigned int)ser.get_serialized_data_length());
             m_md5.finalize();
             for(uint8_t i = 0;i<16;++i)    {
                 handle->value[i] = m_md5.digest[i];

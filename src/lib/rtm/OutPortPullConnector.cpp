@@ -50,6 +50,7 @@ namespace RTC
     if (m_provider == nullptr || m_buffer == nullptr) { throw std::bad_alloc(); }
 
     m_buffer->init(info.properties.getNode("buffer"));
+    m_provider->init(info.properties);
     m_provider->setBuffer(m_buffer);
     m_provider->setConnector(this);
     m_provider->setListener(info, m_listeners);

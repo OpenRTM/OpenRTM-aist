@@ -13,7 +13,11 @@
 
 // Module specification
 // <rtc-template block="module_spec">
+#if RTM_MAJOR_VERSION >= 2
 static const char* const motor_spec[] =
+#else
+static const char* motor_spec[] =
+#endif
   {
     "implementation_id", "Motor",
     "type_name",         "Motor",

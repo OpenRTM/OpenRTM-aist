@@ -262,6 +262,35 @@ namespace NVUtil
   /*!
    * @if jp
    *
+   * @brief Properties を NVList にマージする
+   *
+   * このオペレーションは Properties を NVList へマージする。
+   * NVList の value は全て CORBA::string 型としてマージする。
+   *
+   * @param nv Properties の値を格納する NVList
+   * @param prop コピー元の Properties
+   *
+   * @else
+   *
+   * @brief Merge the properties to NVList
+   *
+   * This operation merges the properties into NVList.
+   * All NVList's values are copied as CORBA::string.
+   *
+   * @param nv NVList to store properties values
+   * @param prop Properties that is merged from
+   *
+   * @endif
+   */
+#ifndef ORB_IS_RTORB
+  void mergeFromProperties(SDOPackage::NVList& nv, const coil::Properties& prop);
+#else  // ORB_IS_RTORB
+  void mergeFromProperties(SDOPackage_NVList& nv, const coil::Properties& prop);
+#endif  // ORB_IS_RTORB
+
+  /*!
+   * @if jp
+   *
    * @brief NVList を Properties へコピーする
    *
    * このオペレーションは NVList を Properties へコピーする。

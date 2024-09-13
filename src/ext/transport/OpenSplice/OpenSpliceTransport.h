@@ -52,7 +52,7 @@ extern "C"
    * @endif
    */
   DLL_EXPORT void OpenSpliceTransportInit(RTC::Manager* manager);
-};
+}
 
 #endif // RTC_OPENSPLICETRANSPORT_H
 

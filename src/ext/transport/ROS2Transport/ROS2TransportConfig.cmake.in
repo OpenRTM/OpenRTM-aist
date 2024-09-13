@@ -1,0 +1,51 @@
+# -*- cmake -*-
+#
+# @file ROS2Transport.cmake
+# @brief cmake-config file for ROS2Transport
+#
+# This file is used for cmake config-mode.
+# The following variables are defined.
+#
+# Basic compiler/linker options
+# - ROS2TRANSPORT_CFLAGS: cflags 
+# - ROS2TRANSPORT_INCLUDE_DIRS: include directories
+# - ROS2TRANSPORT_LDFLAGS: linker options
+# - ROS2TRANSPORT_LIBRARY_DIRS: library directories
+# - ROS2TRANSPORT_LIBRARIES: libraries
+# - ROS2TRANSPORT_LIB_DIR: OpenRTM's lib directory
+#
+#
+# ROS2Transport version
+# - ROS2TRANSPORT_VERSION: x.y.z version
+# - ROS2TRANSPORT_VERSION_MAJOR: major version number
+# - ROS2TRANSPORT_VERSION_MINOR: minor version number
+# - ROS2TRANSPORT_VERSION_PATCH: revision number
+# - ROS2TRANSPORT_SHORT_VERSION: short version number 1.1.0->110
+#
+
+
+message(STATUS "ROS2Transport.cmake found.")
+message(STATUS "CMAKE_GENERATOR check mode.")
+
+find_package(OpenRTM @RTM_MAJOR_VERSION@.@RTM_MINOR_VERSION@ REQUIRED)
+
+
+# ROS2Transport version
+set(ROS2TRANSPORT_VERSION @RTM_VERSION@)
+set(ROS2TRANSPORT_VERSION_MAJOR @RTM_MAJOR_VERSION@)
+set(ROS2TRANSPORT_VERSION_MINOR @RTM_MINOR_VERSION@)
+set(ROS2TRANSPORT_VERSION_PATCH @RTM_REVISION_NUM@)
+set(ROS2TRANSPORT_SHORT_VERSION @RTM_VERSION@)
+
+# Basic compiler/linker options
+set(ROS2TRANSPORT_CFLAGS )
+set(ROS2TRANSPORT_INCLUDE_DIRS ${OPENRTM_DIR}/@INSTALL_ROS2TRANSPORT_INCLUDE_DIR@)
+set(ROS2TRANSPORT_LDFLAGS )
+
+set(ROS2TRANSPORT_LIBRARY_DIRS )
+set(ROS2TRANSPORT_LIBRARIES ${OPENRTM_DIR}/@INSTALL_ROS2TRANSPORT_LIB_DIR@/@target@@CMAKE_SHARED_LIBRARY_SUFFIX@ ${OPENRTM_DIR}/@INSTALL_ROS2TRANSPORT_LIB_DIR@/@INSTALL_FASTRTPSTRANSPORT_LIB@@CMAKE_SHARED_LIBRARY_SUFFIX@)
+
+
+
+
+# end of ROS2Transport.cmake
