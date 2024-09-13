@@ -18,8 +18,10 @@
 #pragma warning(pop)
 #endif
 
+#ifdef DDS_USE_EXPLICIT_TEMPLATES
 #if DDS_USE_EXPLICIT_TEMPLATES
 template class DDS_DCPSUVLSeq < OpenRTM_OpenSplice::CORBACdrData, struct CORBACdrDataSeq_uniq_>;
+#endif
 #endif
 
 const char * OpenRTM_OpenSplice::CORBACdrDataTypeSupportInterface::_local_id = "IDL:OpenRTM/CORBACdrDataTypeSupportInterface:1.0";

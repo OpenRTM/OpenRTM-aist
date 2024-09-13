@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5.1)
 
 project (OpenRTMCMake
-	VERSION 2.0.0
+	VERSION 2.0.2
 	LANGUAGES CXX)
 
 if(CORBA STREQUAL "ORBexpress")
@@ -28,7 +28,7 @@ if(WIN32)
 		set(OPENRTM_LOCAL_LIBRARIES ${OPENRTM_LOCAL_LIBRARIES};optimized;${DATATYPE};debug;${DATATYPE}d)
 	endforeach()
 else(WIN32)
-	set(OPENRTM_LIBRARIES "${RTM_PROJECT_NAME};${ORB_LIBRARIES};rtmCamera;rtmManipulator")
+	set(OPENRTM_LIBRARIES "${RTM_PROJECT_NAME};${ORB_LIBRARIES};rtmCamera2;rtmManipulator2")
 endif(WIN32)
 
 if(BUILD_RTM_LINUX_PKGS)
@@ -65,4 +65,8 @@ elseif(MSVC)
 		install(FILES  ${PROJECT_BINARY_DIR}/cmake/OpenRTMConfig.cmake DESTINATION ${INSTALL_RTM_BIN_DIR} COMPONENT cmakefiles)
 	endif()
 endif()
+
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/OpenRTMConfigVersion.cmake.in ${PROJECT_BINARY_DIR}/cmake/OpenRTMConfigVersion.cmake @ONLY)
+install(FILES ${PROJECT_BINARY_DIR}/cmake/OpenRTMConfigVersion.cmake DESTINATION ${INSTALL_RTM_CMAKE_DIR} COMPONENT cmakefiles)
 

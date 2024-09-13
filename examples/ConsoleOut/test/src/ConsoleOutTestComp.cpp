@@ -1,13 +1,13 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
+// <rtc-template block="description">
 /*!
  * @file ConsoleOutTestComp.cpp
- * @brief Standalone component
- * @date $Date$
+ * @brief Standalone component (test code)
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- * $Id$
  */
+// </rtc-template>
 
 #include <rtm/Manager.h>
 #include <iostream>

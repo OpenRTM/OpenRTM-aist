@@ -93,13 +93,15 @@ namespace coil
     do
       {
         char str[512];
-        fgets(str, 512, fd);
-        std::string line(str);
-        if (!line.empty())
+        if(fgets(str, 512, fd) != nullptr)
           {
-            line.erase(line.size() - 1);
+            std::string line(str);
+            if (!line.empty())
+              {
+                line.erase(line.size() - 1);
+              }
+            out.emplace_back(line);
           }
-        out.emplace_back(line);
       } while (feof(fd) == 0);
     
     (void) pclose(fd);

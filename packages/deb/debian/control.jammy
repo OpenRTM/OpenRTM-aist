@@ -1,0 +1,63 @@
+Source: openrtm2
+Section: science
+Priority: extra
+Maintainer: Noriaki Ando <n-ando@aist.go.jp>
+Build-Depends: debhelper (>= 9), libomniorb4-dev, omniidl4 | omniidl,  omniorb4-nameserver | omniorb-nameserver, python3, uuid-dev
+Standards-Version: 3.8.4
+Homepage: http://www.openrtm.org
+
+Package: openrtm2
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, omniorb-nameserver, openrtm2-naming (>= 2.0.2-0)
+Description: OpenRTM-aist, RT-Middleware distributed by AIST
+ OpenRTM-aist is a reference implementation of RTC (Robotic Technology
+ Component Version 1.1, formal/12-09-01) specification which is OMG
+ standard (http://www.omg.org/spec/RTC/). OpenRTM-aist includes
+ RT-Middleware runtime environment and RTC framework. The OMG standard
+ defines a component model and certain important infrastructure
+ services applicable to the domain of robotics software
+ development. OpenRTM-aist is being developed and distributed by
+ National Institute of Advanced Industrial Science and Technology
+ (AIST), Japan. Please see http://www.openrtm.org/ for more detail.
+
+Package: openrtm2-naming
+Architecture: any
+Multi-Arch: same
+Replaces: openrtm2 (<< 2.0.2-0)
+Breaks: openrtm2 (<< 2.0.2-0)
+Description: OpenRTM-aist name server launcher
+
+Package: openrtm2-ros2-tp
+Architecture: any
+Multi-Arch: same
+Depends: openrtm2, ros-humble-ros-core
+Description: OpenRTM-aist extension ROS2 package
+ Extensions of OpenRTM-aist
+
+Package: openrtm2-dev
+Architecture: any
+Multi-Arch: same
+Depends: openrtm2, openrtm2-idl
+Description: OpenRTM-aist headers for development
+ The header files and libraries needed for developing RT-Components
+ using OpenRTM-aist.
+
+Package: openrtm2-idl
+Architecture: any
+Multi-Arch: same
+Description: OpenRTM-aist idls for development
+ The idl files needed for developing RT-Components using OpenRTM-aist.
+
+Package: openrtm2-example
+Architecture: any
+Multi-Arch: same
+Depends: openrtm2
+Description: OpenRTM-aist examples
+ Example components and sources of OpenRTM-aist
+
+Package: openrtm2-doc
+Architecture: all
+Description: Documentation for openrtm2
+ Class reference manual of OpenRTM-aist.

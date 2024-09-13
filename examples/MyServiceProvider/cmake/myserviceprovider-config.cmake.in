@@ -1,0 +1,54 @@
+# MyServiceProvider CMake config file
+#
+# This file sets the following variables:
+# MyServiceProvider_FOUND - Always TRUE.
+# MyServiceProvider_INCLUDE_DIRS - Directories containing the MyServiceProvider include files.
+# MyServiceProvider_IDL_DIRS - Directories containing the MyServiceProvider IDL files.
+# MyServiceProvider_LIBRARIES - Libraries needed to use MyServiceProvider.
+# MyServiceProvider_DEFINITIONS - Compiler flags for MyServiceProvider.
+# MyServiceProvider_VERSION - The version of MyServiceProvider found.
+# MyServiceProvider_VERSION_MAJOR - The major version of MyServiceProvider found.
+# MyServiceProvider_VERSION_MINOR - The minor version of MyServiceProvider found.
+# MyServiceProvider_VERSION_REVISION - The revision version of MyServiceProvider found.
+# MyServiceProvider_VERSION_CANDIDATE - The candidate version of MyServiceProvider found.
+
+message(STATUS "Found MyServiceProvider-@PROJECT_VERSION@")
+set(MyServiceProvider_FOUND TRUE)
+
+find_package(<dependency> REQUIRED)
+
+#set(MyServiceProvider_INCLUDE_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@"
+#    ${<dependency>_INCLUDE_DIRS}
+#    )
+#
+#set(MyServiceProvider_IDL_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@/idl")
+set(MyServiceProvider_INCLUDE_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@"
+    ${<dependency>_INCLUDE_DIRS}
+    )
+set(MyServiceProvider_IDL_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@/idl")
+
+
+if(WIN32)
+    set(MyServiceProvider_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_STATIC_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+else(WIN32)
+    set(MyServiceProvider_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_SHARED_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+endif(WIN32)
+
+set(MyServiceProvider_DEFINITIONS ${<dependency>_DEFINITIONS})
+
+set(MyServiceProvider_VERSION @PROJECT_VERSION@)
+set(MyServiceProvider_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(MyServiceProvider_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(MyServiceProvider_VERSION_REVISION @PROJECT_VERSION_REVISION@)
+set(MyServiceProvider_VERSION_CANDIDATE @PROJECT_VERSION_CANDIDATE@)
+

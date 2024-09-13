@@ -27,7 +27,7 @@ namespace RTM
   //============================================================
   NamingServiceNumberingPolicy::NamingServiceNumberingPolicy()
     {
-	  m_mgr = &RTC::Manager::instance();
+      m_mgr = &RTC::Manager::instance();
     }
   /*!
    * @if jp
@@ -38,25 +38,24 @@ namespace RTM
    */
   std::string NamingServiceNumberingPolicy::onCreate(void* obj)
     {
-	  int num = 0;
-	  while (true)
-	  {
-		  std::string num_str = coil::otos<int>(num);
-		  RTC::RTObject_impl *rtobj = static_cast<RTC::RTObject_impl *>(obj);
+      int num = 0;
+      while (true)
+        {
+          std::string num_str = coil::otos<int>(num);
+          RTC::RTObject_impl *rtobj = static_cast<RTC::RTObject_impl *>(obj);
 
+          std::string name = rtobj->getTypeName() + num_str;
 
-		  std::string name = rtobj->getTypeName() + num_str;
-
-		  if (!find(name))
-		  {
-			  return num_str;
-		  }
-		  else
-		  {
-			  num++;
-		  }
-	  }
-	  return  coil::otos<int>(num);
+          if (!find(name))
+            {
+              return num_str;
+            }
+          else
+            {
+                  num++;
+            }
+        }
+      return  coil::otos<int>(num);
     }
   
   /*!
@@ -70,38 +69,38 @@ namespace RTM
     {
     }
   
-	/*!
-	* @if jp
-	*
-	* @brief オブジェクトの検索
-	*
-	* 指定名のインスタンス名のRTCを検索し、
-	* 　　　　一致するRTCが存在する場合はTrueを返す
-	*
-	* @param name 検索対象オブジェクトの名前
-	*
-	* @return 判定
-	*
-	* @else
-	*
-	* @brief
-	*
-	*
-	* @param name
-	*
-	* @return
-	*
-	* @endif
-	*/
+  /*!
+   * @if jp
+   *
+   * @brief オブジェクトの検索
+   *
+   * 指定名のインスタンス名のRTCを検索し、
+   * 　　　　一致するRTCが存在する場合はTrueを返す
+   *
+   * @param name 検索対象オブジェクトの名前
+   *
+   * @return 判定
+   *
+   * @else
+   *
+   * @brief
+   *
+   *
+   * @param name
+   *
+   * @return
+   *
+   * @endif
+   */
   bool NamingServiceNumberingPolicy::find(std::string name)
     {
-	  RTC::RTCList rtcs;
-	  std::string rtc_name = "rtcname://*/*/";
-	  rtc_name += name;
+      RTC::RTCList rtcs;
+      std::string rtc_name = "rtcname://*/*/";
+      rtc_name += name;
 
-	  rtcs = m_mgr->getNaming()->string_to_component(rtc_name);
+      rtcs = m_mgr->getNaming()->string_to_component(rtc_name);
 
-	  return rtcs.length() > 0;
+      return rtcs.length() > 0;
     }
 } //namespace RTM 
 
@@ -112,9 +111,9 @@ extern "C"
     ::RTM::NumberingPolicyFactory::
       instance().addFactory("ns_unique",
                             ::coil::Creator< ::RTM::NumberingPolicyBase,
-							::RTM::NamingServiceNumberingPolicy>,
+                                                      ::RTM::NamingServiceNumberingPolicy>,
                             ::coil::Destructor< ::RTM::NumberingPolicyBase,
-							::RTM::NamingServiceNumberingPolicy>);
+                                                      ::RTM::NamingServiceNumberingPolicy>);
     }
 }
 

@@ -111,7 +111,7 @@ namespace RTC
       SdoServiceProviderFactory::instance().getIdentifiers()};
     coil::Properties tmp;
     tmp["sdo.service.provider.available_services"]
-      = coil::flatten(availableProviderTypes);
+      = coil::eraseBlank(coil::flatten(availableProviderTypes));
     RTC_DEBUG(("sdo.service.provider.available_services: %s",
                tmp["sdo.service.provider.available_services"].c_str()));
     m_rtobj.setProperties(std::move(tmp));
@@ -172,7 +172,7 @@ namespace RTC
 
     coil::Properties tmp;
     tmp["sdo.service.consumer.available_services"]
-      = coil::flatten(SdoServiceConsumerFactory::instance().getIdentifiers());
+      = coil::eraseBlank(coil::flatten(SdoServiceConsumerFactory::instance().getIdentifiers()));
     m_rtobj.setProperties(tmp);
     RTC_DEBUG(("sdo.service.consumer.available_services: %s",
                prop["sdo.service.consumer.available_services"].c_str()));

@@ -1,17 +1,11 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 // <rtc-template block="description">
-/*! \mainpage
+/*!
+ * @file  ConsoleIn.h
+ * @brief Console input component
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- */
- 
- /*!
- * @file  ConsoleIn.h
- * @brief Console input component
- * @date  $Date$
- *
- * $Id$
  */
 // </rtc-template>
 
@@ -180,7 +174,7 @@ class ConsoleIn
    * 
    * 
    */
-   // RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
 
   /***
    *
@@ -192,7 +186,7 @@ class ConsoleIn
    * 
    * 
    */
-   // RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
 
   /***
    *

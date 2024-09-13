@@ -467,7 +467,7 @@ namespace RTC
      * @return 終了コード
      *         RTC::RTC_OK 正常終了
      *         RTC::RTC_ERROR ロード失敗・不明なエラー
-     *         RTC::PRECONDITION_NOT_MET 設定にり許可されない操作
+     *         RTC::PRECONDITION_NOT_MET 設定により許可されない操作
      *         RTC::BAD_PARAMETER 不正なパラメータ
      * 
      * @else
@@ -488,6 +488,44 @@ namespace RTC
      * @endif
      */
     ReturnCode_t load(const std::string& fname, const std::string& initfunc);
+
+    /*!
+     * @if jp
+     * @brief [CORBA interface] モジュールのロード
+     *
+     * 指定したコンポーネントのモジュールをロードするとともに、
+     * 指定した初期化関数を実行する。
+     *
+     * @param prop   module_file_name: モジュールファイル名
+     *               module_file_path: モジュールファイルのパス
+     *               language: プログラミング言語
+     * @param initfunc 初期化関数名
+     * @return 終了コード
+     *         RTC::RTC_OK 正常終了
+     *         RTC::RTC_ERROR ロード失敗・不明なエラー
+     *         RTC::PRECONDITION_NOT_MET 設定により許可されない操作
+     *         RTC::BAD_PARAMETER 不正なパラメータ
+     *
+     * @else
+     *
+     * @brief [CORBA interface] Load module
+     *
+     * Load specified module (shared library, DLL etc..),
+     * and invoke initialize function.
+     *
+     * @param prop   module_file_name: module file name
+     *               module_file_path: module file path
+     *               language: programming language
+     * @param initfunc The initialize function name
+     * @return Return code
+     *         RTC::RTC_OK Normal return
+     *         RTC::RTC_ERROR Load failed, or unknown error
+     *         RTC::PRECONDITION_NOT_MET Not allowed operation by conf
+     *         RTC::BAD_PARAMETER Invalid parameter
+     *
+     * @endif
+     */
+    ReturnCode_t load(coil::Properties &prop, const std::string& initfunc);
 
     /*!
      * @if jp
@@ -1737,141 +1775,141 @@ namespace RTC
     bool initFactories();
 
     void initCpuAffinity();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したポートを接続する
-	 *
-	 * 例:
-	 * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
-	 *
-	 *
-	 * @else
-	 * @brief 
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreConnection();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
-	 *
-	 * 例:
-	 * manager.components.preactivation: RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreActivation();
-	/*!
-	 * @if jp
-	 * @brief 起動時にrtc.confで指定したRTCを生成する
-	 *
-	 * 例:
-	 * manager.components.precreate RTC1,RTC2~
-	 *
-	 *
-	 * @else
-	 * @brief
-	 *
-	 *
-	 * @endif
-	 */
-	void initPreCreation();
-	/*!
-	* @if jp
-	* @brief 
-	*
-	*
-	*
-	* @else
-	* @brief
-	*
-	*
-	* @endif
-	*/
-	void invokeInitProc();
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void publishPorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	void subscribePorts(RTObject_impl* comp);
-	/*!
-	* @if jp
-	* @brief
-	* @param comp
-	*
-	*
-	*
-	* @else
-	* @brief
-	* @param comp
-	*
-	*
-	* @endif
-	*/
-	PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
-	/*!
-	* @if jp
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @else
-	* @brief
-	* @param port
-	* @param target_ports
-	*
-	*
-	* @endif
-	*/
-	void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したポートを接続する
+     *
+     * 例:
+     * manager.components.preconnect: RTC0.port0?port=RTC0.port1&interface_type=corba_cdr&dataflow_type=pull&~,~
+     *
+     *
+     * @else
+     * @brief 
+     *
+     *
+     * @endif
+     */
+    void initPreConnection();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCをアクティベーションする
+     *
+     * 例:
+     * manager.components.preactivation: RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreActivation();
+    /*!
+     * @if jp
+     * @brief 起動時にrtc.confで指定したRTCを生成する
+     *
+     * 例:
+     * manager.components.precreate RTC1,RTC2~
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void initPreCreation();
+    /*!
+     * @if jp
+     * @brief 
+     *
+     *
+     *
+     * @else
+     * @brief
+     *
+     *
+     * @endif
+     */
+    void invokeInitProc();
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void publishPorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    void subscribePorts(RTObject_impl* comp);
+    /*!
+     * @if jp
+     * @brief
+     * @param comp
+     *
+     *
+     *
+     * @else
+     * @brief
+     * @param comp
+     *
+     *
+     * @endif
+     */
+    PortServiceList* getPortsOnNameServers(const std::string& nsname, const std::string& kind);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectDataPorts(PortService_ptr port, PortServiceList_var& target_ports);
+    /*!
+     * @if jp
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @else
+     * @brief
+     * @param port
+     * @param target_ports
+     *
+     *
+     * @endif
+     */
+    void connectServicePorts(PortService_ptr port, PortServiceList_var& target_ports);
 
     /*!
      * @if jp
@@ -2243,21 +2281,23 @@ namespace RTC
     {
     public:
       explicit FactoryPredicate(const char* imple_id)
-        : m_vendor(""), m_category(""), m_impleid(imple_id), m_version("")
+        : m_vendor(""), m_category(""), m_impleid(imple_id), m_version(""), m_language("")
       {
       }
       explicit FactoryPredicate(const coil::Properties& prop)
         : m_vendor(prop["vendor"]),
           m_category(prop["category"]),
           m_impleid(prop["implementation_id"]),
-          m_version(prop["version"])
+          m_version(prop["version"]),
+          m_language(prop["language"])
       {
       }
       explicit FactoryPredicate(FactoryBase* factory)
         : m_vendor(factory->profile()["vendor"]),
           m_category(factory->profile()["category"]),
           m_impleid(factory->profile()["implementation_id"]),
-          m_version(factory->profile()["version"])
+          m_version(factory->profile()["version"]),
+          m_language(factory->profile()["language"])
       {
       }
       ~FactoryPredicate();
@@ -2276,6 +2316,9 @@ namespace RTC
           return false;
         if (!m_version.empty()  && m_version != prop["version"])
           return false;
+        if (!m_language.empty()  && m_language != prop["language"])
+          return false;
+        
 
         return true;
       }
@@ -2284,6 +2327,7 @@ namespace RTC
       std::string m_category;
       std::string m_impleid;
       std::string m_version;
+      std::string m_language;
     };
 
     class ModulePredicate

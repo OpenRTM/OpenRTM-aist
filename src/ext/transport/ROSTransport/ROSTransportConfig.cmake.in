@@ -1,0 +1,51 @@
+# -*- cmake -*-
+#
+# @file ROSTransport.cmake
+# @brief cmake-config file for ROSTransport
+#
+# This file is used for cmake config-mode.
+# The following variables are defined.
+#
+# Basic compiler/linker options
+# - ROSTRANSPORT_CFLAGS: cflags 
+# - ROSTRANSPORT_INCLUDE_DIRS: include directories
+# - ROSTRANSPORT_LDFLAGS: linker options
+# - ROSTRANSPORT_LIBRARY_DIRS: library directories
+# - ROSTRANSPORT_LIBRARIES: libraries
+# - ROSTRANSPORT_LIB_DIR: OpenRTM's lib directory
+#
+#
+# ROSTransport version
+# - ROSTRANSPORT_VERSION: x.y.z version
+# - ROSTRANSPORT_VERSION_MAJOR: major version number
+# - ROSTRANSPORT_VERSION_MINOR: minor version number
+# - ROSTRANSPORT_VERSION_PATCH: revision number
+# - ROSTRANSPORT_SHORT_VERSION: short version number 1.1.0->110
+#
+
+
+message(STATUS "ROSTransport.cmake found.")
+message(STATUS "CMAKE_GENERATOR check mode.")
+
+find_package(OpenRTM @RTM_MAJOR_VERSION@.@RTM_MINOR_VERSION@ REQUIRED)
+
+
+# ROSTransport version
+set(ROSTRANSPORT_VERSION @RTM_VERSION@)
+set(ROSTRANSPORT_VERSION_MAJOR @RTM_MAJOR_VERSION@)
+set(ROSTRANSPORT_VERSION_MINOR @RTM_MINOR_VERSION@)
+set(ROSTRANSPORT_VERSION_PATCH @RTM_REVISION_NUM@)
+set(ROSTRANSPORT_SHORT_VERSION @RTM_VERSION@)
+
+# Basic compiler/linker options
+set(ROSTRANSPORT_CFLAGS )
+set(ROSTRANSPORT_INCLUDE_DIRS ${OPENRTM_DIR}/@INSTALL_ROSTRANSPORT_INCLUDE_DIR@)
+set(ROSTRANSPORT_LDFLAGS )
+
+set(ROSTRANSPORT_LIBRARY_DIRS )
+set(ROSTRANSPORT_LIBRARIES ${OPENRTM_DIR}/@INSTALL_ROSTRANSPORT_LIB_DIR@/@target@@CMAKE_SHARED_LIBRARY_SUFFIX@)
+
+
+
+
+# end of ROSTransport.cmake

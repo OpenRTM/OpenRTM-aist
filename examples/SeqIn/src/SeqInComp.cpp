@@ -130,7 +130,13 @@ int main (int argc, char** argv)
     {
       for (int i = 1; i < argc; ++i)
         {
+#if RTM_MAJOR_VERSION >= 2
           if (coil::normalize(argv[i]) == "-listener")
+#else
+          std::string arg(argv[i]);
+          coil::normalize(arg);
+          if (arg == "-listener")
+#endif
             {
               // Connector Listener Dump Flag ON
               g_Listener_dump_enabled = true;

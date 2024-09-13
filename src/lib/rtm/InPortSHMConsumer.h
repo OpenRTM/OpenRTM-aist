@@ -52,8 +52,8 @@ namespace RTC
    * @endif
    */
   class InPortSHMConsumer
-	  : public InPortConsumer,
-	  public CorbaConsumer< ::OpenRTM::PortSharedMemory >
+       : public InPortConsumer,
+         public CorbaConsumer< ::OpenRTM::PortSharedMemory >
   {
   public:
     /*!
@@ -145,26 +145,26 @@ namespace RTC
      * @endif
      */
     bool setObject(CORBA::Object_ptr obj) override;
-	void publishInterfaceProfile(SDOPackage::NVList& properties) override;
-	bool subscribeInterface(const SDOPackage::NVList& properties) override;
-	void unsubscribeInterface(const SDOPackage::NVList& properties) override;
+    void publishInterfaceProfile(SDOPackage::NVList& properties) override;
+    bool subscribeInterface(const SDOPackage::NVList& properties) override;
+    void unsubscribeInterface(const SDOPackage::NVList& properties) override;
   
 private:
-	bool subscribeFromIor(const SDOPackage::NVList& properties);
-	bool subscribeFromRef(const SDOPackage::NVList& properties);
-	bool unsubscribeFromIor(const SDOPackage::NVList& properties);
-	bool unsubscribeFromRef(const SDOPackage::NVList& properties);
+    bool subscribeFromIor(const SDOPackage::NVList& properties);
+    bool subscribeFromRef(const SDOPackage::NVList& properties);
+    bool unsubscribeFromIor(const SDOPackage::NVList& properties);
+    bool unsubscribeFromRef(const SDOPackage::NVList& properties);
 
 protected:
-	static DataPortStatus convertReturnCode(OpenRTM::PortStatus ret);
+    static DataPortStatus convertReturnCode(OpenRTM::PortStatus ret);
 
-	coil::Properties m_properties;
-	std::mutex m_mutex;
-	std::string m_shm_address;
-	SharedMemoryPort m_shmem;
-	int m_memory_size{0};
-	bool m_endian{true};
-	mutable Logger rtclog{"InPortSHMConsumer"};
+   coil::Properties m_properties;
+   std::mutex m_mutex;
+   std::string m_shm_address;
+   SharedMemoryPort m_shmem;
+   int m_memory_size{0};
+   bool m_endian{true};
+   mutable Logger rtclog{"InPortSHMConsumer"};
   };
 } // namespace RTC
 

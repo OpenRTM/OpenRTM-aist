@@ -70,6 +70,33 @@ namespace RTC
     /*!
      * @if jp
      *
+     * @brief ROSMessageInfoを追加
+     * 
+     * @param id 名前
+     * @param info ROSMessageInfo
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @param id 
+     * @param info 
+     *
+     * @endif
+     */
+    void ROSMessageInfoList::addInfo(const std::string &id, ROSMessageInfoBase* info)
+    {
+        auto data = m_data.find(id);
+        if (data != m_data.end())
+        {
+            data->second.deleteObject();
+        }
+        m_data[id] = ROSMessageInfoEntry(info, [](ROSMessageInfoBase*& obj) { delete obj; });
+    }
+
+    /*!
+     * @if jp
+     *
      * @brief ROSMessageInfoを削除
      *
      * @param id 名前

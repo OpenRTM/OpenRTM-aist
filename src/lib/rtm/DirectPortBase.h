@@ -25,39 +25,39 @@
 
 namespace RTC
 {
-	/*!
-	* @if jp
-	* @class DirectPortBase
-	* @brief direct接続用Port基底クラス
-	*
-	*
-	* @since 1.2.0
-	*
-	* @else
-	* @class DirectPortBase
-	* @brief
-	*
-	*
-	*
-	* @since 1.2.0
-	*
-	* @endif
-	*/
+  /*!
+   * @if jp
+   * @class DirectPortBase
+   * @brief direct接続用Port基底クラス
+   *
+   *
+   * @since 1.2.0
+   *
+   * @else
+   * @class DirectPortBase
+   * @brief
+   *
+   *
+   *
+   * @since 1.2.0
+   *
+   * @endif
+   */
   class DirectPortBase
   {
   public:
-	/*!
-	* @if jp
-	* @brief デストラクタ
-	*
-	*
-	* @else
-	* @brief Destructor
-	*
-	*
-	* @endif
-	*/
-    virtual ~DirectPortBase() = default;
+     /*!
+      * @if jp
+      * @brief デストラクタ
+      *
+      *
+      * @else
+      * @brief Destructor
+      *
+      *
+      * @endif
+      */
+     virtual ~DirectPortBase() = default;
 
 
 

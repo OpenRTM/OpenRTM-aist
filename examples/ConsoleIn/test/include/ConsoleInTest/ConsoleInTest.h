@@ -1,11 +1,13 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
+// <rtc-template block="description">
 /*!
  * @file  ConsoleInTest.h
- * @brief Console input component
- * @date  $Date$
+ * @brief Console input component (test code)
  *
- * $Id$
+ * @author Noriaki Ando <n-ando@aist.go.jp>
+ *
  */
+// </rtc-template>
 
 #ifndef CONSOLEIN_TEST__H
 #define CONSOLEIN_TEST_H
@@ -113,7 +115,7 @@ class ConsoleInTest
    * 
    * 
    */
-   RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id) override;
 
   /***
    *
@@ -125,7 +127,7 @@ class ConsoleInTest
    * 
    * 
    */
-   RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
+  // RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id) override;
 
   /***
    *

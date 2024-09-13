@@ -85,7 +85,7 @@ namespace RTC
    */
   template <class DataType>
   class InPort
-	  : public InPortBase, DirectInPortBase<DataType>
+       : public InPortBase, DirectInPortBase<DataType>
   {
   public:
     /*!
