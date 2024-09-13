@@ -19,6 +19,9 @@
 
 #include <rtm/CORBA_RTCUtil.h>
 #include <rtm/NamingManager.h>
+#ifdef ORB_IS_OMNIORB
+#include <omniORB4/omniURI.h>
+#endif
 
 #include <utility>
 
@@ -1458,5 +1461,530 @@ namespace CORBA_RTCUtil
 
     return true;
   }
+
+
+ /*!
+  * @if jp
+  *
+  * @brief コンストラクタ
+  *
+  * コンストラクタ
+  *
+  * @param uri CORBAオブジェクト参照用URL
+  * @param objkey オブジェクト名
+  *
+  * @else
+  *
+  * @brief Constructor
+  *
+  * Constructor
+  *
+  * @param uri 
+  * @param objkey 
+  *
+  * @endif
+  */
+  CorbaURI::CorbaURI(std::string uri, const std::string &objkey) : m_port(0), m_addressonly(false)
+  {
+    if(uri.find("giop:tcp:") == 0)
+    {
+      uri = coil::replaceString(uri, "giop:tcp:", "corbaloc:iiop:");
+    }
+    else if(uri.find("giop:ssl:") == 0)
+    {
+      uri = coil::replaceString(uri, "giop:ssl:", "corbaloc:ssliop:");
+    }
+    else if(uri.find("giop:http:") == 0)
+    {
+      uri = coil::replaceString(uri, "giop:http:", "");
+    }
+    else if(uri.find("giop::") == 0)
+    {
+      uri = coil::replaceString(uri, "giop::", "corbaloc:iiop:");
+    }
+    else if(uri.find("iiop://") == 0)
+    {
+      uri = coil::replaceString(uri, "iiop://", "corbaloc:iiop:");
+    }
+    else if(uri.find("diop://") == 0)
+    {
+      uri = coil::replaceString(uri, "diop://", "corbaloc:diop:");
+    }
+    else if(uri.find("uiop://") == 0)
+    {
+      uri = coil::replaceString(uri, "uiop://", "corbaloc:uiop:");
+    }
+    else if(uri.find("ssliop://") == 0)
+    {
+      uri = coil::replaceString(uri, "ssliop://", "corbaloc:ssliop:");
+    }
+    else if(uri.find("shmiop://") == 0)
+    {
+      uri = coil::replaceString(uri, "shmiop://", "corbaloc:shmiop:");
+    }
+    else if(uri.find("htiop://") == 0)
+    {
+      uri = coil::replaceString(uri, "htiop://", "corbaloc:htiop:");
+    }
+    else if(uri.find("inet:") == 0)
+    {
+      uri = coil::replaceString(uri, "inet:", "corbaloc:iiop:");
+    }
+#ifdef RTM_OMNIORB_43
+    CORBA::String_var scheme, host, path, fragment;
+    CORBA::UShort port;
+
+    CORBA::Boolean ret = 
+      omni::omniURI::extractURL(uri.c_str(),
+                          scheme.out(), host.out(),
+                          port, path.out(), fragment.out());
+
+    if(ret)
+    {
+      m_protocol = scheme.in();
+      m_host = host.in();
+      m_port = static_cast<unsigned short>(port);
+      m_path = path.in();
+      m_fragment = fragment.in();
+      if(!m_fragment.empty())
+      {
+        m_uri = uri;
+      }
+      else
+      {
+        m_fragment = objkey;
+        m_uri = uri + "#";
+        m_uri += m_fragment;
+      }
+      return;
+    }
+    else
+    {
+      m_fragment = objkey;
+      if(uri.find("corbaloc") == 0)
+      {
+        m_uri = uri;
+        if(!m_fragment.empty())
+        {
+          m_uri += "/";
+          m_uri += m_fragment;
+        }
+        m_protocol = "corbaloc";
+        return;
+      }
+      else if(uri.find("corbaname") == 0)
+      {
+        m_uri = uri;
+        if(!m_fragment.empty())
+        {
+          m_uri +=  "#";
+          m_uri += m_fragment;
+        }
+        m_protocol = "corbaname";
+        return;
+      }
+      else
+      {
+        m_uri = "corbaloc:iiop:";
+        m_uri += uri;
+        if(!m_fragment.empty())
+        {
+          m_uri += "/";
+          m_uri += m_fragment;
+        }
+        m_protocol = "corbaloc";
+        m_addressonly = true;
+        coil::vstring host_port(coil::split(uri, ":"));
+        if (host_port.size() == 2)
+        {
+          m_host = host_port[0];
+          coil::stringTo(m_port, host_port[1].c_str());
+        }
+        return;
+      }
+    }
+#else
+    m_fragment = objkey;
+    if(uri.find("corbaloc") == 0)
+    {
+      m_uri = uri;
+      if(!m_fragment.empty())
+      {
+        m_uri += "/";
+        m_uri += m_fragment;
+      }
+      m_protocol = "corbaloc";
+      return;
+    }
+    else if(uri.find("corbaname") == 0)
+    {
+      m_uri = uri;
+      if(!m_fragment.empty())
+      {
+        m_uri += "#";
+        m_uri += m_fragment;
+      }
+      m_protocol = "corbaname";
+      return;
+    }
+    else
+    {
+      m_uri = "corbaloc:iiop:";
+      m_uri += uri;
+      if(!m_fragment.empty())
+      {
+        m_uri += "/";
+        m_uri += m_fragment;
+      }
+      m_protocol = "corbaloc";
+      m_addressonly = true;
+      return;
+    }
+#endif
+
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief デストラクタ
+   *
+   * デストラクタ
+   *
+   * @else
+   *
+   * @brief Destructor
+   *
+   * Destructor
+   *
+   * @endif
+   */
+  CorbaURI::~CorbaURI(){}
+
+  /*!
+   * @if jp
+   *
+   * @brief CORBAオブジェクト参照用URLを取得する
+   *
+   * @return CORBAオブジェクト参照用URL
+   *
+   * @else
+   *
+   * @brief 
+   *
+   *
+   * @return 
+   *
+   * @endif
+   */
+  std::string CorbaURI::toString() const
+  {
+    return m_uri;
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief 参照形式を取得する
+   * 例：corbaloc、corbaname、http、https、ws、wss
+   *
+   * @return 参照形式
+   *
+   * @else
+   *
+   * @brief 
+   *
+   *
+   * @return 
+   *
+   * @endif
+   */
+  std::string CorbaURI::getProtocol() const
+  {
+    return m_protocol;
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief ホスト名を取得する
+   *
+   * @return ホスト名
+   *
+   * @else
+   *
+   * @brief 
+   *
+   *
+   * @return 
+   *
+   * @endif
+   */
+  std::string CorbaURI::getHost() const
+  {
+    return m_host;
+  }
+  /*!
+   * @if jp
+   *
+   * @brief ポート番号を取得する
+   *
+   * @return ポート番号
+   *
+   * @else
+   *
+   * @brief 
+   *
+   *
+   * @return 
+   *
+   * @endif
+   */
+  unsigned short CorbaURI::getPort() const
+  {
+    return m_port;
+  }
+
+ /*!
+  * @if jp
+  *
+  * @brief 初期化時にCORBAオブジェクト参照用URLを指定した場合はfalse、
+  * ホスト名、ポート番号のみを指定した場合はtrueを返す。
+  *
+  * @return 参照先の指定方法
+  *
+  * @else
+  *
+  * @brief 
+  *
+  *
+  * @return 
+  *
+  * @endif
+  */
+  bool CorbaURI::isAddressOnly() const
+  {
+    return m_addressonly;
+  }
+
+
+  /*!
+   * @if jp
+   *
+   * @brief コンストラクタ
+   *
+   * コンストラクタ
+   *
+   * 
+   *
+   * @param uri rtcname形式、もしくはrtcloc形式のURI
+   * @param isrtcname rtcname形式を指定する場合はtrue、それ以外はfalse
+   * @param isrtcloc rtcloc形式を指定する場合はtrue、それ以外はfalse
+   *
+   * @else
+   *
+   * @brief Constructor
+   *
+   * Constructor
+   *
+   * @param uri 
+   * @param isrtcname 
+   * @param isrtcloc 
+   *
+   * @endif
+   */
+  RTCURIObject::RTCURIObject(const std::string& uri, bool isrtcname, bool isrtcloc)
+    : m_is_rtcname(false), m_is_rtcloc(false)
+  {
+    size_t pos = uri.find("://");
+    if (pos != std::string::npos)
+    {
+      std::string type = uri.substr(0, pos);
+      std::string addrname = uri.substr(pos + 3);
+      std::string protocol;
+
+      if (type.find("rtcname") == 0)
+      {
+        m_is_rtcname = true;
+      }
+      else if (type.find("rtcloc") == 0)
+      {
+        m_is_rtcloc = true;
+      }
+      else
+      {
+        return;
+      }
+
+      if (isrtcname)
+      {
+        if (!m_is_rtcname)return;
+      }
+
+      if (isrtcloc)
+      {
+        if (!m_is_rtcloc)return;
+      }
+
+      pos = type.find_first_of(".");
+
+      std::string seprtc = "/";
+      if (pos != std::string::npos)
+      {
+        protocol = type.substr(pos+1);
+        if (protocol == "http" || protocol == "https" || protocol == "ws" || protocol == "wss")
+        {
+          seprtc = "#";
+        }
+      }
+
+      pos = addrname.find_first_of(seprtc);
+      std::string hostport;
+      if (pos != std::string::npos)
+      {
+        hostport = addrname.substr(0, pos);
+        m_rtcpath = addrname.substr(pos + 1);
+      }
+      else
+      {
+        m_rtcpath = addrname;
+      }
+      
+
+      if (protocol == "http" || protocol == "https" || protocol == "ws" || protocol == "wss")
+      {
+        m_address = protocol;
+        m_address += "://";
+        m_address += hostport;
+      }
+      else
+      {
+        m_address = "corbaloc:";
+        m_address += protocol;
+        m_address += ":";
+        m_address += hostport;
+      }
+
+    }
+  }
+
+
+  /*!
+   * @if jp
+   *
+   * @brief デストラクタ
+   *
+   * デストラクタ
+   *
+   * @else
+   *
+   * @brief Destructor
+   *
+   * Destructor
+   *
+   * @endif
+   */
+  RTCURIObject::~RTCURIObject()
+  {
+
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief RTC名を取得する
+   *
+   * rtcname形式の場合はネームサーバーに登録したRTCのパスを取得できる。
+   * context1.kind1/context2.kind2/..../RTC_name
+   *
+   * rtcloc形式の場合はカテゴリ名/RTC名で取得できる。
+   *
+   * @return RTC名
+   *
+   * @else
+   *
+   * @brief 
+   *
+   * 
+   *
+   * @return
+   *
+   * @endif
+   */
+  std::string RTCURIObject::getRTCName() const
+  {
+    return m_rtcpath;
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief 通信先のアドレスを取得する
+   *
+   *
+   * context1.kind1/context2.kind2/..../RTC_name
+   *
+   * rtcloc形式の場合はカテゴリ名/RTC名で取得できる。
+   *
+   * category_name/RTC_name
+   *
+   * @return RTC名
+   *
+   * @else
+   *
+   * @brief
+   *
+   *
+   * @return
+   *
+   * @endif
+   */
+  std::string RTCURIObject::getAddress() const
+  {
+    return m_address;
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief URIがrtcname形式かを判定する
+   *
+   * @return true：rtcname形式、false：それ以外
+   *
+   * @else
+   *
+   * @brief
+   *
+   *
+   * @return
+   *
+   * @endif
+   */
+  bool RTCURIObject::isRTCNameURI() const
+  {
+    return m_is_rtcname;
+  }
+
+  /*!
+   * @if jp
+   *
+   * @brief URIがrtcloc形式かを判定する
+   *
+   * @return true：rtcname形式、false：それ以外
+   *
+   * @else
+   *
+   * @brief
+   *
+   *
+   * @return
+   *
+   * @endif
+   */
+  bool RTCURIObject::isRTCLocURI() const
+  {
+    return m_is_rtcloc;
+  }
+
 } // namespace CORBA_RTCUtil
 
