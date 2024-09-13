@@ -64,6 +64,18 @@ else()
 			SYSTEM PRIVATE
 			${FLB_INCLUDR_DIR}
 	)
+	if(NOT FLUENTBIT_ADD_INCLUDE)
+		target_include_directories(${target}
+			SYSTEM PRIVATE
+			${FLB_INCLUDR_DIR}
+		)
+	else()
+		target_include_directories(${target}
+			SYSTEM PRIVATE
+			${FLB_INCLUDR_DIR}
+			${FLB_INCLUDR_DIR}/monkey
+		)
+	endif()
 	target_link_libraries(${target} PRIVATE 
 			${libs}
 			${RTM_LINKER_OPTION}
@@ -82,6 +94,9 @@ if(VXWORKS)
 	endif(RTP)
 endif(VXWORKS)
 
+if(BUILD_RTM_LINUX_PKGS)
+	set(CMAKE_INSTALL_PREFIX "/usr")
+endif()
 set(FLUENTPLUGIN_PATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_RTM_EXT_DIR}/logger/FluentBit${CMAKE_SHARED_LIBRARY_SUFFIX}")
 if(MSVC)
 	string(REPLACE "/" "\\\\" FLUENTPLUGIN_PATH "${FLUENTPLUGIN_PATH}")

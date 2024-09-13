@@ -1,4 +1,5 @@
 ﻿#include "ByteData.h"
+#include "ByteDataStreamBase.h"
 #include <cstring>
 
 namespace RTC

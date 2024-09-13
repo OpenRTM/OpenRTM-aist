@@ -69,7 +69,7 @@ namespace RTC
    * @endif
    */
   DataPortStatus InPortDSConsumer::
-	  put(ByteData& data)
+     put(ByteData& data)
   {
     RTC_PARANOID(("put()"));
 

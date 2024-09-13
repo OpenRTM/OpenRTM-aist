@@ -60,7 +60,7 @@ else()
 endif()
 
 
-install(FILES FastRTPSMessageInfo.h DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext COMPONENT ext)
+install(FILES FastRTPSMessageInfo.h DESTINATION ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext/FastRTPS COMPONENT ext)
 
 
 

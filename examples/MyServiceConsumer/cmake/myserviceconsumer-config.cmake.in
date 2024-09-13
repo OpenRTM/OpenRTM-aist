@@ -1,0 +1,54 @@
+# MyServiceConsumer CMake config file
+#
+# This file sets the following variables:
+# MyServiceConsumer_FOUND - Always TRUE.
+# MyServiceConsumer_INCLUDE_DIRS - Directories containing the MyServiceConsumer include files.
+# MyServiceConsumer_IDL_DIRS - Directories containing the MyServiceConsumer IDL files.
+# MyServiceConsumer_LIBRARIES - Libraries needed to use MyServiceConsumer.
+# MyServiceConsumer_DEFINITIONS - Compiler flags for MyServiceConsumer.
+# MyServiceConsumer_VERSION - The version of MyServiceConsumer found.
+# MyServiceConsumer_VERSION_MAJOR - The major version of MyServiceConsumer found.
+# MyServiceConsumer_VERSION_MINOR - The minor version of MyServiceConsumer found.
+# MyServiceConsumer_VERSION_REVISION - The revision version of MyServiceConsumer found.
+# MyServiceConsumer_VERSION_CANDIDATE - The candidate version of MyServiceConsumer found.
+
+message(STATUS "Found MyServiceConsumer-@PROJECT_VERSION@")
+set(MyServiceConsumer_FOUND TRUE)
+
+find_package(<dependency> REQUIRED)
+
+#set(MyServiceConsumer_INCLUDE_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@"
+#    ${<dependency>_INCLUDE_DIRS}
+#    )
+#
+#set(MyServiceConsumer_IDL_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@/idl")
+set(MyServiceConsumer_INCLUDE_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@"
+    ${<dependency>_INCLUDE_DIRS}
+    )
+set(MyServiceConsumer_IDL_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@/idl")
+
+
+if(WIN32)
+    set(MyServiceConsumer_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_STATIC_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+else(WIN32)
+    set(MyServiceConsumer_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_SHARED_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+endif(WIN32)
+
+set(MyServiceConsumer_DEFINITIONS ${<dependency>_DEFINITIONS})
+
+set(MyServiceConsumer_VERSION @PROJECT_VERSION@)
+set(MyServiceConsumer_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(MyServiceConsumer_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(MyServiceConsumer_VERSION_REVISION @PROJECT_VERSION_REVISION@)
+set(MyServiceConsumer_VERSION_CANDIDATE @PROJECT_VERSION_CANDIDATE@)
+

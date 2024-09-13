@@ -67,7 +67,7 @@ namespace RTC
    * @endif
    */
   DataPortStatus InPortDirectConsumer::
-	  put(ByteData&  /*data*/)
+     put(ByteData&  /*data*/)
   {
     RTC_PARANOID(("put(): never called."));
     return DataPortStatus::UNKNOWN_ERROR;

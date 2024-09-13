@@ -204,7 +204,7 @@ class Struct:
 	def __init__(self):
 		return
 
-libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
+libdir_path = os.popen("rtm2-config --libdir", "r").read().split("\n")
 if libdir_path[0] != '':
 	pyhelper_path = libdir_path[0] + "/py_helper"
 	sys.path.append(pyhelper_path)
@@ -902,7 +902,7 @@ def main():
 			output = a
 			# ...
 
-	prefix = os.popen("rtm-config --prefix", "r").read().split("\n")
+	prefix = os.popen("rtm2-config --prefix", "r").read().split("\n")
 	idl_inc = []
 	if prefix[0] != '':
 		idl_inc.append(prefix[0] + "/include/rtm/idl")

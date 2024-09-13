@@ -1,16 +1,16 @@
-Source: openrtm-aist
+Source: openrtm2
 Section: science
 Priority: extra
 Maintainer: Noriaki Ando <n-ando@aist.go.jp>
-Build-Depends: debhelper (>= 9), libomniorb4-dev, omniidl4 | omniidl,  omniorb4-nameserver | omniorb-nameserver, python, uuid-dev
+Build-Depends: debhelper (>= 9), libomniorb4-dev, omniidl4 | omniidl,  omniorb4-nameserver | omniorb-nameserver, python3, uuid-dev
 Standards-Version: 3.8.4
 Homepage: http://www.openrtm.org
 
-Package: openrtm-aist
+Package: openrtm2
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}, omniorb-nameserver
+Depends: ${misc:Depends}, omniorb-nameserver, openrtm2-naming (>= 2.0.2-0)
 Description: OpenRTM-aist, RT-Middleware distributed by AIST
  OpenRTM-aist is a reference implementation of RTC (Robotic Technology
  Component Version 1.1, formal/12-09-01) specification which is OMG
@@ -22,44 +22,49 @@ Description: OpenRTM-aist, RT-Middleware distributed by AIST
  National Institute of Advanced Industrial Science and Technology
  (AIST), Japan. Please see http://www.openrtm.org/ for more detail.
 
-Package: openrtm-aist-ros
+Package: openrtm2-naming
 Architecture: any
 Multi-Arch: same
-Depends: openrtm-aist, ros-noetic-ros-core
+Replaces: openrtm2 (<< 2.0.2-0)
+Breaks: openrtm2 (<< 2.0.2-0)
+Description: OpenRTM-aist name server launcher
+
+Package: openrtm2-ros-tp
+Architecture: any
+Multi-Arch: same
+Depends: openrtm2, ros-noetic-ros-core
 Description: OpenRTM-aist extension ROS package
  Extensions of OpenRTM-aist
 
-Package: openrtm-aist-ros2
+Package: openrtm2-ros2-tp
 Architecture: any
 Multi-Arch: same
-Depends: openrtm-aist, ros-foxy-ros-core
+Depends: openrtm2, ros-foxy-ros-core
 Description: OpenRTM-aist extension ROS2 package
  Extensions of OpenRTM-aist
 
-Package: openrtm-aist-dev
+Package: openrtm2-dev
 Architecture: any
 Multi-Arch: same
-Depends: openrtm-aist, openrtm-aist-idl (>= 1.2.1-0)
+Depends: openrtm2, openrtm2-idl
 Description: OpenRTM-aist headers for development
  The header files and libraries needed for developing RT-Components
  using OpenRTM-aist.
 
-Package: openrtm-aist-idl
+Package: openrtm2-idl
 Architecture: any
 Multi-Arch: same
-Replaces: openrtm-aist-dev (<< 1.2.1-0)
-Breaks: openrtm-aist-dev (<< 1.2.1-0)
 Description: OpenRTM-aist idls for development
  The idl files needed for developing RT-Components using OpenRTM-aist.
 
-Package: openrtm-aist-example
+Package: openrtm2-example
 Architecture: any
 Multi-Arch: same
-Depends: openrtm-aist
+Depends: openrtm2
 Description: OpenRTM-aist examples
  Example components and sources of OpenRTM-aist
 
-Package: openrtm-aist-doc
+Package: openrtm2-doc
 Architecture: all
-Description: Documentation for openrtm-aist
+Description: Documentation for openrtm2
  Class reference manual of OpenRTM-aist.

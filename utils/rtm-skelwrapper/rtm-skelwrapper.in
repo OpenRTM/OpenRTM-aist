@@ -68,7 +68,7 @@ Options:
     [--verbose or -v]                     verbose mode
 
 Example:
-$ rtm-skelwrapper --idl=file=<IDL path>/<IDL basename>.idl
+$ rtm2-skelwrapper --idl=file=<IDL path>/<IDL basename>.idl
                   --include-dir=<include dir>
                   --output-dir=<output dir>
                   --skel-suffix=<skel suffix>

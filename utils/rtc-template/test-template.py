@@ -393,7 +393,7 @@ sh_header = """\
 #!/bin/sh
 export PYTHONPATH=../../:../../py_helper
 export RTM_ROOT=../../../../
-export PATH=./:../../:../../../rtm-skelwrapper:$PATH
+export PATH=./:../../:../../../rtm2-skelwrapper:$PATH
 
 rm -rf *.cpp *.h *.hh *.cc *.sln *.vcproj *.vsprops *.yaml
 rm -rf copyprops.bat Makefile.* README.*
@@ -727,7 +727,7 @@ class TestGen:
         fd.close()
 
     def create_rtmconfig(self, dict):
-        fname = dict["name"] + "/rtm-config"
+        fname = dict["name"] + "/rtm2-config"
         fd = open(fname, "w")
         fd.write(rtm_config)
         fd.close()

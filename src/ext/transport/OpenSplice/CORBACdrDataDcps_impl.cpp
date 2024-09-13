@@ -14,7 +14,7 @@
 // DDS OpenRTM_OpenSplice::CORBACdrData TypeSupportMetaHolder Object Body
 OpenRTM_OpenSplice::CORBACdrDataTypeSupportMetaHolder::CORBACdrDataTypeSupportMetaHolder (::DDS::String datatype, ::DDS::String keys, ::DDS::String descriptor) :
         DDS::OpenSplice::TypeSupportMetaHolder (DDS::string_dup(datatype), "", DDS::string_dup(keys)),
-        m_datatype(DDS::string_dup(datatype)), m_keys(DDS::string_dup(keys)), m_descriptor(DDS::string_dup(descriptor))
+        m_datatype(DDS::string_dup(datatype)), m_descriptor(DDS::string_dup(descriptor)), m_keys(DDS::string_dup(keys))
 {
     copyIn = (DDS::OpenSplice::cxxCopyIn) OpenSplice_OpenRTM_CORBACdrData_copyIn;
     copyOut = (DDS::OpenSplice::cxxCopyOut) OpenSplice_OpenRTM_CORBACdrData_copyOut;
@@ -554,7 +554,7 @@ OpenRTM_OpenSplice::CORBACdrDataDataReader_impl::dataSeqGetBuffer (
     DDS::ULong index)
 {
     OpenRTM_OpenSplice::CORBACdrDataSeq *data_seq = reinterpret_cast<OpenRTM_OpenSplice::CORBACdrDataSeq *>(received_data);
-	return &((*data_seq)[index]);
+    return &((*data_seq)[index]);
 }
 
 void

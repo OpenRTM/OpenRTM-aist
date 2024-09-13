@@ -1024,7 +1024,7 @@ namespace RTC
   */
   DirectPortBase* PortBase::getDirectPort()
   {
-	  return m_directport;
+      return m_directport;
   }
 
 
