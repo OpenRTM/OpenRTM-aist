@@ -166,7 +166,7 @@ namespace SDOPackage
 
         removePort(member, m_expPorts);
         m_rtobj->getProperties()["conf.default.exported_ports"] =
-          ::coil::flatten(m_expPorts);
+          ::coil::eraseBlank(::coil::flatten(m_expPorts));
 
         removeParticipantFromEC(member);
         removeOrganizationFromTarget(member);

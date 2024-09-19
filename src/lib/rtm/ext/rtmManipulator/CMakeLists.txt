@@ -4,9 +4,15 @@ if(WIN32)
 	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-project (rtmManipulator
-	VERSION ${RTM_VERSION}
-	LANGUAGES CXX)
+if(WIN32)
+	project (rtmManipulator
+		VERSION ${RTM_VERSION}
+		LANGUAGES CXX)
+else()
+	project (rtmManipulator2
+		VERSION ${RTM_VERSION}
+		LANGUAGES CXX)
+endif()
 
 set(${PROJECT_NAME}_IDLS
 	ManipulatorCommonInterface_Common.idl

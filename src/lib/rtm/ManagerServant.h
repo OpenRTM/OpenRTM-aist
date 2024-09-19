@@ -667,7 +667,7 @@ namespace RTM
      * @endif
      */
     RTC::RTObject_ptr
-    createComponentByManagerName(const std::string& create_arg);
+    createComponentByManagerName(std::string& create_arg, std::string& mgrstr);
 
     /*
      * @if jp
@@ -688,7 +688,7 @@ namespace RTM
      * @endif
      */
     RTC::RTObject_ptr
-    createComponentByAddress(const std::string& create_arg);
+    createComponentByAddress(std::string& create_arg, std::string& mgrstr);
 
     /*
      * @if jp
@@ -703,6 +703,32 @@ namespace RTM
      * @endif
      */
     void updateMasterManager();
+    /*
+     * @if jp
+     * @brief create引数から指定されたキーの値を返す
+     *
+     * create引数から指定されたキーを値を返すとともに、そのキーと値を削除した引
+     * 数を返す。
+     * module_name: module_name?param1=value1&param2=value2&param3...
+     * param_name:  param2
+     * の場合
+     * 返り値: value2
+     * module_name: module_name?param1=value1&param3...
+     * となる。
+     *
+     * @else @brief returns value of specified param_name from create arg
+     *
+     * This function returns the value of specified param_name from
+     * create argument, and delete param_name=value from the create
+     * arg string. If the arguments are
+     * module_name: module_name?param1=value1&param2=value2&param3...
+     * param_name:  param2
+     * this function returns
+     * ret value: value2
+     * module_name: module_name?param1=value1&param3...
+     *
+     * @endif
+     */
     std::string getParameterByModulename(const std::string& param_name, std::string &module_name);
     static bool isProcessIDManager(const std::string& mgrname);
 

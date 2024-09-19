@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5.1)
 
 project (OpenRTM_aist
-	VERSION 2.0.0
+	VERSION 2.0.2
 	LANGUAGES CXX)
 
 set(CORBA omniORB CACHE STRING "set CORBA ")
@@ -64,24 +64,34 @@ set(OPENRTM_VERSION ${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}.${RTM_REVISION_NUM
 set(OPENRTM_NAME OpenRTM-aist-${OPENRTM_VERSION})
 set(RTM_SO_VERSION ${OpenRTM_aist_VERSION_MAJOR}.${OpenRTM_aist_VERSION_MINOR})
 set(COIL_PROJECT_NAME coil)
-set(RTM_PROJECT_NAME RTC)
+if(MSVC)
+	set(RTM_PROJECT_NAME RTC)
+else()
+	set(RTM_PROJECT_NAME RTC2)
+endif()
 set(RTCSKEL_PROJECT_NAME RTCSkel)
 
 if(MSVC)
-	if(NOT RTM_VC_VER)
+	if(${MSVC_TOOLSET_VERSION} STREQUAL "140" OR
+			${MSVC_TOOLSET_VERSION} STREQUAL "141")
+		set(RTM_VC_VER vc14)
+	elseif(${MSVC_TOOLSET_VERSION} STREQUAL "142" OR
+			${MSVC_TOOLSET_VERSION} STREQUAL "143")
+		set(RTM_VC_VER vc16)
+	else()
 		set(RTM_VC_VER "vc${MSVC_TOOLSET_VERSION}")
 	endif()
-	set(INSTALL_RTM_SCRIPT_DIR ${OPENRTM_VERSION}/bin/)
-	set(INSTALL_RTM_BIN_DIR ${OPENRTM_VERSION}/bin/${RTM_VC_VER}/)
-	set(INSTALL_RTM_INCLUDE_DIR ${OPENRTM_VERSION}/)
-	set(INSTALL_COIL_INCLUDE_DIR ${OPENRTM_VERSION}/)
-	set(INSTALL_RTM_LIB_DIR ${OPENRTM_VERSION}/bin/${RTM_VC_VER}/)
-	set(INSTALL_RTM_EXAMPLE_DIR ${OPENRTM_VERSION}/Components/C++/Examples/${RTM_VC_VER}/)
+	set(INSTALL_RTM_SCRIPT_DIR ${OPENRTM_VERSION}/bin)
+	set(INSTALL_RTM_BIN_DIR ${OPENRTM_VERSION}/bin/${RTM_VC_VER})
+	set(INSTALL_RTM_INCLUDE_DIR ${OPENRTM_VERSION})
+	set(INSTALL_COIL_INCLUDE_DIR ${OPENRTM_VERSION})
+	set(INSTALL_RTM_LIB_DIR ${OPENRTM_VERSION}/bin/${RTM_VC_VER})
+	set(INSTALL_RTM_EXAMPLE_DIR ${OPENRTM_VERSION}/Components/C++/Examples/${RTM_VC_VER})
 	set(INSTALL_RTM_EXAMPLE_SHAREDLIB_DIR ${INSTALL_RTM_EXAMPLE_DIR})
-	set(INSTALL_RTM_DOC_DIR ${OPENRTM_VERSION}/docs/)
-	set(INSTALL_RTM_EXT_DIR ${OPENRTM_VERSION}/ext/${RTM_VC_VER}/)
-	set(INSTALL_RTM_CMAKE_DIR ${OPENRTM_VERSION}/cmake/)
-	set(INSTALL_RTM_ETC_DIR ${OPENRTM_VERSION}/ext/)
+	set(INSTALL_RTM_DOC_DIR ${OPENRTM_VERSION}/docs)
+	set(INSTALL_RTM_EXT_DIR ${OPENRTM_VERSION}/ext/${RTM_VC_VER})
+	set(INSTALL_RTM_CMAKE_DIR ${OPENRTM_VERSION}/cmake)
+	set(INSTALL_RTM_ETC_DIR ${OPENRTM_VERSION}/ext)
 	# For setting warning options manually, delete CMake default options.
 	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -104,6 +114,9 @@ elseif(UNIX)
 	set(INSTALL_RTM_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/openrtm-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
 	set(INSTALL_RTM_ETC_DIR ${CMAKE_INSTALL_SYSCONFDIR})
 	set(INSTALL_RTM_SHARE_DIR ${CMAKE_INSTALL_DATAROOTDIR})
+	if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 12.0.0)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aggressive-loop-optimizations --param max-inline-insns-single=1000 --param inline-unit-growth=1000 --param large-function-growth=2000")
+	endif()
 else()
 	set(INSTALL_RTM_SCRIPT_DIR lib/openrtm-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/py_helper)
 	set(INSTALL_RTM_BIN_DIR bin)
@@ -120,11 +133,12 @@ else()
 endif(MSVC)
 
 set(SSL_ENABLE FALSE CACHE BOOL "set SSL_ENABLE")
+set(HTTP_ENABLE FALSE CACHE BOOL "set HTTP_ENABLE")
 set(OBSERVER_ENABLE FALSE CACHE BOOL "set OBSERVER_ENABLE")
 
 set(LOGGING_ENABLE TRUE CACHE BOOL "set LOGGING_ENABLE")
 if(NO_LOGGING)
-	SET (ORB_C_FLAGS_LIST
+	set(ORB_C_FLAGS_LIST
 		${ORB_C_FLAGS_LIST}
 		-DNO_LOGGING
 	)
@@ -160,8 +174,8 @@ elseif(CORBA STREQUAL "omniORB")
 			message(FATAL_ERROR "can not find THIS_IS_OMNIORB_*_*_*.")
 		endif()
 		get_filename_component(OMNIORB_VERSIONFILE "${OMNIORB_VERSIONFILEPATH}" NAME)
-		string(REGEX REPLACE "THIS_IS_OMNIORB_([0-9])_([0-9])_([0-9])$" "\\1\\2" OMNI_VERSION ${OMNIORB_VERSIONFILE})
-		string(REGEX REPLACE "THIS_IS_OMNIORB_([0-9])_([0-9])_([0-9])$" "\\3" OMNI_MINOR ${OMNIORB_VERSIONFILE})
+		string(REGEX REPLACE "THIS_IS_OMNIORB_([0-9])_([0-9])_([0-9]).*$" "\\1\\2" OMNI_VERSION ${OMNIORB_VERSIONFILE})
+		string(REGEX REPLACE "THIS_IS_OMNIORB_([0-9])_([0-9])_([0-9]).*$" "\\3" OMNI_MINOR ${OMNIORB_VERSIONFILE})
 		string(REGEX REPLACE "([0-9])([0-9])$" "\\1" OMNI_VERSION1 ${OMNI_VERSION})
 		string(REGEX REPLACE "([0-9])([0-9])$" "\\2" OMNI_VERSION2 ${OMNI_VERSION})
 	endif()
@@ -197,11 +211,11 @@ endif()
 
 if(VXWORKS)
 	if("${VX_CPU_FAMILY}" STREQUAL "ppc")
-		SET (CPU_TYPE powerpc)
+		set(CPU_TYPE powerpc)
 	elseif("${VX_CPU_FAMILY}" STREQUAL "simpentium")
-		SET (CPU_TYPE simpentium)
+		set(CPU_TYPE simpentium)
 	elseif("${VX_CPU_FAMILY}" STREQUAL "simlinux")
-		SET (CPU_TYPE simlinux)
+		set(CPU_TYPE simlinux)
 	endif()
 endif(VXWORKS)
 
@@ -226,7 +240,8 @@ if(CORBA STREQUAL "ORBexpress")
 
 		set(ORB_LIBRARIES OEnames OEtcp OEmirror OEbridge OEudp OEipmc OEshrmem OEorb)
 	endif()
-	SET (ORB_C_FLAGS_LIST
+	set(ORB_C_FLAGS_LIST
+		${ORB_C_FLAGS_LIST}
 		 -DCORBA_ANY_SHARED_PTR_OPERATORS -DINCLUDE_CORBA_CORBALOC
 #		-Wpointer-arith -Wwrite-strings -Waggregate-return -Wredundant-decls -Wno-unused -Wshadow -Wundef -Wold-style-cast -fno-implement-inlines -fvolatile  -ansi -msoft-float
 	)
@@ -239,12 +254,14 @@ elseif(CORBA STREQUAL "omniORB")
 	set(CORBA_NAME "omniORB" CACHE STRING "CORBA name.")
 	if(VXWORKS)
 		if("${VX_CPU_FAMILY}" STREQUAL "ppc")
-			SET (ORB_C_FLAGS_LIST
+			set(ORB_C_FLAGS_LIST
+				${ORB_C_FLAGS_LIST}
 				-D__vxWorks__
 				-D__powerpc__
 			)
 		else()
-			SET (ORB_C_FLAGS_LIST
+			set(ORB_C_FLAGS_LIST
+				${ORB_C_FLAGS_LIST}
 				-D__vxWorks__
 				-D__x86__
 			)
@@ -267,21 +284,26 @@ elseif(CORBA STREQUAL "omniORB")
 		set(ORB_LIBRARIES omniDynamic4 omniORB4 omnithread)
 		if(SSL_ENABLE)
 			set(ORBSSL_LIBRARIES omnisslTP4)
+			if(HTTP_ENABLE)
+				set(ORBHTTP_LIBRARIES omnihttpCrypto4 omnihttpTP4)
+			endif(HTTP_ENABLE)
 		endif(SSL_ENABLE)
 		
 
 	elseif(MSVC)
 		if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM")
-			SET(ARCH_NAME ARM_win32)
-			SET (ORB_C_FLAGS_LIST
+			set(ARCH_NAME ARM_win32)
+			set(ORB_C_FLAGS_LIST
+				${ORB_C_FLAGS_LIST}
 				-D__WIN32__
 				-D__arm__
 			)
 			set(ORB_LINK_DIR ${ORB_ROOT}/lib/${ARCH_NAME})
 			set(OMNIORB_BINARY_DIR ${ORB_ROOT}/bin/${ARCH_NAME})
 		else()
-			SET(ARCH_NAME x86_win32)
-			SET (ORB_C_FLAGS_LIST
+			set(ARCH_NAME x86_win32)
+			set(ORB_C_FLAGS_LIST
+				${ORB_C_FLAGS_LIST}
 				-D__WIN32__
 				-D__x86__
 			)
@@ -302,13 +324,18 @@ elseif(CORBA STREQUAL "omniORB")
 		set(ORB_LIBRARIES optimized;omniDynamic${OMNI_VERSION}${OMNI_MINOR}_rt;optimized;omniORB${OMNI_VERSION}${OMNI_MINOR}_rt;optimized;omnithread${OMNITHREAD_VERSION}_rt;debug;omniDynamic${OMNI_VERSION}${OMNI_MINOR}_rtd;debug;omniORB${OMNI_VERSION}${OMNI_MINOR}_rtd;debug;omnithread${OMNITHREAD_VERSION}_rtd)
 		if(SSL_ENABLE)
 			set(ORBSSL_LIBRARIES optimized;omnisslTP${OMNI_VERSION}${OMNI_MINOR}_rt;debug;omnisslTP${OMNI_VERSION}${OMNI_MINOR}_rtd)
+			if(HTTP_ENABLE)
+				set(ORBHTTP_LIBRARIES 
+					optimized;omnihttpCrypto${OMNI_VERSION}${OMNI_MINOR}_rt;debug;omnihttpCrypto${OMNI_VERSION}${OMNI_MINOR}_rtd;
+					optimized;omnihttpTP${OMNI_VERSION}${OMNI_MINOR}_rt;debug;omnihttpTP${OMNI_VERSION}${OMNI_MINOR}_rtd)
+			endif(HTTP_ENABLE)
 		endif(SSL_ENABLE)
 
 
 
 		set(ORB_INSTALL_DIR ${OPENRTM_VERSION}/omniORB/${OMNI_VERSION1}.${OMNI_VERSION2}.${OMNI_MINOR}_${RTM_VC_VER}/)
 		
-		foreach(library ${ORB_LIBRARIES};${ORBSSL_LIBRARIES})
+		foreach(library ${ORB_LIBRARIES};${ORBSSL_LIBRARIES};${ORBHTTP_LIBRARIES})
 			if((NOT (${library} STREQUAL "optimized")) AND (NOT (${library} STREQUAL "debug")))
 				string(REPLACE "_rt" "*" dll "${library}")
 				file(GLOB OMNIORB_DLLS "${OMNIORB_BINARY_DIR}/${dll}.dll")
@@ -369,11 +396,11 @@ elseif(CORBA STREQUAL "TAO")
 	
 	if(VXWORKS)
 		if("${VX_CPU_FAMILY}" STREQUAL "ppc")
-			SET(ORB_C_FLAGS_LIST -D__powerpc__)
+			set(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -D__powerpc__)
 		else()
-			SET(ORB_C_FLAGS_LIST -D__x86__)
+			set(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -D__x86__)
 		endif()
-		SET(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -DACE_VXWORKS=0x690 -DACE_HAS_PTHREADS -DACE_HAS_AIO_CALLS -DACE_LACKS_ISBLANK)
+		set(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -DACE_VXWORKS=0x690 -DACE_HAS_PTHREADS -DACE_HAS_AIO_CALLS -DACE_LACKS_ISBLANK)
 
 		set(ORB_LINK_DIR ${ORB_ROOT}/lib)
 		set(ORB_LIBRARIES TAO_AnyTypeCode TAO_PortableServer TAO_Svc_Utils TAO_CosNaming TAO_DynamicInterface TAO_PI TAO_Utils TAO_PortableServer TAO_DiffServPolicy TAO_DynamicInterface TAO_Strategies TAO ACE)
@@ -395,7 +422,7 @@ elseif(CORBA STREQUAL "TAO")
 		set(ORB_LIBRARIES ${ORB_LIBRARIES1};${ORB_LIBRARIES2})
 
 		set(ORB_INCLUDE_DIR ${ORB_ROOT} ${ORB_ROOT}/TAO ${ORB_ROOT}/TAO/orbsvcs)
-		SET(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -DWIN32_LEAN_AND_MEAN -DWITH_ACE)
+		set(ORB_C_FLAGS_LIST ${ORB_C_FLAGS_LIST} -DWIN32_LEAN_AND_MEAN -DWITH_ACE)
 
 		set(ORB_LIBRARIES_INSTALL ${ORB_LIBRARIES1};TAO_IDL_FE;TAO_IDL_FEd;TAO_IDL_BE;TAO_IDL_BEd;)
 		set(ORB_INSTALL_DIR ${OPENRTM_VERSION}/ACE/${RTM_VC_VER}/)
@@ -521,7 +548,7 @@ if(VXWORKS)
 
 	set(ORB_LIBRARIES_PATH)
 	FOREACH(NAME ${ORB_LIBRARIES})
-		SET(ORB_LIB ORB_${NAME}_LIBRARY)
+		set(ORB_LIB ORB_${NAME}_LIBRARY)
 		LIST(APPEND ORB_LIBVARS ${ORB_LIB})
 		FIND_LIBRARY(${ORB_LIB} ${NAME}
 			PATHS ${ORB_LINK_DIR}
@@ -666,7 +693,7 @@ function(openrtm_common_set_compile_options target)
 		-Wstrict-null-sentinel
 		-Wstrict-overflow=5
 		$<$<VERSION_GREATER:${CMAKE_CXX_COMPILER_VERSION},6.9.9>: -Wstringop-overflow=4>
-		$<$<VERSION_GREATER:${CMAKE_CXX_COMPILER_VERSION},9.9.9>: -Wsuggest-attribute=cold>
+		$<$<VERSION_GREATER:${CMAKE_CXX_COMPILER_VERSION},13.9.9>: -Wsuggest-attribute=cold>
 		-Wsuggest-attribute=format
 		$<$<VERSION_GREATER:${CMAKE_CXX_COMPILER_VERSION},7.9.9>: -Wsuggest-attribute=malloc>
 		$<$<VERSION_GREATER:${CMAKE_CXX_COMPILER_VERSION},4.9.9>: -Wsuggest-override>
@@ -815,7 +842,7 @@ function(openrtm_gencode_set_compile_props target)
 endfunction()
 
 function(openrtm_idl_compile idl_name inc_path output category dependencies)
-	set(skel_wrapper ${OpenRTM_aist_BINARY_DIR}/rtm-skelwrapper)
+	set(skel_wrapper ${OpenRTM_aist_BINARY_DIR}/rtm2-skelwrapper)
 	if(CORBA STREQUAL "ORBexpress")
 		set(idl_flags -m -a -ex -fhh -fxcc -fc_c -fs -q -dOE_IDL -I${ORB_ROOT}/idl)
 	elseif (CORBA STREQUAL "omniORB")
@@ -929,6 +956,52 @@ if(WIN32)
 	set(MAKE_DEF_COMMAND ${CMAKE_SOURCE_DIR}/scripts/makedeffile.py)
 endif(WIN32)
 
+if(UNIX)
+  if(ROS_ENABLE OR ROS2_ENABLE)
+    set(INSTALL_ROS2TRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/ros2transport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
+    if(ROS_ENABLE)
+      set(INSTALL_ROSTRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/rostransport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+      )
+    else()
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.ros2-only-support.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+      )
+    endif()
+    file(STRINGS "/etc/os-release" data_list REGEX "^(VERSION_CODENAME)=")
+    # Look for lines like VERSION_CODENAME="..."
+    foreach(var ${data_list})
+      if("${var}" MATCHES "^(VERSION_CODENAME)=(.*)$")
+        set(ubuntu_codename "${CMAKE_MATCH_2}")
+      endif()
+    endforeach()
+
+    if(${ubuntu_codename} MATCHES "focal" OR
+       ${ubuntu_codename} MATCHES "jammy")
+      configure_file(${PROJECT_SOURCE_DIR}/src/ext/transport/FastRTPS/CORBACdrDataPubSubTypes.cpp.ubuntu2204_earlier
+	      ${PROJECT_SOURCE_DIR}/src/ext/transport/FastRTPS/CORBACdrDataPubSubTypes.cpp @ONLY
+      )
+      configure_file(${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h.ubuntu2204_earlier
+	      ${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h @ONLY
+      )
+    endif()
+
+    if(BUILD_RTM_LINUX_PKGS)
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/control.${ubuntu_codename}
+             ${PROJECT_BINARY_DIR}/control @ONLY
+      )
+    endif()
+  else()
+    configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.not-ros-support.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+    )
+    configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/control.not-ros-support
+         ${PROJECT_BINARY_DIR}/control @ONLY
+    )
+  endif()
+endif(UNIX)
+
 add_subdirectory(src)
 
 set(UTILS_ENABLE TRUE CACHE BOOL "set UTILS_ENABLE ")
@@ -975,26 +1048,3 @@ endfunction(get_dist)
 get_dist(DIST_NAME)
 message(STATUS "Distribution is ${DIST_NAME}")
 
-if(UNIX)
-    configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.in
-	 ${PROJECT_BINARY_DIR}/rules @ONLY
-    )
-
-  if(${DIST_NAME} MATCHES "Ubuntu")
-    file(STRINGS "/etc/os-release" data_list REGEX "^(VERSION_CODENAME)=")
-
-    # Look for lines like VERSION_CODENAME="..."
-    foreach(var ${data_list})
-      if("${var}" MATCHES "^(VERSION_CODENAME)=(.*)$")
-        set(ubuntu_codename "${CMAKE_MATCH_2}")
-        configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/control.${ubuntu_codename}
-             ${PROJECT_BINARY_DIR}/control @ONLY
-        )
-      endif()
-    endforeach()
-  else()
-    configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/control.not-ros-support
-         ${PROJECT_BINARY_DIR}/control @ONLY
-    )
-  endif()
-endif(UNIX)

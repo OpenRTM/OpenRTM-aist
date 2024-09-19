@@ -35,4 +35,4 @@ RUN mkdir -p /root/cxx-deb-pkgs\
  && export LD_LIBRARY_PATH=/opt/ros/dashing/lib\
  && ./dpkg_build.sh
 
-RUN cp /root/OpenRTM-aist/packages/openrtm-aist* /root/cxx-deb-pkgs/
+RUN cp /root/OpenRTM-aist/packages/openrtm* /root/cxx-deb-pkgs/

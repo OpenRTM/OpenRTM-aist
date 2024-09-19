@@ -333,7 +333,7 @@ namespace RTC
       }
 
     m_config["sdo.service.consumer.available_services"]
-      = coil::flatten(SdoServiceConsumerFactory::instance().getIdentifiers());
+      = coil::eraseBlank(coil::flatten(SdoServiceConsumerFactory::instance().getIdentifiers()));
 
     invokeInitProc();
     initPreCreation();
@@ -403,53 +403,72 @@ namespace RTC
     RTC_TRACE(("Manager::load(fname = %s, initfunc = %s)",
                fname.c_str(), initfunc.c_str()));
 
-    std::string file_name(fname);
+    coil::Properties prop;
+    prop["module_file_name"] = fname;
+
+    return load(prop, initfunc);
+  }
+
+  /*!
+   * @if jp
+   * @brief モジュールのロード
+   * @else
+   * @brief Load module
+   * @endif
+   */
+  ReturnCode_t Manager::load(coil::Properties &prop,
+    const std::string &initfunc)
+  {
+    RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
+      prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
+
+    std::string file_name(prop["module_file_name"]);
     std::string init_func(initfunc);
     m_listeners.module_.preLoad(file_name, init_func);
     try
+    {
+      if (init_func.empty())
       {
-        if (init_func.empty())
-          {
-            if (coil::isAbsolutePath(file_name))
-            {
-                coil::vstring mod(coil::split(file_name, "/"));
-                mod = coil::split(mod.back(), "\\");
-                mod = coil::split(mod.back(), ".");
-                init_func = mod[0] + "Init";
-            }
-            else
-            {
-                coil::vstring mod(coil::split(file_name, "."));
-                init_func = mod[0] + "Init";
-            }
-          }
-        std::string path(m_module->load(file_name, init_func));
-        RTC_DEBUG(("module path: %s", path.c_str()));
-        m_listeners.module_.postLoad(path, init_func);
+        if (coil::isAbsolutePath(file_name))
+        {
+          coil::vstring mod(coil::split(file_name, "/"));
+          mod = coil::split(mod.back(), "\\");
+          mod = coil::split(mod.back(), ".");
+          init_func = mod[0] + "Init";
+        }
+        else
+        {
+          coil::vstring mod(coil::split(file_name, "."));
+          init_func = mod[0] + "Init";
+        }
       }
-    catch(RTC::ModuleManager::NotAllowedOperation& e)
-      {
-        RTC_ERROR(("Operation not allowed: %s",
-                   e.reason.c_str()));
-        return RTC::PRECONDITION_NOT_MET;
-      }
-    catch(RTC::ModuleManager::NotFound& e)
-      {
-        RTC_ERROR(("Not found: %s",
-                   e.name.c_str()));
-        return RTC::RTC_ERROR;
-      }
-    catch(RTC::ModuleManager::InvalidArguments& e)
-      {
-        RTC_ERROR(("Invalid argument: %s",
-                   e.reason.c_str()));
-        return RTC::BAD_PARAMETER;
-      }
-    catch(RTC::ModuleManager::Error& e)
-      {
-        RTC_ERROR(("Error: %s", e.reason.c_str()));
-        return RTC::RTC_ERROR;
-      }
+      std::string path(m_module->load(prop, init_func));
+      RTC_DEBUG(("module path: %s", path.c_str()));
+      m_listeners.module_.postLoad(path, init_func);
+    }
+    catch (RTC::ModuleManager::NotAllowedOperation &e)
+    {
+      RTC_ERROR(("Operation not allowed: %s",
+        e.reason.c_str()));
+      return RTC::PRECONDITION_NOT_MET;
+    }
+    catch (RTC::ModuleManager::NotFound &e)
+    {
+      RTC_ERROR(("Not found: %s",
+        e.name.c_str()));
+      return RTC::RTC_ERROR;
+    }
+    catch (RTC::ModuleManager::InvalidArguments &e)
+    {
+      RTC_ERROR(("Invalid argument: %s",
+        e.reason.c_str()));
+      return RTC::BAD_PARAMETER;
+    }
+    catch (RTC::ModuleManager::Error &e)
+    {
+      RTC_ERROR(("Error: %s", e.reason.c_str()));
+      return RTC::RTC_ERROR;
+    }
     catch (...)
       {
         RTC_ERROR(("Unknown error."));
@@ -687,30 +706,31 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         std::vector<coil::Properties> mp(m_module->getLoadableModules());
         RTC_INFO(("%d loadable modules found", mp.size()));
 
-        std::vector<coil::Properties>::iterator it;
-        it = std::find_if(mp.begin(), mp.end(), ModulePredicate(comp_id));
-        if (it == mp.end())
-          {
-            RTC_ERROR(("No module for %s in loadable modules list",
-                       comp_id["implementation_id"].c_str()));
-            return nullptr;
-          }
-        if (it->findNode("module_file_name") == nullptr)
-          {
-            RTC_ERROR(("Hmm...module_file_name key not found."));
-            return nullptr;
-          }
-        // module loading
-        RTC_INFO(("Loading module: %s", (*it)["module_file_name"].c_str()));
-        load((*it)["module_file_name"], "");
-        factory = m_factory.find(comp_id);
-        if (factory == nullptr)
-          {
-            RTC_ERROR(("Factory not found for loaded module: %s",
-                       comp_id["implementation_id"].c_str()));
-            return nullptr;
-          }
+      std::vector<coil::Properties>::iterator it;
+      it = std::find_if(mp.begin(), mp.end(), ModulePredicate(comp_id));
+      if (it == mp.end())
+      {
+        RTC_ERROR(("No module for %s in loadable modules list",
+                    comp_id["implementation_id"].c_str()));
+        return nullptr;
       }
+      if (it->findNode("module_file_path") == nullptr)
+      {
+        RTC_ERROR(("Hmm...module_file_path key not found."));
+        return nullptr;
+      }
+      // module loading
+      RTC_INFO(("Loading module: %s", (*it)["module_file_path"].c_str()));
+      load((*it), "");
+      factory = m_factory.find(comp_id);
+      if (factory == nullptr)
+      {
+        RTC_ERROR(("Factory not found for loaded module: %s",
+                    comp_id["implementation_id"].c_str()));
+        return nullptr;
+      }
+
+    }
 
     coil::Properties prop;
     prop = factory->profile();
@@ -1228,7 +1248,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
 
     for (auto const& itr : coil::split(m_config["manager.preload.modules"], ","))
       {
-        std::string mpm_{coil::eraseBothEndsBlank(std::move(itr))};
+        std::string mpm_{coil::eraseBothEndsBlank(itr)};
         if (mpm_.empty())
           {
               continue;
@@ -1426,9 +1446,9 @@ std::vector<coil::Properties> Manager::getLoadableModules()
     initLogstreamOthers();
 
     RTC_INFO(("%s", m_config["openrtm.version"].c_str()));
-    RTC_INFO(("Copyright (C) 2003-2020, Noriaki Ando and OpenRTM development team,"));
+    RTC_INFO(("Copyright (C) 2003-2024, Noriaki Ando and OpenRTM development team,"));
     RTC_INFO(("  Intelligent Systems Research Institute, AIST,"));
-    RTC_INFO(("Copyright (C) 2020, Noriaki Ando and OpenRTM development team,"));
+    RTC_INFO(("Copyright (C) 2024, Noriaki Ando and OpenRTM development team,"));
     RTC_INFO(("  Industrial Cyber-Physical Research Center, AIST,"));
     RTC_INFO(("  All right reserved."));
     RTC_INFO(("Manager starting."));
@@ -1530,7 +1550,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
 #ifdef ORB_IS_OMNIORB
         CORBA::PolicyList pl;
         pl.length(1);
-#ifdef RTM_OMNIORB_42
+#if defined(RTM_OMNIORB_42) || defined(RTM_OMNIORB_43)
         pl[0] = omniPolicy::create_local_shortcut_policy(omniPolicy::LOCAL_CALLS_SHORTCUT);
 #else
         CORBA::Any v;
@@ -1735,7 +1755,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
       {
         try
           {
-            m_pORB->shutdown(true);
+            m_pORB->destroy();
             RTC_DEBUG(("ORB was shutdown."));
             RTC_DEBUG(("ORB was destroied."));
             m_pORB = CORBA::ORB::_nil();
@@ -2056,6 +2076,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
           {
           }
       }
+    cleanupComponents();
     for (auto const& m_ec : m_ecs)
       {
         try {
@@ -2296,8 +2317,8 @@ std::vector<coil::Properties> Manager::getLoadableModules()
       {
         naming_formats = comp_prop["naming.formats"];
       }
-    naming_formats = coil::flatten(coil::unique_sv(coil::split(naming_formats,
-                                                               ",")));
+    naming_formats = coil::eraseBlank(coil::flatten(coil::unique_sv(coil::split(naming_formats,
+                                                               ","))));
 
     std::string naming_names;
     naming_names = formatString(naming_formats.c_str(), comp->getProperties());
@@ -2584,7 +2605,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
 
         coil::vstring tmp = coil::split(port0_str, ".");
         tmp.pop_back();
-        std::string comp0_name = coil::flatten(tmp, ".");
+        std::string comp0_name = coil::eraseBlank(coil::flatten(tmp, "."));
 
         std::string port0_name = port0_str;
         RTObject_impl* comp0 = nullptr;
@@ -2643,7 +2664,7 @@ std::vector<coil::Properties> Manager::getLoadableModules()
           {
             tmp = coil::split(port, ".");
             tmp.pop_back();
-            std::string comp_name = coil::flatten(tmp, ".");
+            std::string comp_name = coil::eraseBlank(coil::flatten(tmp, "."));
             std::string port_name = port;
             RTObject_impl* comp = nullptr;
             RTC::RTObject_var comp_ref;

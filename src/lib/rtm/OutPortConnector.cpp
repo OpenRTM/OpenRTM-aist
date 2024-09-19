@@ -45,7 +45,7 @@ namespace RTC
    */
   OutPortConnector::~OutPortConnector()
   {
-    delete m_cdr;
+    SerializerFactory::instance().deleteObject(m_cdr);
   }
   /*!
    * @if jp

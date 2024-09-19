@@ -58,9 +58,17 @@ namespace RTC
     m_downloadAllowed = coil::toBool(prop[ALLOW_URL], "yes", "no", false);
     m_initFuncSuffix  = prop[INITFUNC_SFX];
     m_initFuncPrefix  = prop[INITFUNC_PFX];
-    coil::vstring langs(coil::split(prop["manager.supported_languages"], ","));
+
+    if (coil::toBool(prop["manager.is_master"], "YES", "NO", false))
+    {
+      m_supported_languages = coil::split(prop["manager.supported_languages"], ",");
+    }
+    else
+    {
+      m_supported_languages.push_back("C++");
+    }
     
-    for (auto& lang : langs)
+    for (auto& lang : m_supported_languages)
     {
         m_loadfailmods[lang] = coil::vstring();
     }
@@ -88,67 +96,92 @@ namespace RTC
   std::string ModuleManager::load(const std::string& file_name)
   {
     RTC_TRACE(("load(fname = %s)", file_name.c_str()));
-    if (file_name.empty()) throw InvalidArguments("Invalid file name.");
+    coil::Properties prop;
+    prop["module_file_name"] = file_name;
+    return load(prop);
+  }
+
+  /*!
+   * @if jp
+   * @brief モジュールのロード
+   * @else
+   * @brief Load the module
+   * @endif
+   */
+  std::string ModuleManager::load(coil::Properties& prop)
+  {
+    RTC_TRACE(("load(filename = %s, filepath = %s, language = %s)", 
+      prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str()));
+    std::string file_name(prop["module_file_name"]);
+    std::string file_path(prop["module_file_path"]);
+    if (file_name.empty())
+      throw InvalidArguments("Invalid file name.");
 
     if (coil::isURL(file_name))
+    {
+      if (!m_downloadAllowed)
       {
-        if (!m_downloadAllowed)
-          {
-            RTC_ERROR(("Downloading module is not allowed."));
-            throw NotAllowedOperation("Downloading module is not allowed.");
-          }
-        else
-          {
-            throw NotFound("Not implemented.");
-          }
+        RTC_ERROR(("Downloading module is not allowed."));
+        throw NotAllowedOperation("Downloading module is not allowed.");
       }
+      else
+      {
+        throw NotFound("Not implemented.");
+      }
+    }
 
     // Find local file from load path or absolute directory
-    std::string file_path;
     if (coil::isAbsolutePath(file_name))
+    {
+      if (!m_absoluteAllowed)
       {
-        if (!m_absoluteAllowed)
-          {
-            RTC_ERROR(("Absolute path is not allowed"));
-            throw NotAllowedOperation("Absolute path is not allowed");
-          }
-        else
-          {
-            file_path = file_name;
-          }
+        RTC_ERROR(("Absolute path is not allowed"));
+        throw NotAllowedOperation("Absolute path is not allowed");
       }
-    else
+      else
       {
-        file_path = findFile(file_name, m_loadPath);
+        file_path = file_name;
       }
+    }
+    else if (file_path.empty())
+    {
+      StringVector paths;
+      for (size_t i = 0; i < m_loadPath.size(); i++)
+      {
+        paths.emplace_back(coil::replaceEnv(m_loadPath[i]));
+      }
+      file_path = findFile(file_name, paths);
+    }
 
-    // Now file_name is valid full path to moduleW
+    // Now file_name is valid full path to module
     if (file_path.empty() || !fileExist(file_path))
-      {
-        RTC_ERROR(("Module file not found: %s", file_name.c_str()));
-        throw FileNotFound(file_name);
-      }
+    {
+      RTC_ERROR(("Module file not found: %s", file_name.c_str()));
+      throw FileNotFound(file_name);
+    }
 
-    DLLEntity* dll(new DLLEntity());
+    DLLEntity *dll(new DLLEntity());
 
-    int retval =  dll->dll.open(file_path.c_str());
+    int retval = dll->dll.open(file_path.c_str());
     if (retval != 0)
-      {
-        RTC_ERROR(("Module file %s load failed: %s",
-                   file_path.c_str(), dll->dll.error()));
-        delete dll;
-        throw Error("DLL open failed.");
-      }
+    {
+      RTC_ERROR(("Module file %s load failed: %s",
+        file_path.c_str(), dll->dll.error()));
+      delete dll;
+      throw Error("DLL open failed.");
+    }
     dll->properties["file_path"] = file_path;
     bool ret = m_modules.registerObject(dll);
     if (!ret)
-      {
-        RTC_ERROR(("Module registration failed: %s", file_path.c_str()));
-        delete dll;
-      }
+    {
+      RTC_ERROR(("Module registration failed: %s", file_path.c_str()));
+      delete dll;
+    }
 
     return file_path;
   }
+
+
 
   /*!
    * @if jp
@@ -170,8 +203,34 @@ namespace RTC
         throw InvalidOperation("Invalid file name");
       }
 
-    void (*initfptr)(Manager*);
-    *reinterpret_cast<void**>(&initfptr) = this->symbol(name, init_func);
+    void (*initfptr)(Manager *);
+    *reinterpret_cast<void **>(&initfptr) = this->symbol(name, init_func);
+    (*initfptr)(&(Manager::instance()));
+
+    return name;
+  }
+  /*!
+   * @if jp
+   * @brief モジュールのロード、初期化
+   * @else
+   * @brief Load and initialize the module
+   * @endif
+   */
+  std::string ModuleManager::load(coil::Properties& prop,
+    const std::string& init_func)
+  {
+    RTC_TRACE(("load(filename = %s, filepath = %s, language = %s, init_func = %s)", 
+      prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), init_func.c_str()));
+    std::string name;
+    name = load(prop);
+
+    if (name.empty())
+    {
+      throw InvalidOperation("Invalid file name");
+    }
+
+    void(*initfptr)(Manager *);
+    *reinterpret_cast<void **>(&initfptr) = this->symbol(name, init_func);
     (*initfptr)(&(Manager::instance()));
 
     return name;
@@ -321,11 +380,11 @@ namespace RTC
 
     // getting loadable module file path list.
     coil::Properties& gprop(Manager::instance().getConfig());
-    coil::vstring langs(coil::split(gprop["manager.supported_languages"], ","));
+
     RTC_DEBUG(("langs: %s", gprop["manager.supported_languages"].c_str()));
 
     // for each languages
-    for (auto & lang : langs)
+    for (auto & lang : m_supported_languages)
       {
         // 1. getting loadable files list
         coil::vstring modules(0);

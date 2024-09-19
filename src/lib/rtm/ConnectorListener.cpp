@@ -61,7 +61,7 @@ namespace RTC
    */
   ConnectorDataListenerHolder::ConnectorDataListenerHolder()
   {
-      delete m_cdr;
+      SerializerFactory::instance().deleteObject(m_cdr);
   }
 
 

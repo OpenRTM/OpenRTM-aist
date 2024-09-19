@@ -157,7 +157,7 @@ namespace RTC
           case 'f':
             if (!fileExist(get_opts.optarg))
               {
-                std::cerr << "Configuration file: " << m_configFile;
+                std::cerr << "Configuration file: " << get_opts.optarg;
                 std::cerr << " not found." << std::endl;
 #ifndef __QNX__
                 for (int i(0); i < argc; ++i)

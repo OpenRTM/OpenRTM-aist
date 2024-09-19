@@ -91,6 +91,7 @@
 #include <sensor_msgs/msg/image__rosidl_typesupport_fastrtps_cpp.hpp>
 #endif
 
+#include "ROS2MessageInfo.h"
 
 namespace RTC
 {
@@ -286,13 +287,13 @@ namespace RTC
       
       eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR);
+                eprosima::fastcdr::DDS_CDR);
       m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       std_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.getSerializedDataLength();
+      m_message.length = (uint32_t)ser.get_serialized_data_length();
 
       
       return true;
@@ -321,7 +322,7 @@ namespace RTC
 
       eprosima::fastcdr::FastBuffer fastbuffer((char*)m_message.data, m_message.length);
       eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR); // Object that deserializes the data.
+                eprosima::fastcdr::DDS_CDR); // Object that deserializes the data.
       
       deser.read_encapsulation();
       
@@ -356,13 +357,13 @@ namespace RTC
       
       eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR);
+                eprosima::fastcdr::DDS_CDR);
       m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       geometry_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.getSerializedDataLength();
+      m_message.length = (uint32_t)ser.get_serialized_data_length();
 
       
       return true;
@@ -392,7 +393,7 @@ namespace RTC
 
       eprosima::fastcdr::FastBuffer fastbuffer((char*)m_message.data, m_message.length);
       eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR); // Object that deserializes the data.
+                eprosima::fastcdr::DDS_CDR); // Object that deserializes the data.
       
       deser.read_encapsulation();
       
@@ -427,13 +428,13 @@ namespace RTC
       
       eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR);
+                eprosima::fastcdr::DDS_CDR);
       m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       sensor_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.getSerializedDataLength();
+      m_message.length = (uint32_t)ser.get_serialized_data_length();
 
       
       return true;
@@ -463,7 +464,7 @@ namespace RTC
 
       eprosima::fastcdr::FastBuffer fastbuffer((char*)m_message.data, m_message.length);
       eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-                eprosima::fastcdr::Cdr::DDS_CDR); // Object that deserializes the data.
+                eprosima::fastcdr::DDS_CDR); // Object that deserializes the data.
       
       deser.read_encapsulation();
       
@@ -704,7 +705,31 @@ namespace RTC
       return ret;
     }
   };
-  
+
+  /*!
+   * @if jp
+   *
+   * @brief GlobalFactoryにROS2用シリアライザを追加する
+   * 
+   * @param marshalingtype シリアライザの名称
+   *
+   * @else
+   *
+   * @brief 
+   *
+   * @param marshalingtype 
+   *
+   * @endif
+   */
+  template <class DataType, class MessageType, class SerializerType>
+  void addRos2Serializer(const std::string &marshalingtype)
+  {
+    addSerializer<DataType, SerializerType>(marshalingtype);
+
+    GlobalFastRTPSMessageInfoList::
+            instance().addInfo(marshalingtype,
+            new ROS2MessageInfo<MessageType>());
+  }
 }
 
 

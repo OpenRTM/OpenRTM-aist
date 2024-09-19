@@ -409,6 +409,7 @@ namespace coil
       "(?:"
         "^/" // UNIX absolute path
         R"(|^[a-zA-Z]{1}:\\)" // Windows absolute path
+        R"(|^[a-zA-Z]{1}:/)" // Windows absolute path
         R"(|^\\\\)" // Windows network file path
       ")"} ;
     return std::regex_search(str, path);
@@ -611,18 +612,22 @@ namespace coil
     coil::vstring params = coil::split(str.substr(qpos), "&");
 
     std::map<std::string, std::string> retmap;
-    for (auto & param : params)
+    for (auto& param : params)
+    {
+      if (coil::eraseBothEndsBlank(param).empty())
       {
-        std::string::size_type pos = param.find('=');
-        if (pos != std::string::npos)
-          {
-            retmap[param.substr(0, pos)] = param.substr(pos + 1);
-          }
-        else
-          {
-            retmap[param] = std::string("");
-          }
+        continue;
       }
+      std::string::size_type pos = param.find('=');
+      if (pos != std::string::npos)
+      {
+        const std::string key{ param.substr(0, pos) };
+        if (!coil::eraseBothEndsBlank(key).empty())
+        {
+          retmap[key] = param.substr(pos + 1);
+        }
+      }
+    }
     return retmap;
   }
 

@@ -1,13 +1,11 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 // <rtc-template block="description">
 /*!
  * @file ConsoleInComp.cpp
  * @brief Standalone component
- * @date $Date$
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- * $Id$
  */
 // </rtc-template>
 

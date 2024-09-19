@@ -41,25 +41,25 @@ endif()
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/rtm-config.in
-	${PROJECT_BINARY_DIR}/rtm-config @ONLY)
+	${PROJECT_BINARY_DIR}/rtm2-config @ONLY)
 
 if(NOT WIN32)
 	install(
-		FILES ${PROJECT_BINARY_DIR}/rtm-config
+		FILES ${PROJECT_BINARY_DIR}/rtm2-config
 		DESTINATION ${INSTALL_RTM_BIN_DIR}
 		COMPONENT utils
 		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ  WORLD_READ WORLD_EXECUTE)
 else()
 	install(
-		FILES ${PROJECT_BINARY_DIR}/rtm-config
+		FILES ${PROJECT_BINARY_DIR}/rtm2-config
 		DESTINATION ${INSTALL_RTM_BIN_DIR} COMPONENT utils)
 endif()
 
 #------------------------------
 # Configure openrtm-aist.pc
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/openrtm-aist.pc.in ${PROJECT_BINARY_DIR}/openrtm-aist.pc @ONLY)
+	${CMAKE_CURRENT_SOURCE_DIR}/openrtm-aist.pc.in ${PROJECT_BINARY_DIR}/openrtm2.pc @ONLY)
 install(
-	FILES ${PROJECT_BINARY_DIR}/openrtm-aist.pc
+	FILES ${PROJECT_BINARY_DIR}/openrtm2.pc
 	DESTINATION ${INSTALL_RTM_LIB_DIR}/pkgconfig
 	COMPONENT utils)
