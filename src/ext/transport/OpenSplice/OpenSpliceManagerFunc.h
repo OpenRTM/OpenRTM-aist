@@ -23,7 +23,7 @@
 
 namespace RTC_OpenSplice
 {
-    void start();
+    void start(coil::Properties& prop);
     void shutdown();
     bool registerType(const std::string& datatype, const std::string& idlpath);
     bool registeredType(const std::string& datatype);

@@ -64,6 +64,9 @@
 /* omniORB version is 4.2 */
 #cmakedefine RTM_OMNIORB_42
 
+/* omniORB version is 4.3 */
+#cmakedefine RTM_OMNIORB_43
+
 /* OS is Mac OS X */
 #cmakedefine RTM_OS_DARWIN TRUE
 

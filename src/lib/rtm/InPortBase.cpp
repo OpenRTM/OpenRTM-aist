@@ -723,15 +723,24 @@ namespace RTC
 
     // InPortProvider supports "push" dataflow type
     if (!provider_types.empty())
+    {
+      RTC_DEBUG(("dataflow_type push is supported"));
+      appendProperty("dataport.dataflow_type", "push");
+      coil::Properties prop_options;
+      for (auto& provider_type : provider_types)
       {
-        RTC_DEBUG(("dataflow_type push is supported"));
-        appendProperty("dataport.dataflow_type", "push");
-        for (auto & provider_type : provider_types)
-        {
-            appendProperty("dataport.interface_type",
-                        provider_type.c_str());
-        }
+        appendProperty("dataport.interface_type",
+          provider_type.c_str());
+        coil::Properties prop_if(factory.getProperties(provider_type));
+        coil::Properties& prop_node(prop_options.getNode(provider_type));
+        prop_node << prop_if;
       }
+      coil::Properties prop;
+      NVUtil::copyToProperties(prop, m_profile.properties);
+      coil::Properties& prop_dataport(prop.getNode("dataport.interface_option"));
+      prop_dataport << prop_options;
+      NVUtil::copyFromProperties(m_profile.properties, prop);
+    }
 
     m_providerTypes = provider_types;
   }
@@ -778,11 +787,20 @@ namespace RTC
       {
         RTC_PARANOID(("dataflow_type pull is supported"));
         appendProperty("dataport.dataflow_type", "pull");
+        coil::Properties prop_options;
         for (auto & consumer_type : consumer_types)
         {
             appendProperty("dataport.interface_type",
                         consumer_type.c_str());
+            coil::Properties prop_if(factory.getProperties(consumer_type));
+            coil::Properties& prop_node(prop_options.getNode(consumer_type));
+            prop_node << prop_if;
         }
+        coil::Properties prop;
+        NVUtil::copyToProperties(prop, m_profile.properties);
+        coil::Properties& prop_dataport(prop.getNode("dataport.interface_option"));
+        prop_dataport << prop_options;
+        NVUtil::copyFromProperties(m_profile.properties, prop);
       }
 
     m_consumerTypes = consumer_types;
@@ -1118,7 +1136,7 @@ namespace RTC
 
       node << portprop;
 
-      NVUtil::copyFromProperties(connector_profile.properties, prop);
+      NVUtil::mergeFromProperties(connector_profile.properties, prop);
 
       std::string _str = node["fan_in"];
       unsigned int value = 100;

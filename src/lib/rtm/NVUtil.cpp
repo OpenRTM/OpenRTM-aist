@@ -113,6 +113,56 @@ namespace NVUtil
       }
   }
 
+
+  /*!
+   * @if jp
+   * @brief Properties を NVList へマージする
+   * @else
+   * @brief Merge the properties to NVList
+   * @endif
+   */
+#ifndef ORB_IS_RTORB
+  void mergeFromProperties(SDOPackage::NVList& nv, const coil::Properties& prop)
+#else  // ORB_IS_RTORB
+  void mergeFromProperties(SDOPackage_NVList& nv, const coil::Properties& prop)
+#endif  // ORB_IS_RTORB
+  {
+    std::vector<std::string> keys;
+    keys = prop.propertyNames();
+#ifndef ORB_IS_RTORB
+    SDOPackage::NVList nve;
+#else  // ORB_IS_RTORB
+    SDOPackage_NVList nve;
+#endif  // ORB_IS_RTORB
+    nve.length(static_cast<CORBA::ULong>(keys.size()));
+
+    CORBA::ULong nsize(0);
+    for (CORBA::ULong i = 0; i < nv.length(); ++i)
+      {
+        if (prop.findNode(static_cast<const char*>(nv[i].name)) == nullptr)
+          {
+            nve[nsize] = nv[i];
+            nsize++;
+          }
+      }
+
+    CORBA::ULong ksize(static_cast<CORBA::ULong>(keys.size()));
+    CORBA::ULong len(ksize + nsize);
+    nv.length(len);
+
+    for (CORBA::ULong i = 0; i < ksize; ++i)
+      {
+        nv[i].name = CORBA::string_dup(keys[i].c_str());
+        nv[i].value <<= prop[keys[i]].c_str();
+      }
+
+    for (CORBA::ULong i = 0; i < nsize; ++i)
+      {
+        nv[i+ ksize] = nve[i];
+      }
+
+  }
+
   /*!
    * @if jp
    * @brief NVList を Properties へコピーする

@@ -175,9 +175,9 @@ namespace RTC
     if (index >= 0)
       {
 #ifdef ORB_IS_ORBEXPRESS
-	return RTC::PortService::_duplicate(m_portRefs[index].in());
+        return RTC::PortService::_duplicate(m_portRefs[index].in());
 #else
-	return RTC::PortService::_duplicate(m_portRefs[index]);
+        return RTC::PortService::_duplicate(m_portRefs[index]);
 #endif
       }
     return RTC::PortService::_nil();

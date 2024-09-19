@@ -1,4 +1,4 @@
-﻿# ConsoleOut
+# ConsoleOut
 
 ## Overview
 
@@ -62,36 +62,12 @@ Console output component
     <td colspan="2"></td>
   </tr>
   <tr>
-    <td rowspan="4">on_activated</td>
-    <td colspan="2">implemented</td>
-    <tr>
-      <td>Description</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>PreCondition</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>PostCondition</td>
-      <td></td>
-    </tr>
+    <td>on_activated</td>
+    <td colspan="2"></td>
   </tr>
   <tr>
-    <td rowspan="4">on_deactivated</td>
-    <td colspan="2">implemented</td>
-    <tr>
-      <td>Description</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>PreCondition</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>PostCondition</td>
-      <td></td>
-    </tr>
+    <td>on_deactivated</td>
+    <td colspan="2"></td>
   </tr>
   <tr>
     <td rowspan="4">on_execute</td>

@@ -1,0 +1,34 @@
+FROM openrtm/devel-rtm:ubuntu24.04
+
+RUN apt-get update\
+ && apt-get install -y --no-install-recommends\
+ doxygen\
+ graphviz\
+ build-essential\
+ debhelper\
+ devscripts\
+ fakeroot
+
+COPY OpenRTM-aist /root/OpenRTM-aist
+RUN cmake\
+ -DSSL_ENABLE=ON\
+ -DOBSERVER_ENABLE=ON\
+ -DFASTRTPS_ENABLE=ON\
+ -DROS2_ENABLE=ON\
+ -DDOCUMENTS_ENABLE=ON\
+ -DBUILD_RTM_LINUX_PKGS=ON\
+ -DCMAKE_BUILD_TYPE=Release\
+ -DCMAKE_INSTALL_PREFIX=/tmp/rtm/install\
+ -S /root/OpenRTM-aist\
+ -B/tmp/rtm/build\
+ && cmake --build /tmp/rtm/build --target install/strip -- -j$(nproc)
+
+WORKDIR /root/OpenRTM-aist/packages/deb/
+RUN mkdir -p /root/cxx-deb-pkgs\
+ && cp /tmp/rtm/build/rules debian/\
+ && cp /tmp/rtm/build/control debian/\
+ && chmod 775 dpkg_build.sh\
+ && export LD_LIBRARY_PATH=/opt/ros/jazzy/lib\
+ && ./dpkg_build.sh
+
+RUN cp /root/OpenRTM-aist/packages/openrtm* /root/cxx-deb-pkgs/

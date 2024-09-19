@@ -129,10 +129,10 @@ cp %{_topdir}/../../src/ext/sdo/observer/idl/*.cc %{ext_dir}/sdo/observer/idl
 %files
 /etc/rtc.conf.sample
 %defattr(-,root,root,-)
-%attr(755,root,root) %{_bindir}/rtm-naming
-%attr(755,root,root) %{_bindir}/rtcd
-%attr(755,root,root) %{_bindir}/rtcprof
-%attr(755,root,root) %{_bindir}/rtm-config
+%attr(755,root,root) %{_bindir}/rtm2-naming
+%attr(755,root,root) %{_bindir}/rtcd2
+%attr(755,root,root) %{_bindir}/rtcprof2
+%attr(755,root,root) %{_bindir}/rtm2-config
 %{_libdir}/libRTC*
 %{_libdir}/libcoil*
 %{_libdir}/librtm*
@@ -145,7 +145,7 @@ cp %{_topdir}/../../src/ext/sdo/observer/idl/*.cc %{ext_dir}/sdo/observer/idl
 %files devel
 %defattr(-,root,root,-)
 %attr(755,root,root) %{_bindir}/rtc-template
-%attr(755,root,root) %{_bindir}/rtm-skelwrapper
+%attr(755,root,root) %{_bindir}/rtm2-skelwrapper
 %attr(755,root,root) %{_bindir}/coil-config
 %{rtm_includedir}/*
 %{coil_includedir}/*

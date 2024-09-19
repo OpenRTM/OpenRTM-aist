@@ -96,6 +96,24 @@ namespace RTC
   std::string ModuleManager::load(const std::string &file_name)
   {
     RTC_TRACE(("load(fname = %s)", file_name.c_str()));
+    coil::Properties prop;
+    prop["module_file_name"] = file_name;
+    return load(prop);
+  }
+
+  /*!
+   * @if jp
+   * @brief モジュールのロード
+   * @else
+   * @brief Load the module
+   * @endif
+   */
+  std::string ModuleManager::load(coil::Properties &prop)
+  {
+    RTC_TRACE(("load(filename = %s, filepath = %s, language = %s)",
+               prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str()));
+    std::string file_name(prop["module_file_name"]);
+    std::string file_path(prop["module_file_path"]);
     if (file_name.empty())
       throw InvalidArguments("Invalid file name.");
 
@@ -113,7 +131,6 @@ namespace RTC
     }
 
     // Find local file from load path or absolute directory
-    std::string file_path;
     if (coil::isAbsolutePath(file_name))
     {
       if (!m_absoluteAllowed)
@@ -138,7 +155,7 @@ namespace RTC
       file_path = findFile(file_name, paths);
     }
 
-    // Now file_name is valid full path to moduleW
+    // Now file_name is valid full path to module
     if (file_path.empty() || !fileExist(file_path))
     {
       RTC_ERROR(("Module file not found: %s", file_name.c_str()));
@@ -180,6 +197,32 @@ namespace RTC
                file_name.c_str(), init_func.c_str()));
     std::string name;
     name = load(file_name);
+
+    if (name.empty())
+    {
+      throw InvalidOperation("Invalid file name");
+    }
+
+    void (*initfptr)(Manager *);
+    *reinterpret_cast<void **>(&initfptr) = this->symbol(name, init_func);
+    (*initfptr)(&(Manager::instance()));
+
+    return name;
+  }
+  /*!
+   * @if jp
+   * @brief モジュールのロード、初期化
+   * @else
+   * @brief Load and initialize the module
+   * @endif
+   */
+  std::string ModuleManager::load(coil::Properties &prop,
+                                  const std::string &init_func)
+  {
+    RTC_TRACE(("load(filename = %s, filepath = %s, language = %s, init_func = %s)",
+               prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), init_func.c_str()));
+    std::string name;
+    name = load(prop);
 
     if (name.empty())
     {

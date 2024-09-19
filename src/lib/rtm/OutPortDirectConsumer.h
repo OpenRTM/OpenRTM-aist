@@ -52,7 +52,7 @@ namespace RTC
    *
    * @endif
    */
-	class OutPortDirectConsumer
+  class OutPortDirectConsumer
     : public OutPortConsumer
   {
   public:
@@ -70,7 +70,7 @@ namespace RTC
      *
      * @endif
      */
-	 OutPortDirectConsumer();
+    OutPortDirectConsumer();
 
     /*!
      * @if jp
@@ -85,7 +85,7 @@ namespace RTC
      *
      * @endif
      */
-	~OutPortDirectConsumer() override;
+    ~OutPortDirectConsumer() override;
 
     /*!
      * @if jp
@@ -257,8 +257,8 @@ namespace RTC
     void unsubscribeInterface(const SDOPackage::NVList& properties) override;
     
 private:
-	mutable Logger rtclog;
-	coil::Properties m_properties;
+    mutable Logger rtclog;
+    coil::Properties m_properties;
   };
 } // namespace RTC
 
@@ -277,7 +277,7 @@ extern "C"
    *
    * @endif
    */
-	void OutPortDirectConsumerInit(void);
+  void OutPortDirectConsumerInit(void);
 }
 
 #endif // RTC_OUTPORTDIRECTCONSUMER_H

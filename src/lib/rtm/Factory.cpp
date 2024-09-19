@@ -99,8 +99,8 @@ namespace RTC
    * @endif
    */
   FactoryCXX::FactoryCXX(const coil::Properties& profile,
-			 RtcNewFunc new_func,
-			 RtcDeleteFunc delete_func,
+                         RtcNewFunc new_func,
+                         RtcDeleteFunc delete_func,
                          RTM::NumberingPolicyBase* policy)
     : FactoryBase(profile),
       m_New(new_func),

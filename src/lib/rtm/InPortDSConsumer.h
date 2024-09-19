@@ -151,7 +151,7 @@ namespace RTC
      *
      * @endif
      */
-	DataPortStatus put(ByteData& data) override;
+    DataPortStatus put(ByteData& data) override;
 
     /*!
      * @if jp

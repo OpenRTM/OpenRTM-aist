@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dds xmlns="http://www.omg.org/dds/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="file:DDS_QoSProfile.xsd">
+     <qos_profile name="testProfile">
+          <datareader_qos>
+          </datareader_qos>
+          <datawriter_qos>
+          </datawriter_qos>
+          <domainparticipant_qos>
+          </domainparticipant_qos>
+          <subscriber_qos>
+          </subscriber_qos>
+          <publisher_qos>
+          </publisher_qos>
+          <topic_qos>
+          </topic_qos>
+</qos_profile>
+</dds>
