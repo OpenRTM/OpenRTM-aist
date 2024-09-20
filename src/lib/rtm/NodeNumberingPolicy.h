@@ -47,7 +47,7 @@ namespace RTM
    *
    * @endif
    */
-	class NodeNumberingPolicy
+  class NodeNumberingPolicy
     : public NumberingPolicyBase
   {
   public:
@@ -66,7 +66,7 @@ namespace RTM
      *
      * @endif
      */
-	  NodeNumberingPolicy();
+    NodeNumberingPolicy();
     
     /*!
      * @if jp
@@ -79,7 +79,7 @@ namespace RTM
      *
      * @endif
      */
-	  ~NodeNumberingPolicy() override = default;
+    ~NodeNumberingPolicy() override = default;
     
     /*!
      * @if jp
@@ -132,36 +132,36 @@ namespace RTM
     void onDelete(void* obj) override;
     
   protected:
-	  /*!
-	  * @if jp
-	  *
-	  * @brief オブジェクトの検索
-	  *
-	  * マスターマネージャ、およびスレーブマネージャに登録されたRTCを検索し、
-	  * 　　　　名前が一致するRTCが存在する場合はTrueを返す
-	  * このプロセスで起動したマネージャがマスターマネージャではなく、
-	  *  さらにマスターマネージャが1つも登録されていない場合はこのプロセスのマネージャから検索
-	  *
-	  * @param name 検索対象オブジェクトの名前
-	  *
-	  * @return 判定
-	  *
-	  * @else
-	  *
-	  * @brief
-	  *
-	  *
-	  * @param name
-	  *
-	  * @return
-	  *
-	  * @endif
-	  */
-	  virtual bool find(std::string name);
+    /*!
+     * @if jp
+     *
+     * @brief オブジェクトの検索
+     *
+     * マスターマネージャ、およびスレーブマネージャに登録されたRTCを検索し、
+     * 　　　　名前が一致するRTCが存在する場合はTrueを返す
+     * このプロセスで起動したマネージャがマスターマネージャではなく、
+     *  さらにマスターマネージャが1つも登録されていない場合はこのプロセスのマネージャから検索
+     *
+     * @param name 検索対象オブジェクトの名前
+     *
+     * @return 判定
+     *
+     * @else
+     *
+     * @brief
+     *
+     *
+     * @param name
+     *
+     * @return
+     *
+     * @endif
+     */
+    virtual bool find(std::string name);
     
   private:
     std::vector<void*> m_objects;
-	RTC::Manager *m_mgr;
+    RTC::Manager *m_mgr;
   };
 } // namespace RTM
 

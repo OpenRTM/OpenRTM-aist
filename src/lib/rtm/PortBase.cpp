@@ -240,7 +240,7 @@ namespace RTC
             PortService_var portref = getPortRef();
             if (!portref->_is_equivalent(connector_profile.ports[i]))
               {
-                bool ret = CORBA_RTCUtil::already_connected(connector_profile.ports[i], m_objref.in());
+                bool ret = CORBA_RTCUtil::already_connected(m_objref.in(), connector_profile.ports[i]);
                 if(ret)
                   {
                     return RTC::PRECONDITION_NOT_MET;
@@ -1002,7 +1002,7 @@ namespace RTC
   */
   DirectPortBase* PortBase::getDirectPort()
   {
-	  return m_directport;
+      return m_directport;
   }
 
 

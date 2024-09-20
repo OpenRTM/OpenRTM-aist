@@ -97,7 +97,7 @@ namespace RTC
   */
   void FileStreamBase::enableEscapeSequence()
   {
-	  m_esEnable = true;
+    m_esEnable = true;
   }
 
   /*!
@@ -117,7 +117,7 @@ namespace RTC
   */
   void FileStreamBase::disableEscapeSequence()
   {
-	  m_esEnable = false;
+    m_esEnable = false;
   }
 
 

@@ -60,18 +60,18 @@ namespace OpenRTM_OpenSplice
       using _var_type = CORBACdrDataTypeSupportInterface_var;
 
       static CORBACdrDataTypeSupportInterface_ptr _duplicate (CORBACdrDataTypeSupportInterface_ptr obj);
-      DDS::Boolean _local_is_a (const char * id);
+      DDS::Boolean _local_is_a (const char * id) override;
 
       static CORBACdrDataTypeSupportInterface_ptr _narrow (DDS::Object_ptr obj);
       static CORBACdrDataTypeSupportInterface_ptr _unchecked_narrow (DDS::Object_ptr obj);
-      static CORBACdrDataTypeSupportInterface_ptr _nil () { return 0; }
+      static CORBACdrDataTypeSupportInterface_ptr _nil () { return nullptr; }
       static const char * _local_id;
       CORBACdrDataTypeSupportInterface_ptr _this () { return this; }
 
 
    protected:
-      CORBACdrDataTypeSupportInterface () {};
-      ~CORBACdrDataTypeSupportInterface () {};
+      CORBACdrDataTypeSupportInterface () {}
+      ~CORBACdrDataTypeSupportInterface () {}
    private:
       CORBACdrDataTypeSupportInterface (const CORBACdrDataTypeSupportInterface &);
       CORBACdrDataTypeSupportInterface & operator = (const CORBACdrDataTypeSupportInterface &);
@@ -86,11 +86,11 @@ namespace OpenRTM_OpenSplice
       using _var_type = CORBACdrDataDataWriter_var;
 
       static CORBACdrDataDataWriter_ptr _duplicate (CORBACdrDataDataWriter_ptr obj);
-      DDS::Boolean _local_is_a (const char * id);
+      DDS::Boolean _local_is_a (const char * id) override;
 
       static CORBACdrDataDataWriter_ptr _narrow (DDS::Object_ptr obj);
       static CORBACdrDataDataWriter_ptr _unchecked_narrow (DDS::Object_ptr obj);
-      static CORBACdrDataDataWriter_ptr _nil () { return 0; }
+      static CORBACdrDataDataWriter_ptr _nil () { return nullptr; }
       static const char * _local_id;
       CORBACdrDataDataWriter_ptr _this () { return this; }
 
@@ -109,8 +109,8 @@ namespace OpenRTM_OpenSplice
       virtual DDS::LongLong lookup_instance (const CORBACdrData& instance_data) = 0;
 
    protected:
-      CORBACdrDataDataWriter () {};
-      ~CORBACdrDataDataWriter () {};
+      CORBACdrDataDataWriter () {}
+      ~CORBACdrDataDataWriter () {}
    private:
       CORBACdrDataDataWriter (const CORBACdrDataDataWriter &);
       CORBACdrDataDataWriter & operator = (const CORBACdrDataDataWriter &);
@@ -125,11 +125,11 @@ namespace OpenRTM_OpenSplice
       using _var_type = CORBACdrDataDataReader_var;
 
       static CORBACdrDataDataReader_ptr _duplicate (CORBACdrDataDataReader_ptr obj);
-      DDS::Boolean _local_is_a (const char * id);
+      DDS::Boolean _local_is_a (const char * id) override;
 
       static CORBACdrDataDataReader_ptr _narrow (DDS::Object_ptr obj);
       static CORBACdrDataDataReader_ptr _unchecked_narrow (DDS::Object_ptr obj);
-      static CORBACdrDataDataReader_ptr _nil () { return 0; }
+      static CORBACdrDataDataReader_ptr _nil () { return nullptr; }
       static const char * _local_id;
       CORBACdrDataDataReader_ptr _this () { return this; }
 
@@ -151,8 +151,8 @@ namespace OpenRTM_OpenSplice
       virtual DDS::LongLong lookup_instance (const CORBACdrData& instance) = 0;
 
    protected:
-      CORBACdrDataDataReader () {};
-      ~CORBACdrDataDataReader () {};
+      CORBACdrDataDataReader () {}
+      ~CORBACdrDataDataReader () {}
    private:
       CORBACdrDataDataReader (const CORBACdrDataDataReader &);
       CORBACdrDataDataReader & operator = (const CORBACdrDataDataReader &);
@@ -167,11 +167,11 @@ namespace OpenRTM_OpenSplice
       using _var_type = CORBACdrDataDataReaderView_var;
 
       static CORBACdrDataDataReaderView_ptr _duplicate (CORBACdrDataDataReaderView_ptr obj);
-      DDS::Boolean _local_is_a (const char * id);
+      DDS::Boolean _local_is_a (const char * id) override;
 
       static CORBACdrDataDataReaderView_ptr _narrow (DDS::Object_ptr obj);
       static CORBACdrDataDataReaderView_ptr _unchecked_narrow (DDS::Object_ptr obj);
-      static CORBACdrDataDataReaderView_ptr _nil () { return 0; }
+      static CORBACdrDataDataReaderView_ptr _nil () { return nullptr; }
       static const char * _local_id;
       CORBACdrDataDataReaderView_ptr _this () { return this; }
 
@@ -192,8 +192,8 @@ namespace OpenRTM_OpenSplice
       virtual DDS::LongLong lookup_instance (const CORBACdrData& instance) = 0;
 
    protected:
-      CORBACdrDataDataReaderView () {};
-      ~CORBACdrDataDataReaderView () {};
+      CORBACdrDataDataReaderView () {}
+      ~CORBACdrDataDataReaderView () {}
    private:
       CORBACdrDataDataReaderView (const CORBACdrDataDataReaderView &);
       CORBACdrDataDataReaderView & operator = (const CORBACdrDataDataReaderView &);

@@ -274,6 +274,59 @@ namespace RTC
      * @endif
      */
     std::string load(const std::string& file_name);
+    /*!
+     * @if jp
+     *
+     * @brief モジュールのロード
+     *
+     * file_name をDLL もしくは共有ライブラリとしてロードする。
+     * file_name は既定のロードパス (manager.modules.load_path) に対する
+     * 相対パスで指定する。
+     * ただし、module_file_pathが設定されている場合には module_file_path の
+     * パスのライブラリをロードする。
+     *
+     * Property manager.modules.abs_path_allowed が yes の場合、
+     * ロードするモジュールを絶対パスで指定することができる。<br>
+     * Property manager.modules.download_allowed が yes の場合、
+     * ロードするモジュールをURLで指定することができる。
+     *
+     * module_file_name は絶対パスで指定することができる。
+     * manager.modules.abs_path_allowd が no の場合、
+     * 既定のモジュールロードパスから、file_name のモジュールを探しロードする。
+     *
+     * @param prop   module_file_name: モジュールファイル名
+     *               module_file_path: モジュールいファイルのパス
+     *               language: プログラミング言語
+     *
+     * @return 指定したロード対象モジュール名
+     *
+     * @else
+     *
+     * @brief Load the module
+     *
+     * Load file_name as DLL or a shared liblary.
+     * The file_name is specified by the relative path to default load
+     * path (manager.modules.load_path).
+     *
+     * If Property manager.modules.abs_path_allowed is yes,
+     * the load module can be specified by the absolute path.<br>
+     * If Property manager.modules.download_allowed is yes,
+     * the load module can be specified with URL.
+     *
+     * The module_file_name can be specified by the absolute path.
+     * If manager.modules.abs_path_allowed is no, module of file_name
+     * will be searched from the default module load path and loaded.
+     *
+     * @param prop   module_file_name: module file name
+     *               module_file_path: module file path
+     *               language: programming language
+     *
+     * @return Name of module for the specified load
+     *
+     * @endif
+     */
+    std::string load(coil::Properties& prop);
+
 
     /*!
      * @if jp
@@ -304,6 +357,40 @@ namespace RTC
      */
     std::string load(const std::string& file_name,
                      const std::string& init_func);
+    /*!
+     * @if jp
+     *
+     * @brief モジュールのロード、初期化
+     *
+     * 指定したファイルをDLL もしくは共有ライブラリとしてロードするとともに、
+     * 指定した初期化用オペレーションを実行する。
+     *
+     * @param prop   module_file_name: モジュールファイル名
+     *               module_file_path: モジュールいファイルのパス
+     *               language: プログラミング言語
+     * @param init_func 初期化処理用オペレーション
+     *
+     * @return 指定したロード対象モジュール名
+     *
+     * @else
+     *
+     * @brief Load and intialize the module
+     *
+     * Load the specified file as DLL or a shared library, and execute operation
+     * for specified initialization.
+     *
+     * @param prop   module_file_name: module file name
+     *               module_file_path: module file path
+     *               language: programming language
+     * @param init_func Operation for initialization
+     *
+     * @return Name of module for the specified load
+     *
+     * @endif
+     */
+    std::string load(coil::Properties& prop,
+        const std::string& init_func);
+
 
     /*!
      * @if jp
@@ -684,11 +771,21 @@ namespace RTC
     {
       std::string m_filepath;
     public:
-      explicit DllPred(const char* filepath) : m_filepath(filepath) {}
+      explicit DllPred(const char* filepath) 
+      {
+        m_filepath = coil::replaceString(filepath, "\\", "/");
+        m_filepath = coil::replaceString(m_filepath, "//", "/");
+      }
       explicit DllPred(const DLLEntity* dll)
-               : m_filepath(dll->properties["file_path"]) {}
+      {
+        m_filepath = coil::replaceString(dll->properties["file_path"], "\\", "/");
+        m_filepath = coil::replaceString(m_filepath, "//", "/");
+      }
       bool operator()(DLLEntity* dllentity)
       {
+        std::string file_path = coil::replaceString(
+          dllentity->properties.getProperty("file_path"), "\\", "/");
+        file_path = coil::replaceString(file_path, "//", "/");
         return m_filepath == dllentity->properties.getProperty("file_path");
       }
     };
@@ -754,6 +851,15 @@ namespace RTC
 
     /*!
      * @if jp
+     * @brief サポートするRTCの実装言語
+     * @else
+     * @brief 
+     * @endif
+     */
+    coil::vstring m_supported_languages;
+
+    /*!
+     * @if jp
      * @brief モジュールアンロードファンクタ
      * @else
      * @brief Module unloading functor
@@ -771,7 +877,7 @@ namespace RTC
     };
 
     vProperties m_modprofs;
-	std::map<std::string, coil::vstring> m_loadfailmods;
+    std::map<std::string, coil::vstring> m_loadfailmods;
 
   };   // class ModuleManager
 } // namespace RTC

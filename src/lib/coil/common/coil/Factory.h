@@ -21,6 +21,7 @@
 #define COIL_FACTORY_H
 
 #include <coil/Singleton.h>
+#include <coil/Properties.h>
 
 #include <cassert>
 #include <cstdint>
@@ -59,7 +60,7 @@
 
 namespace coil
 {
-/*!
+  /*!
    * @if jp
    *
    * @brief reutrn codes of Factory class.
@@ -70,17 +71,17 @@ namespace coil
    *
    * @endif
    */
-enum class FactoryReturn : uint8_t
-{
-  OK,
-  FACTORY_ERROR,
-  ALREADY_EXISTS,
-  NOT_FOUND,
-  INVALID_ARG,
-  UNKNOWN_ERROR
-};
+  enum class FactoryReturn : uint8_t
+  {
+    OK,
+    FACTORY_ERROR,
+    ALREADY_EXISTS,
+    NOT_FOUND,
+    INVALID_ARG,
+    UNKNOWN_ERROR
+  };
 
-/*!
+  /*!
    * @if jp
    *
    * @brief Creator テンプレート
@@ -91,13 +92,13 @@ enum class FactoryReturn : uint8_t
    *
    * @endif
    */
-template <class AbstractClass, class ConcreteClass>
-AbstractClass *Creator()
-{
-  return new ConcreteClass();
-}
+  template <class AbstractClass, class ConcreteClass>
+  AbstractClass *Creator()
+  {
+    return new ConcreteClass();
+  }
 
-/*!
+  /*!
    * @if jp
    *
    * @brief Destructor テンプレート
@@ -108,23 +109,23 @@ AbstractClass *Creator()
    *
    * @endif
    */
-template <class AbstractClass, class ConcreteClass>
-void Destructor(AbstractClass *&obj)
-{
-  if (obj == nullptr)
+  template <class AbstractClass, class ConcreteClass>
+  void Destructor(AbstractClass *&obj)
   {
-    return;
+    if (obj == nullptr)
+    {
+      return;
+    }
+    ConcreteClass *tmp = dynamic_cast<ConcreteClass *>(obj);
+    if (tmp == nullptr)
+    {
+      return;
+    }
+    delete obj;
+    obj = nullptr;
   }
-  ConcreteClass *tmp = dynamic_cast<ConcreteClass *>(obj);
-  if (tmp == nullptr)
-  {
-    return;
-  }
-  delete obj;
-  obj = nullptr;
-}
 
-/*!
+  /*!
    * @if jp
    *
    * @class Factory
@@ -137,23 +138,23 @@ void Destructor(AbstractClass *&obj)
    *
    * @endif
    */
-template <
-    class AbstractClass,
-    typename Identifier = std::string,
-    typename Compare = std::less<Identifier>,
-    typename Creator = AbstractClass *(*)(),
-    typename Destructor = void (*)(AbstractClass *&)>
-class Factory
-{
-  class FactoryEntry;
+  template <
+      class AbstractClass,
+      typename Identifier = std::string,
+      typename Compare = std::less<Identifier>,
+      typename Creator = AbstractClass *(*)(),
+      typename Destructor = void (*)(AbstractClass *&)>
+  class Factory
+  {
+    class FactoryEntry;
 
-public:
-  using FactoryMap = std::map<Identifier, FactoryEntry>;
-  using FactoryMapIt = typename FactoryMap::iterator;
-  using ObjectMap = std::map<AbstractClass *, FactoryEntry>;
-  using ObjectMapIt = typename ObjectMap::iterator;
+  public:
+    using FactoryMap = std::map<Identifier, FactoryEntry>;
+    using FactoryMapIt = typename FactoryMap::iterator;
+    using ObjectMap = std::map<AbstractClass *, FactoryEntry>;
+    using ObjectMapIt = typename ObjectMap::iterator;
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリー有無チェック
@@ -176,13 +177,13 @@ public:
      *
      * @endif
      */
-  bool hasFactory(const Identifier &id)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    return static_cast<bool>(m_creators.count(id) != 0);
-  }
+    bool hasFactory(const Identifier &id)
+    {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      return static_cast<bool>(m_creators.count(id) != 0);
+    }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリーIDリスト取得
@@ -201,24 +202,56 @@ public:
      *
      * @endif
      */
-  std::vector<Identifier> getIdentifiers()
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    std::vector<Identifier> idlist;
-    idlist.reserve(m_creators.size());
-
-    FactoryMapIt it(m_creators.begin());
-    FactoryMapIt it_end(m_creators.end());
-
-    while (it != it_end)
+    std::vector<Identifier> getIdentifiers()
     {
-      idlist.emplace_back(it->first);
-      ++it;
-    }
-    return idlist;
-  }
+      std::lock_guard<std::mutex> guard(m_mutex);
+      std::vector<Identifier> idlist;
+      idlist.reserve(m_creators.size());
 
-  /*!
+      FactoryMapIt it(m_creators.begin());
+      FactoryMapIt it_end(m_creators.end());
+
+      while (it != it_end)
+      {
+        idlist.emplace_back(it->first);
+        ++it;
+      }
+      return idlist;
+    }
+
+    /*!
+     * @if jp
+     *
+     * @brief 指定IDのファクトリのプロパティを取得する
+     *
+     * プロパティにはオブジェクトの設定に必要なパラメータ
+     * の情報を格納している
+     *
+     * @return プロパティ
+     *
+     * @else
+     *
+     * @brief 
+     *
+     * 
+     *
+     * @return 
+     *
+     * @endif
+     */
+    Properties getProperties(const Identifier &id)
+    {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      FactoryMapIt it = m_creators.find(id);
+      if (it != m_creators.end())
+      {
+        return m_creators[id].prop_;
+      }
+    
+      return Properties();
+    }
+
+    /*!
      * @if jp
      *
      * @brief ファクトリー登録
@@ -228,6 +261,7 @@ public:
      * @param id ファクトリーID
      * @param creator クリエータ用ファンクタ
      * @param destructor デストラクタ用ファンクタ
+     * @param prop 設定に必要な各種パラメータの情報
      *
      * @return OK: 正常終了
      *         ALREADY_EXISTS: 登録済み
@@ -242,6 +276,7 @@ public:
      * @param id Factory ID.
      * @param creator Functor for creator.
      * @param destructor Functor for destructor.
+     * @param prop 
      *
      * @return OK: Successful
      *         ALREADY_EXISTS: already exists.
@@ -249,25 +284,26 @@ public:
      *
      * @endif
      */
-  FactoryReturn addFactory(const Identifier &id,
-                           Creator creator,
-                           Destructor destructor)
-  {
-    if (creator == nullptr || destructor == nullptr)
+    FactoryReturn addFactory(const Identifier &id,
+                             Creator creator,
+                             Destructor destructor,
+                             Properties prop = Properties())
     {
-      return FactoryReturn::INVALID_ARG;
+      if (creator == nullptr || destructor == nullptr)
+      {
+        return FactoryReturn::INVALID_ARG;
+      }
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_creators.count(id) != 0)
+      {
+        return FactoryReturn::ALREADY_EXISTS;
+      }
+      FactoryEntry f(id, creator, destructor, prop);
+      m_creators[id] = f;
+      return FactoryReturn::OK;
     }
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_creators.count(id) != 0)
-    {
-      return FactoryReturn::ALREADY_EXISTS;
-    }
-    FactoryEntry f(id, creator, destructor);
-    m_creators[id] = f;
-    return FactoryReturn::OK;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリー削除
@@ -292,18 +328,18 @@ public:
      *
      * @endif
      */
-  FactoryReturn removeFactory(const Identifier &id)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_creators.count(id) == 0)
+    FactoryReturn removeFactory(const Identifier &id)
     {
-      return FactoryReturn::NOT_FOUND;
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_creators.count(id) == 0)
+      {
+        return FactoryReturn::NOT_FOUND;
+      }
+      m_creators.erase(id);
+      return FactoryReturn::OK;
     }
-    m_creators.erase(id);
-    return FactoryReturn::OK;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリーオブジェクト生成
@@ -326,20 +362,20 @@ public:
      *
      * @endif
      */
-  AbstractClass *createObject(const Identifier &id)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_creators.count(id) == 0)
+    AbstractClass *createObject(const Identifier &id)
     {
-      return nullptr;
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_creators.count(id) == 0)
+      {
+        return nullptr;
+      }
+      AbstractClass *obj = m_creators[id].creator_();
+      assert(m_objects.count(obj) == 0);
+      m_objects[obj] = m_creators[id];
+      return obj;
     }
-    AbstractClass *obj = m_creators[id].creator_();
-    assert(m_objects.count(obj) == 0);
-    m_objects[obj] = m_creators[id];
-    return obj;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリーオブジェクト削除
@@ -360,19 +396,19 @@ public:
      *
      * @endif
      */
-  FactoryReturn deleteObject(const Identifier &id, AbstractClass *&obj)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_creators.count(id) == 0)
+    FactoryReturn deleteObject(const Identifier &id, AbstractClass *&obj)
     {
-      return deleteObject(obj);
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_creators.count(id) == 0)
+      {
+        return deleteObject(obj);
+      }
+      m_creators[id].destructor_(obj);
+      m_objects.erase(obj);
+      return FactoryReturn::OK;
     }
-    m_creators[id].destructor_(obj);
-    m_objects.erase(obj);
-    return FactoryReturn::OK;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief ファクトリーオブジェクト削除
@@ -391,20 +427,20 @@ public:
      *
      * @endif
      */
-  FactoryReturn deleteObject(AbstractClass *&obj)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_objects.count(obj) == 0)
+    FactoryReturn deleteObject(AbstractClass *&obj)
     {
-      return FactoryReturn::NOT_FOUND;
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_objects.count(obj) == 0)
+      {
+        return FactoryReturn::NOT_FOUND;
+      }
+      AbstractClass *tmp(obj);
+      m_objects[obj].destructor_(obj);
+      m_objects.erase(tmp);
+      return FactoryReturn::OK;
     }
-    AbstractClass *tmp(obj);
-    m_objects[obj].destructor_(obj);
-    m_objects.erase(tmp);
-    return FactoryReturn::OK;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief 生成済みオブジェクトリストの取得
@@ -423,18 +459,18 @@ public:
      *
      * @endif
      */
-  std::vector<AbstractClass *> createdObjects()
-  {
-    std::vector<AbstractClass *> objects;
-    std::lock_guard<std::mutex> guard(m_mutex);
-    for (ObjectMapIt it(m_objects.begin()); it != m_objects.end(); ++it)
+    std::vector<AbstractClass *> createdObjects()
     {
-      objects.emplace_back(it->first);
+      std::vector<AbstractClass *> objects;
+      std::lock_guard<std::mutex> guard(m_mutex);
+      for (ObjectMapIt it(m_objects.begin()); it != m_objects.end(); ++it)
+      {
+        objects.emplace_back(it->first);
+      }
+      return objects;
     }
-    return objects;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief オブジェクトがこのファクトリの生成物かどうか調べる
@@ -455,13 +491,13 @@ public:
      *
      * @endif
      */
-  bool isProducerOf(AbstractClass *obj)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    return m_objects.count(obj) != 0;
-  }
+    bool isProducerOf(AbstractClass *obj)
+    {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      return m_objects.count(obj) != 0;
+    }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief オブジェクトからクラス識別子(ID)を取得する
@@ -484,18 +520,18 @@ public:
      *                     OK: normal return
      * @endif
      */
-  FactoryReturn objectToIdentifier(AbstractClass *obj, Identifier &id)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    if (m_objects.count(obj) == 0)
+    FactoryReturn objectToIdentifier(AbstractClass *obj, Identifier &id)
     {
-      return FactoryReturn::NOT_FOUND;
+      std::lock_guard<std::mutex> guard(m_mutex);
+      if (m_objects.count(obj) == 0)
+      {
+        return FactoryReturn::NOT_FOUND;
+      }
+      id = m_objects[obj].id_;
+      return FactoryReturn::OK;
     }
-    id = m_objects[obj].id_;
-    return FactoryReturn::OK;
-  }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief オブジェクトのコンストラクタを取得する
@@ -520,13 +556,13 @@ public:
      *
      * @endif
      */
-  Creator objectToCreator(AbstractClass *obj)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    return m_objects[obj].creator_;
-  }
+    Creator objectToCreator(AbstractClass *obj)
+    {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      return m_objects[obj].creator_;
+    }
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief オブジェクトのデストラクタを取得する
@@ -551,14 +587,14 @@ public:
      *
      * @endif
      */
-  Destructor objectToDestructor(AbstractClass *obj)
-  {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    return m_objects[obj].destructor_;
-  }
+    Destructor objectToDestructor(AbstractClass *obj)
+    {
+      std::lock_guard<std::mutex> guard(m_mutex);
+      return m_objects[obj].destructor_;
+    }
 
-private:
-  /*!
+  private:
+    /*!
      * @if jp
      *
      * @class FactoryEntry
@@ -571,12 +607,12 @@ private:
      *
      * @endif
      */
-  class FactoryEntry
-  {
-  public:
-    FactoryEntry() = default;
+    class FactoryEntry
+    {
+    public:
+      FactoryEntry() = default;
 
-    /*!
+      /*!
        * @if jp
        *
        * @brief コンストラクタ
@@ -597,20 +633,32 @@ private:
        *
        * @endif
        */
-    FactoryEntry(Identifier id, Creator creator, Destructor destructor)
-        : id_(std::move(id)), creator_(creator), destructor_(destructor)
-    {
-    }
-    std::string id_;
-    Creator creator_;
-    Destructor destructor_;
-  };
-  FactoryMap m_creators;
-  ObjectMap m_objects;
-  std::mutex m_mutex;
-};
+      FactoryEntry(Identifier id, Creator creator, Destructor destructor, const Properties &prop)
+          : id_(std::move(id)), creator_(creator), destructor_(destructor), prop_(prop)
+      {
+      }
 
-/*!
+      ~FactoryEntry();
+      std::string id_;
+      Creator creator_;
+      Destructor destructor_;
+      Properties prop_;
+    };
+    FactoryMap m_creators;
+    ObjectMap m_objects;
+    std::mutex m_mutex;
+  };
+
+
+  template <
+    class AbstractClass,
+    typename Identifier,
+    typename Compare,
+    typename Creator,
+    typename Destructor>
+    Factory<AbstractClass, Identifier, Compare, Creator, Destructor>::FactoryEntry::~FactoryEntry() = default;
+
+  /*!
    * @if jp
    *
    * @class GlobalFactory
@@ -623,33 +671,33 @@ private:
    *
    * @endif
    */
-template <
-    class AbstractClass,
-    typename Identifier = std::string,
-    typename Compare = std::less<Identifier>,
-    typename Creator = AbstractClass *(*)(),
-    typename Destructor = void (*)(AbstractClass *&)>
-class GlobalFactory
-    : public Factory<AbstractClass, Identifier, Compare, Creator, Destructor>
-{
-public:
-  // A helper class to call SingletonClass-destructor.
-  struct Container
+  template <
+      class AbstractClass,
+      typename Identifier = std::string,
+      typename Compare = std::less<Identifier>,
+      typename Creator = AbstractClass *(*)(),
+      typename Destructor = void (*)(AbstractClass *&)>
+  class GlobalFactory
+      : public Factory<AbstractClass, Identifier, Compare, Creator, Destructor>
   {
-    GlobalFactory *x;
-    ~Container() { delete x; }
-  };
+  public:
+    // A helper class to call SingletonClass-destructor.
+    struct Container
+    {
+      GlobalFactory *x;
+      ~Container() { delete x; }
+    };
 
-  static GlobalFactory &instance()
-  {
-    std::call_once(m_once, [] {
-      m_instance.x = new GlobalFactory();
-    });
-    return *m_instance.x;
-  }
+    static GlobalFactory &instance()
+    {
+      std::call_once(m_once, [] {
+        m_instance.x = new GlobalFactory();
+      });
+      return *m_instance.x;
+    }
 
-private:
-  /*!
+  private:
+    /*!
      * @if jp
      *
      * @brief コンストラクタ
@@ -664,9 +712,9 @@ private:
      *
      * @endif
      */
-  GlobalFactory() = default;
+    GlobalFactory() = default;
 
-  /*!
+    /*!
      * @if jp
      *
      * @brief デストラクタ
@@ -681,34 +729,34 @@ private:
      *
      * @endif
      */
-  ~GlobalFactory() = default;
+    ~GlobalFactory() = default;
 
-  GlobalFactory(const GlobalFactory &x) = delete;
-  GlobalFactory &operator=(const GlobalFactory &x) = delete;
+    GlobalFactory(const GlobalFactory &x) = delete;
+    GlobalFactory &operator=(const GlobalFactory &x) = delete;
 
-  /*!
+    /*!
      * @if jp
      * @brief 排他制御オブジェクト
      * @else
      * @brief Mutual exclusion object
      * @endif
      */
-  static std::once_flag m_once;
-  /*!
+    static std::once_flag m_once;
+    /*!
      * @if jp
      * @brief SingletonClass オブジェクト
      * @else
      * @brief SingletonClass object
      * @endif
      */
-  static Container m_instance;
-};
-template <class AbstractClass, typename Identifier, typename Compare, typename Creator, typename Destructor>
-typename GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::Container
-    GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::m_instance;
+    static Container m_instance;
+  };
+  template <class AbstractClass, typename Identifier, typename Compare, typename Creator, typename Destructor>
+  typename GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::Container
+      GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::m_instance;
 
-template <class AbstractClass, typename Identifier, typename Compare, typename Creator, typename Destructor>
-std::once_flag GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::m_once;
+  template <class AbstractClass, typename Identifier, typename Compare, typename Creator, typename Destructor>
+  std::once_flag GlobalFactory<AbstractClass, Identifier, Compare, Creator, Destructor>::m_once;
 
 } // namespace coil
 

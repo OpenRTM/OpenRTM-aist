@@ -810,14 +810,14 @@ namespace RTC
     InPortConnector*
     createConnector(const ConnectorProfile& cprof, coil::Properties& prop,
                     OutPortConsumer* consumer);
-	 /*!
-	  * @if jp
-	  * @brief ローカルのピアOutPortを取得
-	  * @else
-	  * @brief Getting local peer OutPort if available
-	  * @endif
-	  */
-	OutPortBase* getLocalOutPort(const ConnectorInfo& profile);
+    /*!
+     * @if jp
+     * @brief ローカルのピアOutPortを取得
+     * @else
+     * @brief Getting local peer OutPort if available
+     * @endif
+     */
+    OutPortBase* getLocalOutPort(const ConnectorInfo& profile);
 
     /*!
      * @if jp

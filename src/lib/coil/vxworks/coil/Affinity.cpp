@@ -69,7 +69,7 @@ namespace coil
     }
     else
     {
-	return false;
+        return false;
     }
 
     STATUS result = taskCpuAffinitySet(pid, cpu_set);

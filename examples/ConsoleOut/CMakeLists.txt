@@ -4,7 +4,6 @@ if(OpenRTM_aist_BINARY_DIR)
   set(srcs src/ConsoleOut.cpp include/ConsoleOut/ConsoleOut.h)
   examples_build(ConsoleOut SRCS "${srcs}" MAIN src/ConsoleOutComp.cpp
                  EXTERNAL_INCLUDE PRIVATE include/ConsoleOut)
-  install(FILES rtc.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
   install(FILES consout.conf DESTINATION ${INSTALL_RTM_EXAMPLE_DIR} COMPONENT examples)
 else(OpenRTM_aist_BINARY_DIR)
 
@@ -18,7 +17,7 @@ set(PROJECT_SHORT_VER ${PROJECT_VERSION_MAJOR}${PROJECT_VERSION_MINOR}${PROJECT_
 set(PROJECT_DESCRIPTION "Console output component")
 set(PROJECT_VENDOR "AIST")
 set(PROJECT_MAINTAINER "Noriaki Ando <n-ando@aist.go.jp>")
-set(PROJECT_TYPE "c++/examples")
+set(PROJECT_TYPE "c++/example")
 
 find_package(OpenRTM REQUIRED)
 set(RTM_VER ${OPENRTM_VERSION})
@@ -106,18 +105,19 @@ endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Set up installation directories
 if(WIN32)
-   set(OPENRTM_SHARE_PREFIX "Components/${PROJECT_TYPE}/${RTM_VC_VER}")
+   set(RTM_COMPONENT_PREFIX "Components/${PROJECT_TYPE}")
+   set(OPENRTM_SHARE_PREFIX "OpenRTM-aist/${RTM_VER}/${RTM_COMPONENT_PREFIX}")
+   set(INSTALL_PREFIX ${PROJECT_NAME})
    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      set(CMAKE_INSTALL_PREFIX "${OPENRTM_DIR}/${OPENRTM_SHARE_PREFIX}" CACHE PATH "..." FORCE)
+      set(CMAKE_INSTALL_PREFIX "${OPENRTM_DIR}/${RTM_COMPONENT_PREFIX}" CACHE PATH "..." FORCE)
    else()
-      set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${RTM_VER}/${OPENRTM_SHARE_PREFIX}")
+      set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${OPENRTM_SHARE_PREFIX}")
    endif()
-   set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
 else(WIN32)
    set(OPENRTM_SHARE_PREFIX "share/openrtm-${OPENRTM_VERSION_MAJOR}.${OPENRTM_VERSION_MINOR}")
    set(INSTALL_PREFIX "${OPENRTM_SHARE_PREFIX}/components/${PROJECT_TYPE}/${PROJECT_NAME}")
 endif(WIN32)
-       
+
 # Subdirectories
 add_subdirectory(cmake)
 if(BUILD_DOCUMENTATION)

@@ -18,7 +18,8 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.0.0.08
+VERSION=2.0.0.10
+FILENAME=pkg_install_ubuntu.sh
 
 #
 #---------------------------------------
@@ -29,19 +30,19 @@ usage()
   cat <<EOF
   Usage: 
 
-    $(basename ${0}) -l {all|c++} [-r|-d|-s|-c] [-t OpenRTM-aist old version number] [-u|--yes]
-    $(basename ${0}) [-u]
-    $(basename ${0}) -l {python} [-r|-d|-c] [-t OpenRTM-aist old version number] [-u|--yes]
-    $(basename ${0}) -l {java} [-r|-d|-c] [-u|--yes]
-    $(basename ${0}) -l {openrtp|rtshell} [-d] [-u|--yes]
-    $(basename ${0}) {--help|-h|--version}
+    ${FILENAME} -l {all|c++} [-r|-d|-s|-c] [-t OpenRTM-aist old version number] [-u|--yes]
+    ${FILENAME} [-u]
+    ${FILENAME} -l {python} [-r|-d|-c] [-t OpenRTM-aist old version number] [-u|--yes]
+    ${FILENAME} -l {java} [-r|-d|-c] [-u|--yes]
+    ${FILENAME} -l {openrtp|rtshell} [-d] [-u|--yes]
+    ${FILENAME} {--help|-h|--version}
 
   Example:
-    $(basename ${0}) [= $(basename ${0}) -l all -d]
-    $(basename ${0}) -l all -d
-    $(basename ${0}) -l c++ -c --yes
-    $(basename ${0}) -l all -u
-    $(basename ${0}) -l all -d -t 1.2.1
+    ${FILENAME} [= ${FILENAME} -l all -d]
+    ${FILENAME} -l all -d
+    ${FILENAME} -l c++ -c --yes
+    ${FILENAME} -l all -u
+    ${FILENAME} -l all -d -t 1.2.1
 
   Options:
     -l <argument>  language or tool [c++|python|java|openrtp|rtshell|all]
@@ -80,6 +81,9 @@ old_openrtm_devel="openrtm-aist-doc=$RTM_OLD_VER-0 openrtm-aist-idl=$RTM_OLD_VER
 old_openrtm_runtime="openrtm-aist=$RTM_OLD_VER-0 openrtm-aist-example=$RTM_OLD_VER-0"
 old_openrtm_py_devel="openrtm-aist-python-doc=$RTM_OLD_VER-0"
 old_openrtm_py_runtime="openrtm-aist-python=$RTM_OLD_VER-0 openrtm-aist-python-example=$RTM_OLD_VER-0"
+
+openrtm2_py="openrtm2-python3-doc openrtm2-python3-example openrtm2-python3"
+openrtm2_java="openrtm2-java-doc openrtm2-java-example openrtm2-java"
 
 ARCH=`arch`
 #--------------------------------------- C++
@@ -143,7 +147,7 @@ err_message=""
 
 check_arg()
 {
-  local arg=$1
+  local arg=$1 tmp
   arg_err=0
   
   case "$arg" in
@@ -151,15 +155,18 @@ check_arg()
     c++ ) arg_cxx=true ;;
     python ) arg_python=true ;;
     java ) arg_java=true ;;
-    openrtp ) arg_openrtp=true ;;
+    openrtp ) arg_openrtp=true
+              if test "x${ARCH}" = "xaarch64"; then
+                arg_openrtp=false
+                msg="[WARNING] openrtp is not supported in aarch64 environment."
+                echo $msg
+                tmp="$err_message$LF$msg"
+                err_message=$tmp
+              fi
+	      shift ;;
     rtshell ) arg_rtshell=true ;;
     *) arg_err=-1 ;;
   esac
-
-  if test "x${ARCH}" = "xaarch64"; then
-    arg_openrtp=false
-    echo "[wARNING] openrtp is not supported in aarch64 environment."
-  fi
 }
 
 set_old_rtm_pkgs()
@@ -387,7 +394,7 @@ create_srclist () {
 # ソースリスト更新関数の定義
 #---------------------------------------
 update_source_list () {
-  rtmsite=`apt-cache policy | grep "http://$reposerver"`
+  rtmsite=`grep $reposerver /etc/apt/sources.list`
   if test "x$rtmsite" = "x" ; then
     echo $msg4
     echo $msg5
@@ -398,24 +405,11 @@ update_source_list () {
       echo $msg7
       exit 0
     else
-      echo $openrtm_repo >> /etc/apt/sources.list
+      echo $openrtm_repo | sudo tee -a /etc/apt/sources.list
     fi
   fi
   # 公開鍵登録
-  wget -O- --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key | apt-key add -
-}
-
-#----------------------------------------
-# root かどうかをチェック
-#----------------------------------------
-check_root () {
-  if test ! `id -u` = 0 ; then
-    echo ""
-    echo $msg8
-    echo $msg7
-    echo ""
-    exit 1
-  fi
+  wget -O- --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key | sudo apt-key add -
 }
 
 #----------------------------------------
@@ -433,9 +427,9 @@ install_packages () {
     fi
 
     if test "x$FORCE_YES" = "xtrue" ; then
-      apt-get install --assume-yes --allow-unauthenticated $p
+      sudo apt install --assume-yes --allow-unauthenticated $p
     else
-      apt-get install $p
+      sudo apt install $p
     fi
     if [ $? -ne 0 ]; then
       echo $msg7
@@ -466,13 +460,51 @@ uninstall_packages () {
       tmp_pkg="$uninstall_pkgs $p"
       uninstall_pkgs=$tmp_pkg
     fi
-    apt-get --purge remove $p
+    sudo apt --purge remove $p
     if test "$?" != 0; then
-      apt-get purge $p
+      sudo apt purge $p
     fi
     echo $msg10
     echo ""
   done
+}
+
+#-------------------------------------------------
+# If OpenRTM-aist 2.0 is installed, uninstall its.
+# Target: openrtm2-python3, openrtm2-java
+#         rtshell
+#-------------------------------------------------
+uninstall_openrtm20 ()
+{
+  if test "x$arg_python" = "xtrue" ; then
+    res=`dpkg -l | grep openrtm2-python3`
+    if test ! "x$res" = "x" ; then
+      echo "Uninstall openrtm2-python3."
+      sudo apt --purge remove $openrtm2_py
+      uninstall_pkgs=$openrtm2_py
+    fi
+  fi
+
+  if test "x$arg_java" = "xtrue" ; then
+    res=`dpkg -l | grep openrtm2-java`
+    if test ! "x$res" = "x" ; then
+      echo "Uninstall openrtm2-java."
+      sudo apt --purge remove $openrtm2_java
+      tmp_pkg="$uninstall_pkgs $openrtm2_java"
+      uninstall_pkgs=$tmp_pkg
+    fi
+  fi
+
+  if test "x$arg_rtshell" = "xtrue" ; then
+    res=`pip3 list | grep rtshell`
+    if test ! "x$res" = "x" ; then
+      echo "Uninstall rtshell."
+      rtshell="rtshell-aist rtctree-aist rtsprofile-aist"
+      sudo pip3 uninstall -y $rtshell
+      tmp_pkg="$uninstall_pkgs rtshell"
+      uninstall_pkgs=$tmp_pkg
+    fi
+  fi
 }
 
 #---------------------------------------
@@ -482,33 +514,33 @@ set_package_content()
 {
 #--------------------------------------- C++
 runtime_pkgs="$omni_runtime $openrtm_runtime"
-u_runtime_pkgs=$runtime_pkgs
+u_runtime_pkgs=$openrtm_runtime
 
 src_pkgs="$cxx_devel $cmake_tools $deb_pkg $base_tools $omni_runtime $omni_devel"
 u_src_pkgs="$omni_runtime $omni_devel"
 
 dev_pkgs="$runtime_pkgs $src_pkgs $openrtm_devel"
-u_dev_pkgs="$u_runtime_pkgs $omni_devel $openrtm_devel"
+u_dev_pkgs="$u_runtime_pkgs $openrtm_devel"
 
 core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools"
 u_core_pkgs="$u_src_pkgs"
 
 #--------------------------------------- Python
 python_runtime_pkgs="$omni_runtime $python_runtime $openrtm_py_runtime"
-u_python_runtime_pkgs="$omni_runtime $openrtm_py_runtime"
+u_python_runtime_pkgs="$openrtm_py_runtime"
 
 python_dev_pkgs="$python_runtime_pkgs $python_devel $openrtm_py_devel"
-u_python_dev_pkgs="$u_python_runtime_pkgs $omnipy $openrtm_py_devel"
+u_python_dev_pkgs="$u_python_runtime_pkgs $openrtm_py_devel"
 
 python_core_pkgs="$omni_runtime $python_runtime $python_devel $build_tools $pkg_tools"
 u_python_core_pkgs="$omni_runtime $omnipy"
 
 #--------------------------------------- Java
 java_runtime_pkgs="$omni_runtime $openrtm_j_runtime"
-u_java_runtime_pkgs="$omni_runtime $openrtm_j_runtime"
+u_java_runtime_pkgs="$openrtm_j_runtime"
 
 java_dev_pkgs="$java_runtime_pkgs $cmake_tools $base_tools $openrtm_j_devel"
-u_java_dev_pkgs="$omni_runtime $openrtm_j_runtime $openrtm_j_devel"
+u_java_dev_pkgs="$u_java_runtime_pkgs $openrtm_j_devel"
 
 java_core_pkgs="$omni_runtime $cmake_tools $base_tools $build_tools $java_build $pkg_tools"
 u_java_core_pkgs="$omni_runtime"
@@ -519,6 +551,8 @@ u_java_core_pkgs="$omni_runtime"
 #---------------------------------------
 install_proc()
 {
+  local msg tmp
+
   if test "x$arg_cxx" = "xtrue" ; then
     if test "x$OPT_COREDEVEL" = "xtrue" ; then
       select_opt_c="[c++] install tool_packages for core developer"
@@ -569,7 +603,14 @@ install_proc()
   if test "x$arg_rtshell" = "xtrue" ; then
     select_opt_shl="[rtshell] install"
     install_packages python3-pip
-    rtshell_ret=`pip3 install rtshell-aist`
+    rtshell_ret=`sudo python3 -m pip install rtshell-aist`
+    if test "x$rtshell_ret" != "x"; then
+      sudo rtshell_post_install -n
+    else
+      msg="\n[ERROR] Failed to install rtshell-aist."
+      tmp="$err_message$msg"
+      err_message=$tmp
+    fi
   fi
 }
 
@@ -578,6 +619,8 @@ install_proc()
 #---------------------------------------
 uninstall_proc()
 {
+  local msg tmp
+
   if test "x$arg_cxx" = "xtrue" ; then
     if test "x$OPT_COREDEVEL" = "xtrue" ; then
       select_opt_c="[c++] uninstall tool_packages for core developer"
@@ -627,7 +670,12 @@ uninstall_proc()
 
   if test "x$arg_rtshell" = "xtrue" ; then
     select_opt_shl="[rtshell] uninstall"
-    rtshell_ret=`pip3 uninstall -y rtshell-aist rtctree-aist rtsprofile-aist`
+    rtshell_ret=`sudo python3 -m pip uninstall -y rtshell-aist rtctree-aist rtsprofile-aist`
+    if test "x$rtshell_ret" = "x"; then
+      msg="\n[ERROR] Failed to uninstall rtshell-aist."
+      tmp="$err_message$msg"
+      err_message=$tmp
+    fi
   fi
 }
 
@@ -699,8 +747,10 @@ uninstall_result()
 =============================================
 EOF
   if [ $# -eq 0 ] && test "x$OPT_UNINST" = "xtrue"; then
-    echo "There is no uninstall package."
-    return
+    if test "x$uninstall_pkgs" = "x"; then
+      echo "There is no uninstall package."
+      return
+    fi
   fi
 
   for p in $*; do
@@ -735,12 +785,11 @@ if test "x$arg_all" = "xfalse" ; then
 fi
 
 check_lang
-check_root
 check_reposerver
 create_srclist
 update_source_list
-apt-get autoclean
-apt-get update
+sudo apt autoclean
+sudo apt update
 
 if test "x$arg_all" = "xtrue" &&
    test "x$OPT_OLD_RTM" = "xfalse" ; then
@@ -749,7 +798,9 @@ if test "x$arg_all" = "xtrue" &&
   arg_java=true
   if test "x${ARCH}" = "xaarch64"; then
     arg_openrtp=false
-    echo "[WARNING] openrtp is not supported in aarch64 environment."
+    msg="[WARNING] openrtp is not supported in aarch64 environment."
+    tmp="$err_message$LF$msg"
+    err_message=$tmp
   else
     arg_openrtp=true
   fi
@@ -767,19 +818,32 @@ fi
 set_package_content
 
 if test "x$OPT_UNINST" = "xtrue" ; then
+  uninstall_openrtm20
   install_proc
 else
   uninstall_proc
 fi
 
+# install openjdk-8-jdk
+if test "x$OPT_UNINST" = "xtrue" ; then
+  sudo apt -y install openjdk-8-jdk
+  JAVA8=`update-alternatives --list java | grep java-8`
+  sudo update-alternatives --set java ${JAVA8}
+fi
+
 install_result $install_pkgs
 uninstall_result $uninstall_pkgs
 if test ! "x$err_message" = "x" ; then
-  echo $err_message
+  ESC=$(printf '\033')
+  echo $LF
+  echo "${ESC}[33m${err_message}${ESC}[m"
 fi
 
-# install openjdk-8-jdk
-apt -y install openjdk-8-jdk
-JAVA8=`update-alternatives --list java | grep java-8`
-update-alternatives --set java ${JAVA8}
-
+if test "x$OPT_UNINST" = "xfalse" ; then
+  ESC=$(printf '\033')
+  msg1='omniorb or other OpenRTM dependent packages may still exist. '
+  msg2='If you want to remove them, please do “apt autoremove” later.'
+  echo $LF
+  echo "${ESC}[33m${msg1}${ESC}[m"
+  echo "${ESC}[33m${msg2}${ESC}[m"
+fi

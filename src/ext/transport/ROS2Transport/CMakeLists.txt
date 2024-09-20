@@ -34,6 +34,9 @@ set(target ROS2Transport)
 
 set(srcs ROS2Transport.cpp ROS2Transport.h ROS2MessageInfo.cpp ROS2MessageInfo.h ROS2Serializer.cpp ROS2Serializer.h)
 
+set(INSTALL_ROS2TRANSPORT_LIB_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+set(INSTALL_ROS2TRANSPORT_INCLUDE_DIR ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext)
+set(INSTALL_FASTRTPSTRANSPORT_LIB FastRTPSTransport)
 
 if(VXWORKS AND NOT RTP)
 	set(libs ${RTCSKEL_PROJECT_NAME} fastcdr fastrtps)
@@ -46,6 +49,7 @@ if(VXWORKS AND NOT RTP)
 		PRIVATE ${PROJECT_SOURCE_DIR}/..)
 	target_include_directories(${target} SYSTEM
 		PUBLIC ${rclcpp_INCLUDE_DIRS}
+		PUBLIC ${rmw_fastrtps_cpp_INCLUDE_DIRS}
 		PUBLIC ${std_msgs_INCLUDE_DIRS}
 		PUBLIC ${geometry_msgs_INCLUDE_DIRS}
 		PUBLIC ${sensor_msgs_INCLUDE_DIRS})
@@ -67,9 +71,9 @@ if(VXWORKS AND NOT RTP)
 		)
 	endif()
 
-	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
-				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
-				RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
+	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
+				ARCHIVE DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
+				RUNTIME DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
 				COMPONENT ext)
 else()
 	set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES} FastRTPSTransport 
@@ -77,7 +81,6 @@ else()
 		${std_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
 		${geometry_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
 		${sensor_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
-		${std_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
 		fastcdr fastrtps)
 	add_library(${target} SHARED ${srcs})
 	openrtm_common_set_compile_props(${target})
@@ -87,6 +90,7 @@ else()
 		PRIVATE ${PROJECT_SOURCE_DIR}/..)
 	target_include_directories(${target} SYSTEM
 					PUBLIC ${rclcpp_INCLUDE_DIRS}
+					PUBLIC ${rmw_fastrtps_cpp_INCLUDE_DIRS}
 					PUBLIC ${std_msgs_INCLUDE_DIRS}
 					PUBLIC ${geometry_msgs_INCLUDE_DIRS}
 					PUBLIC ${sensor_msgs_INCLUDE_DIRS})
@@ -108,13 +112,19 @@ else()
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
 
-	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
-				ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
-				RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
+	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
+				ARCHIVE DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
+				RUNTIME DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
 				COMPONENT ext)
 endif()
 
-
+install(FILES ROS2MessageInfo.h ROS2Serializer.h DESTINATION ${INSTALL_ROS2TRANSPORT_INCLUDE_DIR}/ROS2Transport COMPONENT ext)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ROS2TransportConfig.cmake.in ${PROJECT_BINARY_DIR}/ROS2TransportConfig.cmake @ONLY)
+if(UNIX)
+	install(FILES ${PROJECT_BINARY_DIR}/ROS2TransportConfig.cmake DESTINATION ${INSTALL_ROS2TRANSPORT_CMAKE_DIR} COMPONENT cmakefiles)
+else()
+	install(FILES ${PROJECT_BINARY_DIR}/ROS2TransportConfig.cmake DESTINATION ${INSTALL_RTM_CMAKE_DIR} COMPONENT cmakefiles)
+endif()
 
 
 

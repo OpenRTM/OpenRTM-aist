@@ -29,25 +29,26 @@
 
 namespace RTC_OpenSplice
 {
-    void start()
+    void start(coil::Properties& prop)
     {
-        RTC::OpenSpliceManager::instance();
+      RTC::OpenSpliceManager::init(prop);
     }
     void shutdown()
     {
-        RTC::OpenSpliceManager::shutdown_global();
+      RTC::OpenSpliceManager::shutdown_global();
         
     }
     bool registerType(const std::string& datatype, const std::string& idlpath)
     {
-        RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
-        return topicmgr.registerType(datatype, idlpath);
+      RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
+      return topicmgr.registerType(datatype, idlpath);
+        
     }
 
     bool registeredType(const std::string& datatype)
     {
-        RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
-        return topicmgr.registeredType(datatype);
+      RTC::OpenSpliceManager& topicmgr = RTC::OpenSpliceManager::instance();
+      return topicmgr.registeredType(datatype);
     }
 }
 

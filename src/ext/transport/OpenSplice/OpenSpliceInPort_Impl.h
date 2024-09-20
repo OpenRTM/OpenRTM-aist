@@ -22,6 +22,8 @@
 #define LIBRARY_EXPORTS
 #include <rtm/ByteData.h>
 #undef LIBRARY_EXPORTS
+#include <coil/Properties.h>
+#include <string>
 
 
 namespace RTC
@@ -62,7 +64,7 @@ namespace RTC
          *
          * @endif
          */
-        ~OpenSpliceInPortListenerBase();
+        virtual ~OpenSpliceInPortListenerBase();
 
         /*!
          * @if jp
@@ -126,6 +128,7 @@ namespace RTC
          * @param datatype データ型名
          * @param idlpath データ型を定義したIDLファイルのパス
          * @param topic トピック名
+         * @param prop 設定プロパティ
          * @param endian true：リトルエンディアン、false：ビッグエンディアン
          * @param corbamode 
          * @return true：初期化成功、false：問題発生
@@ -137,13 +140,14 @@ namespace RTC
          * @param datatype
          * @param idlpath
          * @param topic
+         * @param prop 
          * @param endian
          * @param corbamode
          * @return
          *
          * @endif
          */
-        virtual bool init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, bool endian=true, bool corbamode=true) = 0;
+        virtual bool init(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian=true, bool corbamode=true) = 0;
         /*!
          * @if jp
          * @brief 終了処理
@@ -170,6 +174,7 @@ namespace RTC
      * @param datatype データ型名
      * @param idlpath データ型を定義したIDLファイルのパス
      * @param topic トピック名
+     * @param prop 設定プロパティ
      * @param endian true：リトルエンディアン、false：ビッグエンディアン
      * @param corbamode 
      * @return OpenSpliceInPort_implオブジェクト
@@ -181,13 +186,14 @@ namespace RTC
      * @param datatype
      * @param idlpath
      * @param topic
+     * @param prop 
      * @param endian
      * @param corbamode
      * @return
      *
      * @endif
      */
-    OpenSpliceInPortBase* createOpenSpliceInPort(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, bool endian = true, bool corbamode = true);
+    OpenSpliceInPortBase* createOpenSpliceInPort(OpenSpliceInPortListenerBase* inportlistener, std::string& datatype, std::string& idlpath, std::string& topic, coil::Properties& prop, bool endian = true, bool corbamode = true);
 }
 
 

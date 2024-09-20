@@ -1,13 +1,11 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 // <rtc-template block="description">
 /*!
  * @file  ConsoleOut.cpp
  * @brief Console output component
- * @date $Date$
  *
  * @author Noriaki Ando <n-ando@aist.go.jp>
  *
- * $Id$
  */
 // </rtc-template>
 
@@ -15,7 +13,11 @@
 
 // Module specification
 // <rtc-template block="module_spec">
+#if RTM_MAJOR_VERSION >= 2
 static const char* const consoleout_spec[] =
+#else
+static const char* consoleout_spec[] =
+#endif
   {
     "implementation_id", "ConsoleOut",
     "type_name",         "ConsoleOut",
@@ -118,33 +120,30 @@ RTC::ReturnCode_t ConsoleOut::onFinalize()
 }
 */
 
-/*
-RTC::ReturnCode_t ConsoleOut::onStartup(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleOut::onShutdown(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleOut::onStartup(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
-/*
-RTC::ReturnCode_t ConsoleOut::onActivated(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleOut::onDeactivated(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleOut::onShutdown(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleOut::onActivated(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleOut::onDeactivated(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
 
 RTC::ReturnCode_t ConsoleOut::onExecute(RTC::UniqueId /*ec_id*/)
 {
@@ -155,45 +154,44 @@ RTC::ReturnCode_t ConsoleOut::onExecute(RTC::UniqueId /*ec_id*/)
       std::cout << "TimeStamp: " << m_in.tm.sec << "[s] ";
       std::cout << m_in.tm.nsec << "[ns]" << std::endl;
     }
+#if RTM_MAJOR_VERSION >= 2
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#else
+  coil::usleep(1000);
+#endif
 
   return RTC::RTC_OK;
 }
 
-/*
-RTC::ReturnCode_t ConsoleOut::onAborting(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleOut::onError(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleOut::onAborting(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
-/*
-RTC::ReturnCode_t ConsoleOut::onReset(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
 
-/*
-RTC::ReturnCode_t ConsoleOut::onStateUpdate(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+//RTC::ReturnCode_t ConsoleOut::onError(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
-/*
-RTC::ReturnCode_t ConsoleOut::onRateChanged(RTC::UniqueId ec_id)
-{
-  return RTC::RTC_OK;
-}
-*/
+
+//RTC::ReturnCode_t ConsoleOut::onReset(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleOut::onStateUpdate(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
+
+
+//RTC::ReturnCode_t ConsoleOut::onRateChanged(RTC::UniqueId /*ec_id*/)
+//{
+//  return RTC::RTC_OK;
+//}
 
 
 
@@ -209,5 +207,3 @@ extern "C"
   }
   
 }
-
-

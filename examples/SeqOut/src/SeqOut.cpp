@@ -15,7 +15,11 @@ bool g_Listener_dump_enabled = false;
 
 // Module specification
 // <rtc-template block="module_spec">
+#if RTM_MAJOR_VERSION >= 2
 static const char* const seqout_spec[] =
+#else
+static const char* seqout_spec[] =
+#endif
   {
     "implementation_id", "SeqOut",
     "type_name",         "SeqOut",
@@ -338,11 +342,19 @@ RTC::ReturnCode_t SeqOut::onExecute(RTC::UniqueId /*ec_id*/)
   // Connector Listener Dump check
   if(g_Listener_dump_enabled)
     {
+#if RTM_MAJOR_VERSION >= 2
       std::this_thread::sleep_for(std::chrono::seconds(1));
+#else
+      coil::usleep(1000000);
+#endif
     }
   else
     {
+#if RTM_MAJOR_VERSION >= 2
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
+#else
+      coil::usleep(200000);
+#endif
     }
 
   return RTC::RTC_OK;

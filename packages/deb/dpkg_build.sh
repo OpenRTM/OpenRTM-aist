@@ -40,8 +40,6 @@ release=`uname -r`-`uname -p`
 dist_name=""
 dist_key=""
 
-# not support multiarch
-not_multiarch_cnmaes="lucid marveric squeeze natty oneiric"
 
 #---------------------------------------
 # Debianコードネーム取得
@@ -56,7 +54,7 @@ check_codename ()
       else
         DISTRIB_CODENAME=`lsb_release -cs`
       fi
-    else
+    elif test ! "x$ID" = "xraspbian" ; then 
       echo "This distribution may not be debian."
       exit
     fi
@@ -123,33 +121,9 @@ fi
 # package build process
 #------------------------------------------------------------
 packagedir=`pwd`/../../
-rm -f $packagedir/packages/openrtm-aist*
+rm -f $packagedir/packages/openrtm*
 
 cp -r debian $packagedir
-
-# check multiarch support
-multiarch_flg="OFF"
-if test "x$dist_key" = "xDebian" || test "x$dist_key" = "xUbuntu" ; then
-    for c in $not_multiarch_cnmaes; do
-        if test $DISTRIB_CODENAME = $c ; then
-            mv $packagedir/debian/compat /tmp/compat.$$
-            echo 7 >  $packagedir/debian/compat
-            mv $packagedir/debian/rules /tmp/rules.$$
-            cp $packagedir/debian/rules.not-multiarch $packagedir/debian/rules
-            DEB_HOST_ARCH=`dpkg-architecture -qDEB_HOST_ARCH`
-            if test "x$DEB_HOST_ARCH" = "xamd64" ; then
-                sed -i -s 's/lib-arch/lib64/' $packagedir/debian/rules
-            else
-                sed -i -s 's/lib-arch/lib/' $packagedir/debian/rules
-            fi
-            mv $packagedir/debian/control /tmp/control.$$
-            cp $packagedir/debian/control.not-multiarch $packagedir/debian/control
-            multiarch_flg="ON"
-            echo "... Multiarch not supported."
-            break
-        fi
-    done
-fi
 
 chmod 755 $packagedir/debian/rules
 
@@ -157,9 +131,4 @@ cd $packagedir
 rm -f config.status
 dpkg-buildpackage -W -us -uc -rfakeroot
 
-mv $packagedir/../openrtm-aist* $packagedir/packages/
-if test "x$multiarch_flg" = "xON" ; then 
-    mv /tmp/compat.$$ $packagedir/debian/compat
-    mv /tmp/rules.$$ $packagedir/debian/rules
-    mv /tmp/control.$$ $packagedir/debian/control
-fi
+mv $packagedir/../openrtm2* $packagedir/packages/

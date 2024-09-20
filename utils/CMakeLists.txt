@@ -10,3 +10,5 @@ add_subdirectory(openrtmNames)
 if(UNIX)
 	add_subdirectory(rtm-config)
 endif()
+
+add_subdirectory(environment-setup-scripts)

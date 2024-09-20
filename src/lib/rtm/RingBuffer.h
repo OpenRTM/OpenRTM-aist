@@ -843,7 +843,7 @@ namespace RTC
     }
 
   private:
-    inline void initLength(const coil::Properties& prop)
+    void initLength(const coil::Properties& prop)
     {
       if (!prop["length"].empty())
         {
@@ -858,7 +858,7 @@ namespace RTC
         }
     }
 
-    inline void initWritePolicy(const coil::Properties& prop)
+    void initWritePolicy(const coil::Properties& prop)
     {
       std::string policy(coil::normalize(prop["write.full_policy"]));
       if (policy == "overwrite")
@@ -885,7 +885,7 @@ namespace RTC
         }
     }
 
-    inline void initReadPolicy(const coil::Properties& prop)
+    void initReadPolicy(const coil::Properties& prop)
     {
       std::string policy(prop["read.empty_policy"]);
       if (policy == "readback")

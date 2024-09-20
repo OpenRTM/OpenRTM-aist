@@ -272,25 +272,25 @@ namespace RTC
   * @brief onAddedComponent() template function
   */
   RTC::ReturnCode_t OpenHRPExecutionContext::
-	  onAddedComponent(RTC::LightweightRTObject_ptr  /*rtobj*/)
+     onAddedComponent(RTC::LightweightRTObject_ptr  /*rtobj*/)
   {
-	  std::lock_guard<std::mutex> guard(m_tickmutex);
+    std::lock_guard<std::mutex> guard(m_tickmutex);
 
-	  ExecutionContextBase::m_worker.updateComponentList();
+    ExecutionContextBase::m_worker.updateComponentList();
 
-	  return RTC::RTC_OK;
+    return RTC::RTC_OK;
   }
   /*!
   * @brief onRemovedComponent() template function
   */
   RTC::ReturnCode_t OpenHRPExecutionContext::
-	  onRemovedComponent(RTC::LightweightRTObject_ptr  /*rtobj*/)
+     onRemovedComponent(RTC::LightweightRTObject_ptr  /*rtobj*/)
   {
-	  std::lock_guard<std::mutex> guard(m_tickmutex);
+    std::lock_guard<std::mutex> guard(m_tickmutex);
 
-	  ExecutionContextBase::m_worker.updateComponentList();
+    ExecutionContextBase::m_worker.updateComponentList();
 
-	  return RTC::RTC_OK;
+    return RTC::RTC_OK;
   }
 } // namespace RTC
 

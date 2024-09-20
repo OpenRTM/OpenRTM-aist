@@ -1,4 +1,4 @@
-﻿version: '{build}'
+version: '{build}'
 clone_folder: c:\workspace\ConsoleIn
 platform:
 - x64

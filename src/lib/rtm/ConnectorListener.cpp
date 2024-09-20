@@ -61,7 +61,7 @@ namespace RTC
    */
   ConnectorDataListenerHolder::ConnectorDataListenerHolder()
   {
-      delete m_cdr;
+      SerializerFactory::instance().deleteObject(m_cdr);
   }
 
 
@@ -113,7 +113,7 @@ namespace RTC
   }
 
   ConnectorDataListenerHolder::ReturnCode
-	  ConnectorDataListenerHolder::notify(ConnectorInfo& info,
+    ConnectorDataListenerHolder::notify(ConnectorInfo& info,
                                                  ByteData& cdrdata, const std::string& marshalingtype)
   {
     std::lock_guard<std::mutex> guard(m_mutex);
@@ -198,7 +198,7 @@ namespace RTC
   }
 
   ConnectorListenerHolder::ReturnCode
-	  ConnectorListenerHolder::notify(ConnectorInfo& info)
+    ConnectorListenerHolder::notify(ConnectorInfo& info)
   {
     std::lock_guard<std::mutex> guard(m_mutex);
     ConnectorListenerHolder::ReturnCode ret(NO_CHANGE);

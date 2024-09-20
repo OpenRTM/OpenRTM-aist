@@ -141,24 +141,24 @@ namespace RTC
      */
     void setListener(ConnectorInfo& info,
                              ConnectorListenersBase* listeners) override;
-	/*!
-	* @if jp
-	* @brief Connectorを設定する。
-	*
-	*
-	*
-	* @param connector OutPortConnector
-	*
-	* @else
-	* @brief set Connector
-	*
-	* 
-	*
-	* @param connector OutPortConnector
-	*
-	* @endif
-	*/
-	void setConnector(InPortConnector* connector) override;
+    /*!
+     * @if jp
+     * @brief Connectorを設定する。
+     *
+     *
+     *
+     * @param connector OutPortConnector
+     *
+     * @else
+     * @brief set Connector
+     *
+     * 
+     *
+     * @param connector OutPortConnector
+     *
+     * @endif
+     */
+    void setConnector(InPortConnector* connector) override;
 
     /*!
      * @if jp
@@ -228,7 +228,7 @@ namespace RTC
 
   private:
     CdrBufferBase* m_buffer{nullptr};
-	::OpenRTM::PortSharedMemory_var  m_objref;
+    ::OpenRTM::PortSharedMemory_var  m_objref;
     ConnectorListenersBase* m_listeners;
     ConnectorInfo m_profile;
     InPortConnector* m_connector{nullptr};

@@ -65,6 +65,32 @@ namespace RTC
         }
     }
 
+    /*!
+     * @if jp
+     *
+     * @brief FastRTPSMessageInfoを追加
+     * 
+     * @param id 名前
+     * @param info FastRTPSMessageInfo
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * @param id 
+     * @param info 
+     *
+     * @endif
+     */
+    void FastRTPSMessageInfoList::addInfo(const std::string &id, FastRTPSMessageInfoBase* info)
+    {
+        auto data = m_data.find(id);
+        if (data != m_data.end())
+        {
+            data->second.deleteObject();
+        }
+        m_data[id] = FastRTPSMessageInfoEntry(info, [](FastRTPSMessageInfoBase*& obj) { delete obj; });
+    }
 
     /*!
      * @if jp
