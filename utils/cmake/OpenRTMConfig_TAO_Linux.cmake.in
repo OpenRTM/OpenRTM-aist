@@ -64,28 +64,41 @@ set(OPENRTM_SHORT_VERSION @RTM_SHORT_VERSION@)
 set(OPENRTM_ORB TAO)
 set(OPENRTM_IDL_WRAPPER rtm2-skelwrapper)
 set(OPENRTM_IDL_WRAPPER_FLAGS --include-dir= --skel-suffix=Skel --stub-suffix=Stub)
-set(OPENRTM_IDLC @IDL_COMPILE_COMMAND@)
+set(OPENRTM_IDLC tao_idl)
 
 
 
-# TAO version
-set(TAO_DIR @ORB_ROOT@)
-if(test${TAO_DIR} STREQUAL "test")
-	set(OPENRTM_IDLFLAGS -as -DTAO_IDL -I/usr/include -I/usr/local/include  -I${OPENRTM_INCLUDE_DIR}/rtm/idl)
-else()
-	set(OPENRTM_IDLFLAGS -as -DTAO_IDL -I${TAO_DIR}/include -I${OPENRTM_INCLUDE_DIR}/rtm/idl)
+if(NOT PKG_CONFIG_FOUND)
+  include(CMakeFindDependencyMacro)
+  find_dependency(PkgConfig)
 endif()
-set(TAO_CFLAGS @ORB_C_FLAGS_LIST@;)
-set(TAO_INCLUDE_DIRS @ORB_INCLUDE_DIR@)
+#
+# Getting TAO settings
+#
+pkg_check_modules(TAO_Svc_Utils REQUIRED TAO_Svc_Utils)
+pkg_check_modules(TAO_CosNaming REQUIRED TAO_CosNaming)
+pkg_check_modules(TAO_IORTable REQUIRED TAO_IORTable)
+pkg_check_modules(TAO_Utils REQUIRED TAO_Utils)
+pkg_check_modules(TAO_Strategies REQUIRED TAO_Strategies)
+set(ACE_TAO_LIBRARIES ${TAO_Svc_Utils_LIBRARIES} ${TAO_CosNaming_LIBRARIES} ${TAO_IORTable_LIBRARIES} ${TAO_Utils_LIBRARIES} ${TAO_Strategies_LIBRARIES})
+set(ACE_TAO_LIBRARY_DIRS ${TAO_Svc_Utils_LIBRARY_DIRS} ${TAO_CosNaming_LIBRARY_DIRS} ${TAO_IORTable_LIBRARY_DIRS} ${TAO_Utils_LIBRARY_DIRS} ${TAO_Strategies_LIBRARY_DIRS})
+set(ACE_TAO_INCLUDE_DIRS ${TAO_Svc_Utils_INCLUDE_DIRS} ${TAO_CosNaming_INCLUDE_DIRS} ${TAO_IORTable_INCLUDE_DIRS} ${TAO_Utils_INCLUDE_DIRS} ${TAO_Strategies_INCLUDE_DIRS})
+set(ACE_TAO_CFLAGS ${TAO_Svc_Utils_CFLAGS} ${TAO_CosNaming_CFLAGS} ${TAO_IORTable_CFLAGS} ${TAO_Utils_CFLAGS} ${TAO_Strategies_CFLAGS})
+set(ACE_TAO_DIR ${TAO_Svc_Utils_PREFIX})
+
+
+set(TAO_CFLAGS ${ACE_TAO_CFLAGS};)
+set(TAO_INCLUDE_DIRS ${ACE_TAO_INCLUDE_DIRS})
 set(TAO_LDFLAGS )
-set(TAO_LIBRARY_DIRS @ORB_LINK_DIR@)
-set(TAO_LIBRARIES @ORB_LIBRARIES@)
+set(TAO_LIBRARY_DIRS ${ACE_TAO_LIBRARY_DIRS})
+set(TAO_LIBRARIES ${ACE_TAO_LIBRARIES})
 
 set(OPENRTM_CFLAGS ${OPENRTM_CFLAGS} ${TAO_CFLAGS})
 set(OPENRTM_INCLUDE_DIRS ${OPENRTM_INCLUDE_DIRS} ${TAO_INCLUDE_DIRS})
 set(OPENRTM_LDFLAGS ${OPENRTM_LDFLAGS} ${TAO_LDFLAGS})
 set(OPENRTM_LIBRARY_DIRS ${OPENRTM_LIBRARY_DIRS} ${TAO_LIBRARY_DIRS})
-
+set(OPENRTM_LIB_DIR ${OPENRTM_LIB_DIR} ${TAO_LIBRARY_DIRS})
+set(OPENRTM_IDLFLAGS -as -DTAO_IDL -I${ACE_TAO_DIR}/include  -I${OPENRTM_INCLUDE_DIR}/rtm/idl)
 
 
 message(STATUS "OpenRTM-aist configuration done")
