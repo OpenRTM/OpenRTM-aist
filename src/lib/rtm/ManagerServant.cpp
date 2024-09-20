@@ -1218,6 +1218,15 @@ namespace RTM
 
         std::string lang_path_key("manager.modules.");
         lang_path_key += lang + ".load_paths";
+        if (param.find("config_file") != param.end())
+          {
+            rtcd_cmd += " -f \"" + coil::escape(param["config_file"]) + "\"";
+          }
+        else if (prop.findNode("config_file"))
+          {
+            rtcd_cmd += " -f \"" + coil::escape(prop["config_file"]) + "\"";
+          }
+
         rtcd_cmd += " -o \"manager.modules.load_path:" + coil::escape(prop["manager.modules.load_path"]) + "\"";
         rtcd_cmd += " -o \"" + lang_path_key + ":" + coil::escape(prop[lang_path_key]) + "\"";
         
@@ -1382,6 +1391,15 @@ namespace RTM
           {
             RTC_WARN(("rtcd command name not found. Default rtcd is used."));
             rtcd_cmd = "rtcd";
+          }
+
+        if (param.find("config_file") != param.end())
+          {
+            rtcd_cmd += " -f \"" + coil::escape(param["config_file"]) + "\"";
+          }
+        else if (prop.findNode("config_file"))
+          {
+            rtcd_cmd += " -f \"" + coil::escape(prop["config_file"]) + "\"";
           }
         rtcd_cmd += " -o \"corba.master_manager:" + mgrstr + "\"";
         rtcd_cmd += " -d ";

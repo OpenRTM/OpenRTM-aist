@@ -412,7 +412,26 @@ namespace RTC
     RTC_TRACE(("Manager::load(fname = %s, initfunc = %s)",
                fname.c_str(), initfunc.c_str()));
 
-    std::string file_name(fname);
+    coil::Properties prop;
+    prop["module_file_name"] = fname;
+
+    return load(prop, initfunc);
+  }
+
+  /*!
+   * @if jp
+   * @brief モジュールのロード
+   * @else
+   * @brief Load module
+   * @endif
+   */
+  ReturnCode_t Manager::load(coil::Properties &prop,
+                             const std::string &initfunc)
+  {
+    RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
+               prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
+
+    std::string file_name(prop["module_file_name"]);
     std::string init_func(initfunc);
     m_listeners.module_.preLoad(file_name, init_func);
     try
@@ -432,7 +451,7 @@ namespace RTC
           init_func = mod[0] + "Init";
         }
       }
-      std::string path(m_module->load(file_name, init_func));
+      std::string path(m_module->load(prop, init_func));
       RTC_DEBUG(("module path: %s", path.c_str()));
       m_listeners.module_.postLoad(path, init_func);
     }

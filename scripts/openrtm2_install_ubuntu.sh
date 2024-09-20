@@ -14,7 +14,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.0.2.03
+VERSION=2.0.2.04
 FILENAME=openrtm2_install_ubuntu.sh
 
 #
@@ -138,6 +138,7 @@ arg_java=false
 arg_openrtp=false
 arg_rtshell=false
 err_message=""
+rts_msg=""
 select_opt_c=""
 }
 
@@ -679,12 +680,10 @@ install_proc()
     if test "x$rtshell_ret" != "x"; then
       sudo rtshell_post_install -n
     else
-      msg="\n[ERROR] Failed to install rtshell-aist."
-      msg2="\nPlease add the following text to /etc/pip.conf and run the script again."
-      msg3="\n[global]"
-      msg4="\nbreak-system-packages = true"
-      tmp="$err_message$msg$msg2$msg3$msg4"
-      err_message=$tmp
+      rts_msg="[ERROR] Failed to install rtshell-aist."
+      rts_msg2="Please add the following text to /etc/pip.conf and run the script again."
+      rts_msg3="[global]"
+      rts_msg4="break-system-packages = true"
     fi
   fi
 }
@@ -932,6 +931,15 @@ if test ! "x$err_message" = "x" ; then
   ESC=$(printf '\033')
   echo $LF
   echo "${ESC}[33m${err_message}${ESC}[m"
+fi
+
+if test ! "x$rts_msg" = "x" ; then
+  ESC=$(printf '\033')
+  echo $LF
+  echo "${ESC}[33m${rts_msg}${ESC}[m"
+  echo "${ESC}[33m${rts_msg2}${ESC}[m"
+  echo "${ESC}[33m${rts_msg3}${ESC}[m"
+  echo "${ESC}[33m${rts_msg4}${ESC}[m"
 fi
 
 ESC=$(printf '\033')
