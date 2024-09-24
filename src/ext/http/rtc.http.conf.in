@@ -6,5 +6,5 @@ manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_HTTPTRANSPORT_DIR@
 manager.preload.modules: HTTPTransport@CMAKE_SHARED_LIBRARY_SUFFIX@
 
 corba.args:-ORBserverTransportRule "* http" -ORBclientTransportRule "* http" -ORBendPoint giop:http:http:///call
-corba.nameservers: http://127.0.0.1:2809/call
-corba.master_manager: giop:http:http://127.0.0.1:2810/call
+corba.nameservers: http://localhost:2809/call
+corba.master_manager: giop:http:http://localhost:2810/call
