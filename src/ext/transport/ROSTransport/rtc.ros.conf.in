@@ -1,0 +1,9 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_ROSTRANSPORT_DIR@
+manager.preload.modules: ROSTransport@CMAKE_SHARED_LIBRARY_SUFFIX@
+
+manager.components.preactivation: ConsoleOut0, ConsoleIn0
+manager.components.preconnect: ConsoleOut0.in?interface_type=ros&marshaling_type=ros:std_msgs/Float32&ros.node.name=ConsoleOut0, ConsoleIn0.out?interface_type=ros&marshaling_type=ros:std_msgs/Float32&ros.node.name=ConsoleIn0
