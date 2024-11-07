@@ -1,0 +1,5 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+corba.args: -ORBEndpoint iiop://: -ORBEndpoint diop://: -ORBSvcConf @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@tao_udp/svc.conf
