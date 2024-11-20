@@ -371,6 +371,7 @@ namespace RTC
     std::string m_messageType;
     std::mutex m_mutex;
     std::string m_datatype;
+    bool m_tcp_nodelay;
     std::string m_roscorehost;
     unsigned int m_roscoreport;
     uint64_t m_message_data_sent;
