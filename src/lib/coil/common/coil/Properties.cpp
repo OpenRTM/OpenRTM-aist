@@ -851,7 +851,15 @@ namespace coil
         }
         else
         {
-          tmp += ": " + curr.value;
+          if (curr.name == "plugins")
+          {
+            std::string fname{coil::replaceString(curr.value, "\\", "\\\\\\\\")};
+            tmp += ": " + fname;
+          }
+          else
+          {
+            tmp += ": " + curr.value;
+          }
         }
         out.emplace_back(tmp);
         return;
