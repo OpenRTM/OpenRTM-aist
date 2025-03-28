@@ -2,6 +2,8 @@ logger.enable: YES
 logger.log_level: DEBUG
 #logger.file_name: stdout
 
+naming.formats: test.host_cxt/%n.rtc
+
 manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_HTTPTRANSPORT_DIR@
 manager.preload.modules: HTTPTransport@CMAKE_SHARED_LIBRARY_SUFFIX@
 
@@ -9,6 +11,6 @@ corba.http.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DI
 corba.http.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/server.pem
 corba.http.key_file_password:password
 
-corba.args:-ORBserverTransportRule "* http" -ORBclientTransportRule "* http" -ORBendPoint giop:http:wss:///ws
-corba.nameservers: wss://127.0.0.1:2809/ws
-corba.master_manager: giop:http:wss://127.0.0.1:2810/ws
+corba.args:-ORBserverTransportRule "* http,tcp" -ORBclientTransportRule "* http,tcp" -ORBendPoint giop:http:wss:///ws -ORBendPoint giop:tcp::
+corba.nameservers: wss://localhost:2809/ws
+corba.master_manager: giop:http:wss://localhost:2810/ws
