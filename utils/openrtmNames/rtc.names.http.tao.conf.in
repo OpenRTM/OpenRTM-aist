@@ -1,0 +1,1 @@
+corba.args: -ORBEndpoint htiop://:2809 -ORBSvcConf @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@tao_http/svc.conf

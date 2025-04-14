@@ -1,0 +1,1 @@
+corba.args:-ORBserverTransportRule "* http" -ORBclientTransportRule "* http" -ORBendPoint giop:http:ws://localhost:2809/ws
