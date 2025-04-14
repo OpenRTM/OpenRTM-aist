@@ -1024,6 +1024,180 @@ namespace CORBA_RTCUtil
                                    SDOPackage::ConfigurationSet& confset,
                                    const std::string& value_name,
                                    const std::string& value);
+  /*!
+   * @if jp
+   * @class CorbaURI クラス
+   * @brief CorbaURI クラス
+   * 指定のCORBAオブジェクト参照用URLから参照形式、ホスト名、ポート番号、
+   * パス、オブジェクトキーを取得する機能を提供するクラス
+   *
+   * @else
+   *
+   * @class CorbaURI class
+   * @brief CorbaURI class
+   *
+   * @endif
+   */
+  class CorbaURI
+  {
+  public:
+    /*!
+     * @if jp
+     *
+     * @brief コンストラクタ
+     *
+     * コンストラクタ
+     *
+     * uriには以下の形式のURLを指定できる
+     * - corbaloc形式(例：corbaloc:iiop:192.168.11.1:2809/Nameservice)
+     * - corbaname形式(例：corbaname::192.168.11.1:2809#ConsoleOut0.rtc)
+     * - HTTP(例：http://192.168.11.1:2809/call#Nameservice)
+     * - HTTPS(例：https://192.168.11.1:2809/call#Nameservice)
+     * - WS(例：ws://192.168.11.1:2809/ws#Nameservice)
+     * - WSS(例：wss://192.168.11.1:2809/ws#Nameservice)
+     *
+     * また、giop:ではじまるエンドポイントを指定することもできる
+     * この場合は上記のcorbaloc形式、corbaname形式、HTTP、HTTPS、WS、WSSのURLに変換する
+     * - giop::192.168.11.1:2809 -> corbaloc:iiop:192.168.11.1:2809
+     * - giop:tcp:192.168.11.1:2809 -> corbaloc:iiop:192.168.11.1:2809
+     * - giop:ssl:192.168.11.1:2809 -> corbaloc:ssliop:192.168.11.1:2809
+     * - giop:http:http://192.168.11.1:2809/call -> http://192.168.11.1:2809/call
+     *
+     * アドレス、ポート番号を指定した場合はcorbaloc形式URLに変換する。
+     * - 192.168.11.1:2809 -> corbaloc:iiop:192.168.11.1:2809
+     *
+     * objkeyを指定した場合はURIの末尾に追加する。
+     * - corbaloc:iiop:192.168.11.1:2809 -> corbaloc:iiop:192.168.11.1:2809/Nameservice
+     * - corbaname::192.168.11.1:2809 -> corbaloc:iiop:192.168.11.1:2809#ConsoleOut0.rtc
+     * - http://192.168.11.1:2809/call -> http://192.168.11.1:2809/call#Nameservice
+     *
+     * @param uri CORBAオブジェクト参照用URL
+     * @param objkey オブジェクト名
+     *
+     * @else
+     *
+     * @brief Constructor
+     *
+     * Constructor
+     *
+     * @param uri 
+     * @param objkey 
+     *
+     * @endif
+     */
+    CorbaURI(std::string uri, const std::string &objkey="");
+    /*!
+     * @if jp
+     *
+     * @brief デストラクタ
+     *
+     * デストラクタ
+     *
+     * @else
+     *
+     * @brief Destructor
+     *
+     * Destructor
+     *
+     * @endif
+     */
+    ~CorbaURI();
+    /*!
+     * @if jp
+     *
+     * @brief CORBAオブジェクト参照用URLを取得する
+     *
+     * @return CORBAオブジェクト参照用URL
+     *
+     * @else
+     *
+     * @brief 
+     *
+     *
+     * @return 
+     *
+     * @endif
+     */
+    std::string toString() const;
+    /*!
+     * @if jp
+     *
+     * @brief 参照形式を取得する
+     * 例：corbaloc、corbaname、http、https、ws、wss
+     *
+     * @return 参照形式
+     *
+     * @else
+     *
+     * @brief 
+     *
+     *
+     * @return 
+     *
+     * @endif
+     */
+    std::string getProtocol() const;
+    /*!
+     * @if jp
+     *
+     * @brief ホスト名を取得する
+     *
+     * @return ホスト名
+     *
+     * @else
+     *
+     * @brief 
+     *
+     *
+     * @return 
+     *
+     * @endif
+     */
+    std::string getHost() const;
+    /*!
+     * @if jp
+     *
+     * @brief ポート番号を取得する
+     *
+     * @return ポート番号
+     *
+     * @else
+     *
+     * @brief 
+     *
+     *
+     * @return 
+     *
+     * @endif
+     */
+    unsigned short getPort() const;
+    /*!
+     * @if jp
+     *
+     * @brief 初期化時にCORBAオブジェクト参照用URLを指定した場合はfalse、
+     * ホスト名、ポート番号のみを指定した場合はtrueを返す。
+     *
+     * @return 参照先の指定方法
+     *
+     * @else
+     *
+     * @brief 
+     *
+     *
+     * @return 
+     *
+     * @endif
+     */
+    bool isAddressOnly() const;
+  private:
+    std::string m_protocol;
+    std::string m_host;
+    unsigned short m_port;
+    std::string m_path;
+    std::string m_fragment;
+    std::string m_uri;
+    bool m_addressonly;
+  };
 
 
 } // namespace CORBA_RTCUtil

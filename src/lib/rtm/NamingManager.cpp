@@ -23,6 +23,7 @@
 #include <rtm/NamingManager.h>
 #include <rtm/Manager.h>
 #include <rtm/CORBA_IORUtil.h>
+#include <rtm/CORBA_RTCUtil.h>
 
 #include <algorithm>
 #include <functional>
@@ -42,25 +43,28 @@ namespace RTC
       m_replaceEndpoint(false)
   {
     rtclog.setName("NamingOnCorba");
-    coil::Properties& prop(Manager::instance().getConfig());
-    m_replaceEndpoint =
-      coil::toBool(prop["corba.nameservice.replace_endpoint"],
-                   "YES", "NO", true);
+    if(CORBA_RTCUtil::CorbaURI(names).isAddressOnly())
+    {
+      coil::Properties& prop(Manager::instance().getConfig());
+      m_replaceEndpoint =
+        coil::toBool(prop["corba.nameservice.replace_endpoint"],
+                    "YES", "NO", true);
 
 
-    coil::vstring host_port(coil::split(names, ":"));
-    if (coil::dest_to_endpoint(host_port[0], m_endpoint))
-      {
+      coil::vstring host_port(coil::split(names, ":"));
+      if (coil::dest_to_endpoint(host_port[0], m_endpoint))
+        {
 
-        RTC_INFO(("Endpoint for the CORBA naming service (%s) is %s.",
-                  host_port[0].c_str(),
-                  m_endpoint.c_str()));
-      }
-    else
-      {
-        RTC_WARN(("No endpoint for the CORBA naming service (%s) was found.",
-                  host_port[0].c_str()));
-      }
+          RTC_INFO(("Endpoint for the CORBA naming service (%s) is %s.",
+                    host_port[0].c_str(),
+                    m_endpoint.c_str()));
+        }
+      else
+        {
+          RTC_WARN(("No endpoint for the CORBA naming service (%s) was found.",
+                    host_port[0].c_str()));
+        }
+    }
   }
   /*!
    * @if jp
@@ -495,11 +499,10 @@ namespace RTC
 
     try
       {
-        std::string mgrloc = "corbaloc:iiop:";
         coil::Properties prop = m_mgr->getConfig();
         std::string manager_name = prop.getProperty("manager.name");
-        mgrloc += name;
-        mgrloc += "/" + manager_name;
+        
+        std::string mgrloc(CORBA_RTCUtil::CorbaURI(name, manager_name).toString());
 
         CORBA::Object_var  mobj = m_orb->string_to_object(mgrloc.c_str());
         RTM::Manager_var mgr = RTM::Manager::_narrow(mobj);
@@ -706,7 +709,17 @@ namespace RTC
       {
         if (n->ns != nullptr)
         {
+          try
+          {
             n->ns->unbindObject(name);
+          }
+          catch(...)
+          {
+            delete n->ns;
+            n->ns = nullptr;
+          }
+          
+           
         }
       }
     unregisterCompName(name);
@@ -841,7 +854,15 @@ namespace RTC
   {
       for (auto & compName : m_compNames)
       {
-        ns->bindObject(compName->name.c_str(), compName->rtobj);
+        try
+        {
+          ns->bindObject(compName->name.c_str(), compName->rtobj);
+        }
+        catch(...)
+        {
+        }
+        
+        
       }
   }
 
