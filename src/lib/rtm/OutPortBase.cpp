@@ -905,7 +905,17 @@ namespace RTC
     if (provider != nullptr)
       {
         RTC_TRACE(("provider created"));
-        provider->init(prop.getNode("provider"));
+
+        try
+          {
+            provider->init(prop.getNode("provider"));
+          }
+        catch (std::bad_alloc&)
+          {
+            RTC_ERROR(("provider creation failed"));
+            OutPortProviderFactory::instance().deleteObject(provider);
+            return nullptr;
+          }
 
 #ifndef ORB_IS_RTORB
         if (!provider->publishInterface(cprof.properties))
@@ -959,7 +969,16 @@ namespace RTC
     if (consumer != nullptr)
       {
         RTC_TRACE(("consumer created"));
-        consumer->init(prop.getNode("consumer"));
+        try
+          {
+            consumer->init(prop.getNode("consumer"));
+          }
+        catch (std::bad_alloc&)
+          {
+            RTC_ERROR(("consumer creation failed"));
+            InPortConsumerFactory::instance().deleteObject(consumer);
+            return nullptr;
+          }
 
         if (!consumer->subscribeInterface(cprof.properties))
           {
