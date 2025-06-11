@@ -14,7 +14,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.0.2.04
+VERSION=2.1.0.00
 FILENAME=openrtm2_install_ubuntu.sh
 
 #
@@ -92,7 +92,6 @@ cmake_tools="cmake doxygen graphviz nkf"
 build_tools="subversion git"
 deb_pkg="uuid-dev libboost-filesystem-dev"
 pkg_tools="build-essential debhelper devscripts"
-fluentbit19="td-agent-bit"
 fluentbit="fluent-bit"
 omni_devel="libomniorb4-dev omniidl"
 omni_runtime="omniorb-nameserver"
@@ -569,11 +568,7 @@ u_src_pkgs="$omni_runtime $omni_devel"
 dev_pkgs="$runtime_pkgs $src_pkgs $openrtm2_devel"
 u_dev_pkgs="$u_runtime_pkgs $openrtm2_devel"
 
-if test "x$code_name" = "xfocal" || test "x$code_name" = "xjammy" ; then
-  core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools $fluentbit19"
-else
-  core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools"
-fi
+core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools $fluentbit"
 u_core_pkgs="$u_src_pkgs"
 
 ros_pkg="$openrtm2_ros"
@@ -643,9 +638,16 @@ install_proc()
     if test "x$OPT_COREDEVEL" = "xtrue" ; then
       select_opt_p="[python] ${op_c_msg}"
       install_packages $python_core_pkgs
-      pip3 install fluent-logger
-      tmp_pkg="$install_pkgs fluent-logger"
-      install_pkgs=$tmp_pkg
+      ret=`sudo python3 -m pip install fluent-logger`
+      if test "x$ret" != "x"; then
+        tmp_pkg="$install_pkgs fluent-logger"
+        install_pkgs=$tmp_pkg
+      else
+        rts_msg="[ERROR] Failed to install fluent-logger."
+	rts_msg2="Please add the following text to /etc/pip.conf and run the script again."
+	rts_msg3="[global]"
+	rts_msg4="break-system-packages = true"
+      fi
     elif test "x$OPT_RUNTIME" = "xtrue" ; then
       select_opt_p="[python] ${op_r_msg}"
       install_packages $python_runtime_pkgs

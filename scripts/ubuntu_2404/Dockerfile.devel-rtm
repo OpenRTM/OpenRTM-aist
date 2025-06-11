@@ -14,11 +14,11 @@ RUN apt update\
  patch
 
 # downlaod fluent-bit.
-COPY fluent-bit-3.2.7-ubuntu.patch /root/fluent-bit-3.2.7-ubuntu.patch
+COPY OpenRTM-aist/scripts/ubuntu_2404/fluent-bit-4.0.3-ubuntu.patch /root/fluent-bit-4.0.3-ubuntu.patch
 RUN mkdir /root/fluent-bit
-RUN wget -O - https://github.com/fluent/fluent-bit/archive/refs/tags/v3.2.7.tar.gz\
+RUN wget -O - https://github.com/fluent/fluent-bit/archive/refs/tags/v4.0.3.tar.gz\
  | tar xfz - -C /root/fluent-bit --strip-components 1\
- && patch -p1 -d /root/fluent-bit < /root/fluent-bit-3.2.7-ubuntu.patch
+ && patch -p1 -d /root/fluent-bit < /root/fluent-bit-4.0.3-ubuntu.patch
 RUN sed  -i -e 's/jemalloc-5.3.0\/configure/jemalloc-5.3.0\/configure --disable-initial-exec-tls/g' /root/fluent-bit/CMakeLists.txt
 
 # build fluent-bit.
@@ -32,22 +32,18 @@ RUN cmake -DFLB_TRACE=Off\
 RUN cmake --build /tmp/flb/build --target install/strip -- -j$(nproc)
 
 # install header files.
-RUN cp -r /root/fluent-bit/lib/cfl/include/cfl\
- /root/fluent-bit/lib/cfl/lib/xxhash/*.h\
- /root/fluent-bit/lib/msgpack-*/include/msgpack.h\
+RUN cp -r /root/fluent-bit/lib/msgpack-*/include/msgpack.h\
  /root/fluent-bit/lib/msgpack-*/include/msgpack\
- /root/fluent-bit/lib/ctraces/lib/mpack/src/mpack\
- /root/fluent-bit/lib/ctraces/include/ctraces\
- /root/fluent-bit/lib/c-ares-*/include/*.h\
- /root/fluent-bit/lib/monkey/mk_core/deps/libevent/include/*.h\
- /root/fluent-bit/lib/monkey/mk_core/deps/libevent/include/event2\
- /tmp/flb/install/include/
-RUN cp -r /tmp/flb/build/lib/c-ares-*/ares_build.h\
- /tmp/flb/build/lib/c-ares-*/ares_config.h\
+ /root/fluent-bit/lib/cfl/include/cfl\
+ /root/fluent-bit/lib/cfl/lib/xxhash/*.h\
  /root/fluent-bit/lib/cmetrics/include/cmetrics\
  /root/fluent-bit/lib/cmetrics/include/prometheus_remote_write\
  /root/fluent-bit/lib/ctraces/include/ctraces\
+ /root/fluent-bit/lib/ctraces/lib/mpack/src/mpack\
+ /root/fluent-bit/lib/cprofiles/include/cprofiles\
  /tmp/flb/install/include/
+RUN cp /tmp/flb/build/lib/cprofiles/include/cprofiles/*.h\
+ /tmp/flb/install/include/cprofiles/
 RUN cp -r /root/fluent-bit/lib/monkey/include/monkey/mk_core/external\
  /tmp/flb/build/lib/monkey/include/monkey/mk_core/mk_core_info.h\
  /tmp/flb/install/include/monkey/mk_core/
@@ -58,8 +54,8 @@ RUN mkdir -p /tmp/flb/install/deps/rbtree\
  && cp /root/fluent-bit/lib/monkey/deps/rbtree/rbtree.h\
  /tmp/flb/install/deps/rbtree/
 RUN mkdir /tmp/flb/install/include/nghttp2\
- && cp /root/fluent-bit/lib/nghttp2/lib/includes/nghttp2/nghttp2.h\
- /tmp/flb/build/lib/nghttp2/lib/includes/nghttp2/nghttp2ver.h\
+ && cp /root/fluent-bit/lib/nghttp2*/lib/includes/nghttp2/nghttp2.h\
+ /tmp/flb/build/lib/nghttp2*/lib/includes/nghttp2/nghttp2ver.h\
  /tmp/flb/install/include/nghttp2/
 
 ############################################################

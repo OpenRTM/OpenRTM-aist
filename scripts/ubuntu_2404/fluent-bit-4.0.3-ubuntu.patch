@@ -1,0 +1,405 @@
+diff -ruN fluent-bit-4.0.3-org/include/fluent-bit/flb_input.h fluent-bit-4.0.3-new/include/fluent-bit/flb_input.h
+--- fluent-bit-4.0.3-org/include/fluent-bit/flb_input.h	2025-05-31 04:40:45.000000000 +0900
++++ fluent-bit-4.0.3-new/include/fluent-bit/flb_input.h	2025-06-09 11:54:47.202599456 +0900
+@@ -556,9 +556,9 @@
+ {
+     struct flb_libco_in_params *params;
+ 
+-    params = pthread_getspecific(libco_in_param_key);
++    params = (struct flb_libco_in_params *)pthread_getspecific(libco_in_param_key);
+     if (params == NULL) {
+-        params = flb_calloc(1, sizeof(struct flb_libco_in_params));
++	params = (struct flb_libco_in_params *)(struct flb_libco_in_params *)flb_calloc(1, sizeof(struct flb_libco_in_params));
+         if (params == NULL) {
+             flb_errno();
+             return;
+@@ -580,9 +580,9 @@
+     struct flb_coro *coro;
+     struct flb_libco_in_params *params;
+ 
+-    params = pthread_getspecific(libco_in_param_key);
++    params = (struct flb_libco_in_params *)pthread_getspecific(libco_in_param_key);
+     if (params == NULL) {
+-        params = flb_calloc(1, sizeof(struct flb_libco_in_params));
++	params = (struct flb_libco_in_params *)flb_calloc(1, sizeof(struct flb_libco_in_params));
+         if (params == NULL) {
+             flb_errno();
+             return;
+diff -ruN fluent-bit-4.0.3-org/include/fluent-bit/flb_output.h fluent-bit-4.0.3-new/include/fluent-bit/flb_output.h
+--- fluent-bit-4.0.3-org/include/fluent-bit/flb_output.h	2025-05-31 04:40:45.000000000 +0900
++++ fluent-bit-4.0.3-new/include/fluent-bit/flb_output.h	2025-06-09 16:32:05.879513875 +0900
+@@ -765,7 +765,7 @@
+             }
+ 
+             records = flb_mp_count(p_buf, p_size);
+-            tmp = flb_event_chunk_create(evc->type, records, evc->tag, flb_sds_len(evc->tag), p_buf, p_size);
++	    tmp = flb_event_chunk_create(evc->type, records, evc->tag, flb_sds_len(evc->tag), (char *)p_buf, p_size);
+             if (!tmp) {
+                 flb_coro_destroy(coro);
+                 flb_free(out_flush);
+@@ -836,7 +836,7 @@
+                     if ((serialization_buffer_offset +
+                          serialized_context_size) > p_size) {
+                         resized_serialization_buffer = \
+-                            flb_realloc(p_buf, p_size + serialized_context_size);
++			    (char *)flb_realloc(p_buf, p_size + serialized_context_size);
+ 
+                         if (resized_serialization_buffer == NULL) {
+                             flb_errno();
+@@ -876,7 +876,7 @@
+                                                 0,
+                                                 evc->tag,
+                                                 flb_sds_len(evc->tag),
+-                                                p_buf,
++                                                (char *)p_buf,
+                                                 p_size);
+ 
+             if (out_flush->processed_event_chunk == NULL) {
+@@ -937,7 +937,7 @@
+                     if ((serialization_buffer_offset +
+                          serialized_context_size) > p_size) {
+                         resized_serialization_buffer = \
+-                            flb_realloc(p_buf, p_size + serialized_context_size);
++                            (char *)flb_realloc(p_buf, p_size + serialized_context_size);
+ 
+                         if (resized_serialization_buffer == NULL) {
+                             flb_errno();
+@@ -977,7 +977,7 @@
+                                                 0,
+                                                 evc->tag,
+                                                 flb_sds_len(evc->tag),
+-                                                p_buf,
++                                                (char *)p_buf,
+                                                 p_size);
+ 
+             if (out_flush->processed_event_chunk == NULL) {
+@@ -1037,7 +1037,7 @@
+                     if ((serialization_buffer_offset +
+                          cfl_sds_len(serialized_profiles_context_buffer)) > p_size) {
+                         resized_serialization_buffer = \
+-                            flb_realloc(p_buf, p_size + cfl_sds_len(serialized_profiles_context_buffer));
++                            (char *)flb_realloc(p_buf, p_size + cfl_sds_len(serialized_profiles_context_buffer));
+ 
+                         if (resized_serialization_buffer == NULL) {
+                             flb_errno();
+@@ -1077,7 +1077,7 @@
+                                                 0,
+                                                 evc->tag,
+                                                 flb_sds_len(evc->tag),
+-                                                p_buf,
++                                                (char *)p_buf,
+                                                 p_size);
+ 
+             if (out_flush->processed_event_chunk == NULL) {
+diff -ruN fluent-bit-4.0.3-org/lib/ctraces/lib/mpack/src/mpack/mpack.h fluent-bit-4.0.3-new/lib/ctraces/lib/mpack/src/mpack/mpack.h
+--- fluent-bit-4.0.3-org/lib/ctraces/lib/mpack/src/mpack/mpack.h	2025-05-31 04:40:45.000000000 +0900
++++ fluent-bit-4.0.3-new/lib/ctraces/lib/mpack/src/mpack/mpack.h	2025-06-09 11:45:20.069933335 +0900
+@@ -3271,124 +3271,124 @@
+ #undef mpack_write_kv
+ #endif
+ 
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, int8_t value) {
+-    mpack_write_i8(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, int16_t value) {
+-    mpack_write_i16(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, int32_t value) {
+-    mpack_write_i32(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, int64_t value) {
+-    mpack_write_i64(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint8_t value) {
+-    mpack_write_u8(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint16_t value) {
+-    mpack_write_u16(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint32_t value) {
+-    mpack_write_u32(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint64_t value) {
+-    mpack_write_u64(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, bool value) {
+-    mpack_write_bool(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, float value) {
+-    mpack_write_float(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, double value) {
+-    mpack_write_double(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, char *value) {
+-    mpack_write_cstr_or_nil(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write(mpack_writer_t* writer, const char *value) {
+-    mpack_write_cstr_or_nil(writer, value);
+-}
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, int8_t value) {
++//    mpack_write_i8(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, int16_t value) {
++//    mpack_write_i16(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, int32_t value) {
++//    mpack_write_i32(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, int64_t value) {
++//    mpack_write_i64(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint8_t value) {
++//    mpack_write_u8(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint16_t value) {
++//    mpack_write_u16(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint32_t value) {
++//    mpack_write_u32(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, uint64_t value) {
++//    mpack_write_u64(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, bool value) {
++//    mpack_write_bool(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, float value) {
++//    mpack_write_float(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, double value) {
++//    mpack_write_double(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, char *value) {
++//    mpack_write_cstr_or_nil(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write(mpack_writer_t* writer, const char *value) {
++//    mpack_write_cstr_or_nil(writer, value);
++//}
+ 
+ /* C++ generic write for key-value pairs */
+ 
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int8_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_i8(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int16_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_i16(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int32_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_i32(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int64_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_i64(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint8_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_u8(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint16_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_u16(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint32_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_u32(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint64_t value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_u64(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, bool value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_bool(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, float value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_float(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, double value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_double(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, char *value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_cstr_or_nil(writer, value);
+-}
+-
+-MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, const char *value) {
+-    mpack_write_cstr(writer, key);
+-    mpack_write_cstr_or_nil(writer, value);
+-}
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int8_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_i8(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int16_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_i16(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int32_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_i32(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, int64_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_i64(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint8_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_u8(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint16_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_u16(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint32_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_u32(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, uint64_t value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_u64(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, bool value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_bool(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, float value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_float(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, double value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_double(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, char *value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_cstr_or_nil(writer, value);
++//}
++//
++//MPACK_INLINE void mpack_write_kv(mpack_writer_t* writer, const char *key, const char *value) {
++//    mpack_write_cstr(writer, key);
++//    mpack_write_cstr_or_nil(writer, value);
++//}
+ 
+ /**
+  * @}
+diff -ruN fluent-bit-4.0.3-org/lib/monkey/deps/rbtree/rbtree.h fluent-bit-4.0.3-new/lib/monkey/deps/rbtree/rbtree.h
+--- fluent-bit-4.0.3-org/lib/monkey/deps/rbtree/rbtree.h	2025-05-31 04:40:45.000000000 +0900
++++ fluent-bit-4.0.3-new/lib/monkey/deps/rbtree/rbtree.h	2025-06-09 14:57:37.796761276 +0900
+@@ -401,6 +401,8 @@
+     if (x->right != NULL) {
+         __rb_tree_find_minimum(x->right, successor);
+         goto done;
++done:
++    return ret;
+     }
+ 
+     struct rb_tree_node *y = x->parent;
+@@ -412,8 +414,6 @@
+ 
+     *successor = y;
+ 
+-done:
+-    return ret;
+ }
+ 
+ /**
+@@ -434,6 +434,8 @@
+     if (x->left != NULL) {
+         __rb_tree_find_maximum(x->left, pred);
+         goto done;
++done:
++    return ret;
+     }
+ 
+     struct rb_tree_node *y = x->parent;
+@@ -445,8 +447,6 @@
+ 
+     *pred = y;
+ 
+-done:
+-    return ret;
+ }
+ 
+ /**@} rb_functions */
+diff -ruN fluent-bit-4.0.3-org/lib/monkey/include/monkey/mk_stream.h fluent-bit-4.0.3-new/lib/monkey/include/monkey/mk_stream.h
+--- fluent-bit-4.0.3-org/lib/monkey/include/monkey/mk_stream.h	2025-05-31 04:40:45.000000000 +0900
++++ fluent-bit-4.0.3-new/lib/monkey/include/monkey/mk_stream.h	2025-06-09 15:01:30.223930702 +0900
+@@ -156,7 +156,7 @@
+     struct mk_iov *iov;
+ 
+     if (!in) {
+-        in = mk_mem_alloc(sizeof(struct mk_stream_input));
++	in = (struct mk_stream_input *)mk_mem_alloc(sizeof(struct mk_stream_input));
+         if (!in) {
+             return -1;
+         }
+@@ -175,7 +175,7 @@
+     in->stream       = stream;
+ 
+     if (type == MK_STREAM_IOV) {
+-        iov = buffer;
++        iov = (struct mk_iov *)buffer;
+         in->bytes_total = iov->total_len;
+     }
+     else {
+@@ -272,7 +272,7 @@
+      * used by Monkey core, at the moment the only caller is the CGI plugin.
+      */
+     if (!stream) {
+-        stream = mk_mem_alloc(sizeof(struct mk_stream));
++	stream = (struct mk_stream *)mk_mem_alloc(sizeof(struct mk_stream));
+         if (!stream) {
+             return NULL;
+         }
