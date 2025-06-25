@@ -1,0 +1,9 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+corba.args: -ORBEndpoint shmiop://: -ORBSvcConf @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@tao_shm/svc.conf
+
+
+#corba.nameservers: corbaloc:shmiop:1.0@:2809
+#corba.master_manager: shmiop://1.0@hostname:2810

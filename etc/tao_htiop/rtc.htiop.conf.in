@@ -1,0 +1,8 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+corba.args: -ORBEndpoint htiop:// -ORBSvcConf @CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@tao_http/svc.conf
+
+#corba.nameservers: corbaloc:htiop:127.0.0.1:2809
+#corba.master_manager: htiop://127.0.0.1:2810
