@@ -481,6 +481,11 @@ namespace RTC
     std::string m_callerid;
     std::string m_messageType;
     std::mutex m_mutex;
+    bool m_tcp_nodelay;
+    bool m_so_keepalive;
+    uint32_t m_tcp_keepcnt;
+    uint32_t m_tcp_keepidle;
+    uint32_t m_tcp_keepintvl;
 
     std::vector<PublisherLink> m_tcp_connecters;
     std::mutex m_con_mutex;
