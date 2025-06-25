@@ -52,6 +52,10 @@
 #endif
 #endif
 
+#if defined(ORB_IS_TAO) && defined(SSL_ENABLE)
+#include <orbsvcs/SecurityLevel2C.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <utility>
@@ -1539,6 +1543,31 @@ std::vector<coil::Properties> Manager::getLoadableModules()
         CORBA::Object_var obj =
           m_pORB->resolve_initial_references((char*)"RootPOA");
         m_pPOA = PortableServer::POA::_narrow(obj);
+#if defined(ORB_IS_TAO) && defined(SSL_ENABLE)
+        for(size_t i=0;i < args.size();i++)
+        {
+          if(args[i].find("-ORB") != std::string::npos && args[i].find("Endpoint") != std::string::npos)
+          {
+            if(i < args.size()-1)
+            {
+              if(args[i+1].find("ssliop://") != std::string::npos)
+              {
+                CORBA::Object_var sec_man =
+                  m_pORB->resolve_initial_references ("SecurityLevel2:SecurityManager");
+                SecurityLevel2::SecurityManager_var sec2manager =
+                  SecurityLevel2::SecurityManager::_narrow (sec_man.in ());
+                SecurityLevel2::AccessDecision_var ad_tmp = sec2manager->access_decision ();
+                TAO::SL2::AccessDecision_var ad =
+                  TAO::SL2::AccessDecision::_narrow (ad_tmp.in ());
+                ad->default_collocated_decision (true);
+                break;
+              }
+            }
+          }
+        }
+
+#endif
+        
 #endif
         if (CORBA::is_nil(m_pPOA))
           {
