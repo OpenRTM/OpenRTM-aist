@@ -21,6 +21,10 @@
 #include <rtm/OutPortCorbaCdrConsumer.h>
 #include <rtm/NVUtil.h>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   /*!
@@ -99,7 +103,29 @@ namespace RTC
 
     try
       {
-        ::OpenRTM::PortStatus ret(_ptr()->get(cdr_data.out()));
+        ::OpenRTM::PortStatus ret(::OpenRTM::PortStatus::PORT_ERROR);
+        try
+          {
+            ret = _ptr()->get(cdr_data.out());
+          }
+#ifdef ORB_IS_OMNIORB
+          catch (const CORBA::COMM_FAILURE& ex)
+          {
+            if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+            {
+              RTC_DEBUG(("Retry get message"));
+              ret = _ptr()->get(cdr_data.out());
+            }
+            else
+            {
+              throw;
+            }
+          }
+#endif
+        catch (...)
+          {
+            throw;
+          }
 
         if (ret == ::OpenRTM::PORT_OK)
           {

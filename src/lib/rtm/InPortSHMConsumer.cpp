@@ -22,6 +22,10 @@
 #include <mutex>
 #include <memory>
 
+#if defined(minor)
+#undef minor
+#endif
+
 
 namespace RTC
 {
@@ -109,15 +113,40 @@ namespace RTC
   {
     RTC_PARANOID(("put()"));
 
+    std::lock_guard<std::mutex> guard(m_mutex);
     try
       {
-        std::lock_guard<std::mutex> guard(m_mutex);
         m_shmem.setEndian(m_endian);
         m_shmem.create_memory(m_memory_size, m_shm_address.c_str());
         m_shmem.write(data);
 
         return convertReturnCode(_ptr()->put());
       }
+#ifdef ORB_IS_OMNIORB
+    catch (const CORBA::COMM_FAILURE& ex)
+      {
+        if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+          {
+            RTC_DEBUG(("Retry put message"));
+            try
+              {
+                m_shmem.setEndian(m_endian);
+                m_shmem.create_memory(m_memory_size, m_shm_address.c_str());
+                m_shmem.write(data);
+
+                return convertReturnCode(_ptr()->put());
+              }
+            catch (...)
+              {
+                return DataPortStatus::CONNECTION_LOST;
+              }
+          }
+        else
+          {
+            return DataPortStatus::CONNECTION_LOST;
+          }
+      }
+#endif
     catch (...)
       {
         return DataPortStatus::CONNECTION_LOST;
