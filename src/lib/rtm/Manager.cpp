@@ -59,6 +59,7 @@
 #include <iostream>
 #include <utility>
 #include <iterator>
+#include <list>
 
 #if defined(minor)
 #undef minor
@@ -1667,39 +1668,19 @@ namespace RTC
    *
    * @endif
    */
-  bool Manager::isORBEndPoint(const std::string &endpoint)
+  bool Manager::isORBEndPoint(const std::string& endpoint)
   {
-    if (endpoint.find("giop:") != std::string::npos)
+    const std::list<std::string> headers{ "giop:", "iiop://",
+                                        "diop://", "uiop://",
+                                        "ssliop://", "shmiop://",
+                                        "htiop://", "inet:"};
+
+    for (const auto &header : headers)
     {
-      return true;
-    }
-    else if (endpoint.find("iiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("diop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("uiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("ssliop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("shmiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("htiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("inet:") != std::string::npos)
-    {
-      return true;
+      if (endpoint.find(header) != std::string::npos)
+      {
+        return true;
+      }
     }
     return false;
   }
