@@ -1237,7 +1237,10 @@ namespace RTM
         rtcd_cmd += " -o \"manager.instance_name:" + mgrstr + "\"";
         rtcd_cmd += " -o \"manager.shutdown_auto:NO\"";
 
-
+        coil::vstring tmp = coil::split (create_arg, "&");
+        rtcd_cmd += " -o \"module_name:\"" + tmp[0];
+        RTC_DEBUG(("module_name: %s", tmp[0].c_str()));
+        
         coil::vstring slaves_names;
         if (mgrstr == "manager_%p")
           {
