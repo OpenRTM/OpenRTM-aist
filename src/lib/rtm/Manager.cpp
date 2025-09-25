@@ -1362,19 +1362,20 @@ std::vector<coil::Properties> Manager::getLoadableModules()
     for (auto const& mod : coil::split(m_config["logger.plugins"], ","))
       {
         std::string initfunc;
-        if (coil::isAbsolutePath(mod))
+        std::string mm(coil::replaceEnv(mod));
+        if (coil::isAbsolutePath(mm))
         {
-            coil::vstring namelist(coil::split((mod), "/"));
+            coil::vstring namelist(coil::split((mm), "/"));
             namelist = coil::split(namelist.back(), "\\");
             initfunc = coil::split(namelist.back(), ".").operator[](0) + "Init";
         }
         else
         {
-            initfunc = coil::split(mod, ".").operator[](0) + "Init";
+            initfunc = coil::split(mm, ".").operator[](0) + "Init";
         }
         try
           {
-            m_module->load(mod, initfunc);
+            m_module->load(mm, initfunc);
           }
         catch (...)
           {
