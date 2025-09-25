@@ -6,6 +6,9 @@ logger.plugins: @FLUENTPLUGIN_PATH@
 
 logger.logstream.fluentd.output0.plugin: forward
 logger.logstream.fluentd.output0.conf.match:*
+logger.logstream.fluentd.output0.conf.retry_limit:Off
 
 logger.logstream.fluentd.input0.plugin: lib
-logger.logstream.fluentd.input0.tag: openrtm.example
+logger.logstream.fluentd.input0.conf.tag: rtclog
+
+logger.logstream.fluentd.option.log_level:off

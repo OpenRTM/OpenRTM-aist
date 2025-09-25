@@ -77,7 +77,7 @@ if(VXWORKS AND NOT RTP)
 				COMPONENT ext)
 else()
 	set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES} FastRTPSTransport 
-		${rclcpp_LIBRARIES} ${std_msgs_LIBRARIES} ${geometry_msgs_LIBRARIES} ${sensor_msgs_LIBRARIES} 
+		${rclcpp_LIBRARIES}  
 		${std_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
 		${geometry_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
 		${sensor_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}

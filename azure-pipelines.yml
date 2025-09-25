@@ -27,19 +27,19 @@ pr:
     - utils/
 
 variables:
-  omniorb: omniORB-4.2.4-x64-vc140-py37
-  omniorbUrl: https://openrtm.org/pub/omniORB/win32/omniORB-4.2.4
-  ros2: ros2-dashing-20191213-windows-amd64
-  ros2Url: https://github.com/ros2/ros2/releases/download/release-dashing-20191213/
+  omniorb: omniORB-4.3.2-x64-vc16-py312
+  omniorbUrl: https://openrtm.org/pub/omniORB/win32/omniORB-4.3.2
+  ros2: ros2-jazzy-20240705-windows-release-amd64
+  ros2Url: https://github.com/ros2/ros2/releases/download/release-jazzy-20240705/
 
 jobs:
   - job: Build
     strategy:
       matrix:
+        vs2022:
+          imageVersion: 'windows-2022'
         vs2019:
           imageVersion: 'windows-2019'
-        vs2017:
-          imageVersion: 'vs2017-win2016'
 
     pool:
       vmImage: $(imageVersion)
@@ -55,7 +55,7 @@ jobs:
       - task: CMake@1
         env:
           PYTHONPATH: '$(Pipeline.Workspace)\ros2-windows\Lib\site-packages;$(PYTHONPATH)'
-          ROS_DISTRO: 'dashing'
+          ROS_DISTRO: 'jazzy'
           ROS_PYTHON_VERSION: '3'
           ROS_VERSION: '2'
           AMENT_PREFIX_PATH: '$(Pipeline.Workspace)\ros2-windows'
@@ -66,10 +66,7 @@ jobs:
           workingDirectory: 'build'
           cmakeArgs:
             -A x64
-            -DRTM_VC_VER=vc14
-            -DOMNI_VERSION=42
-            -DOMNI_MINOR=3
-            -DOMNITHREAD_VERSION=41
+            -DRTM_VC_VER=vc16
             -DCORBA=omniORB
             -DORB_ROOT=$(Pipeline.Workspace)\$(omniorb)
             -DOBSERVER_ENABLE=ON
@@ -91,7 +88,7 @@ jobs:
       vmImage: 'windows-latest'
 
     variables:
-      vcPath: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+      vcPath: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC'
 
     steps:
       - template: .azure-pipelines/openrtm-build-environment.yml
@@ -110,10 +107,7 @@ jobs:
             -DCMAKE_CXX_COMPILER:FILEPATH="$(vcPath)\Tools\Llvm\bin\clang-cl.exe" ^
             -DCMAKE_LINKER:FILEPATH="$(vcPath)\Tools\Llvm\bin\lld-link.exe" ^
             -DCMAKE_BUILD_TYPE=Release ^
-            -DRTM_VC_VER=vc14 ^
-            -DOMNI_VERSION=42 ^
-            -DOMNI_MINOR=3 ^
-            -DOMNITHREAD_VERSION=41 ^
+            -DRTM_VC_VER=vc16 ^
             -DCORBA=omniORB ^
             -DORB_ROOT=$(Pipeline.Workspace)\$(omniorb) ^
             -DOBSERVER_ENABLE=ON ^
@@ -127,7 +121,7 @@ jobs:
           CFLAGS: -m64 -fdiagnostics-absolute-paths
           CXXFLAGS: -m64 -fdiagnostics-absolute-paths
           PYTHONPATH: '$(Pipeline.Workspace)\ros2-windows\Lib\site-packages;$(PYTHONPATH)'
-          ROS_DISTRO: 'dashing'
+          ROS_DISTRO: 'jazzy'
           ROS_PYTHON_VERSION: '3'
           ROS_VERSION: '2'
           AMENT_PREFIX_PATH: '$(Pipeline.Workspace)\ros2-windows'

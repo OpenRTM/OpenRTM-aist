@@ -77,19 +77,39 @@ else(WIN32)
 endif(WIN32)
 
 if(SSL_ENABLE)
-	set(PROTOCOLS ssl)
-
-	if(HTTP_ENABLE)
-		set(PROTOCOLS ${PROTOCOLS} http https ws wss)
+	if(BUILD_RTM_LINUX_PKGS)
+		set(CMAKE_INSTALL_PREFIX "/usr")
 	endif()
+	if(CORBA STREQUAL "omniORB")
+		set(PROTOCOLS tcp ssl)
 
-	foreach(PROTOCOL ${PROTOCOLS})
-		configure_file(
-			${CMAKE_CURRENT_SOURCE_DIR}/rtc.names.${PROTOCOL}.conf.in ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf @ONLY)
-		install(
-			FILES ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf
-			DESTINATION ${INSTALL_RTM_ETC_DIR}
-			COMPONENT utils)
-	endforeach()
+		if(HTTP_ENABLE)
+			set(PROTOCOLS ${PROTOCOLS} http https ws wss)
+		endif()
+
+		foreach(PROTOCOL ${PROTOCOLS})
+			configure_file(
+				${CMAKE_CURRENT_SOURCE_DIR}/rtc.names.${PROTOCOL}.omniorb.conf.in ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf @ONLY)
+			install(
+				FILES ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf
+				DESTINATION ${INSTALL_RTM_ETC_DIR}
+				COMPONENT utils)
+		endforeach()
+	elseif(CORBA STREQUAL "TAO")
+		set(PROTOCOLS tcp http shm)
+
+		if(SSL_ENABLE)
+			set(PROTOCOLS ${PROTOCOLS} ssl)
+		endif()
+
+		foreach(PROTOCOL ${PROTOCOLS})
+			configure_file(
+				${CMAKE_CURRENT_SOURCE_DIR}/rtc.names.${PROTOCOL}.tao.conf.in ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf @ONLY)
+			install(
+				FILES ${PROJECT_BINARY_DIR}/rtc.names.${PROTOCOL}.conf
+				DESTINATION ${INSTALL_RTM_ETC_DIR}
+				COMPONENT utils)
+		endforeach()
+	endif()
 endif()
 

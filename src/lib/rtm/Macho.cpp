@@ -373,8 +373,20 @@ Key _AdaptingInitializer::adapt(Key key) {
 }
 
 
+#if defined(__clang__)
+#if defined(_WIN32) || defined(_WIN64)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 // Singleton initializers.
 _DefaultInitializer _theDefaultInitializer;
 _HistoryInitializer _theHistoryInitializer;
+
+#if defined(__clang__)
+#if defined(_WIN32) || defined(_WIN64)
+#pragma clang diagnostic pop
+#endif
+#endif
 

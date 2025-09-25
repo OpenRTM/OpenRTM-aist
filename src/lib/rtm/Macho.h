@@ -205,6 +205,14 @@
 #include <new>
 #include <cassert>
 
+#if defined(__clang__)
+#if defined(_WIN32) || defined(_WIN64)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+#endif
+
+
 class TestAccess;
 
 
@@ -1972,6 +1980,12 @@ namespace Macho {
 #endif
 
 } // namespace Macho
+
+#if defined(__clang__)
+#if defined(_WIN32) || defined(_WIN64)
+#pragma clang diagnostic pop
+#endif
+#endif
 
 
 #endif // MACHO_HPP

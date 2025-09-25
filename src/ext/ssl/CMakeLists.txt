@@ -5,6 +5,14 @@ project (SSLTransport
 	LANGUAGES CXX)
 
 
+set(SSL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/root.crt ${CMAKE_CURRENT_SOURCE_DIR}/server.pem)
+install(FILES ${SSL_FILES} DESTINATION ${INSTALL_RTM_ETC_DIR}/ssl COMPONENT ext)
+
+if(NOT CORBA STREQUAL "omniORB")
+  return()
+endif()
+
+
 set(OPENSSL_ROOT ${OPENSSL_ROOT} CACHE PATH "set OPENSSL_ROOT")
 
 if(OPENSSL_ROOT)
@@ -55,11 +63,11 @@ if(WIN32)
 else(WIN32)
 endif(WIN32)
 
-set(SSL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/root.crt ${CMAKE_CURRENT_SOURCE_DIR}/server.pem)
-install(FILES ${SSL_FILES} DESTINATION ${INSTALL_RTM_ETC_DIR}/ssl COMPONENT ext)
-
 
 set(INSTALL_SSLTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/ssl)
+if(BUILD_RTM_LINUX_PKGS)
+	set(CMAKE_INSTALL_PREFIX "/usr")
+endif()
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ssl.conf.in ${PROJECT_BINARY_DIR}/rtc.ssl.conf @ONLY)
 install(

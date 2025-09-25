@@ -188,7 +188,7 @@ class Template:
 
     """
     
-    def __init__(self, template, begin_mark="\[", end_mark="\]"):
+    def __init__(self, template, begin_mark="\\[", end_mark="\\]"):
         self.__procs = [self.__proc_text,
                         self.__proc_cmd,
                         self.__proc_bracket]

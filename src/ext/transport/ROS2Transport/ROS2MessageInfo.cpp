@@ -16,5 +16,13 @@
  *
  */
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4996)
+#endif
+
 #include "ROS2MessageInfo.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif

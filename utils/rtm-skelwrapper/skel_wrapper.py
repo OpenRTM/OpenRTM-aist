@@ -247,7 +247,7 @@ class skel_wrapper:
 			self.data["dependencies"] = ''.join(includes)
 		self.verbose_print = print if verbose else lambda *a, **k: None
 
-		m = re.search("\.[iI][dD][lL]$", idl_fname)
+		m = re.search("\\.[iI][dD][lL]$", idl_fname)
 		if m:
 			basename = idl_fname.replace(m.group(0), "")
 		else:
@@ -307,8 +307,8 @@ class skel_wrapper:
 			oldtext = f.read()
 			f.close()
 
-			newtext = re.sub(" \@date.*?\n", "", text)
-			oldtext2 = re.sub(" \@date.*?\n", "", oldtext)
+			newtext = re.sub(" \\@date.*?\n", "", text)
+			oldtext2 = re.sub(" \\@date.*?\n", "", oldtext)
 			if newtext == oldtext2:
 				self.verbose_print("\"" + fname + \
 			    "\" exists and contents is same.")

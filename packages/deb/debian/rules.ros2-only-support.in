@@ -105,6 +105,7 @@ install-arch:
 	(cp $(INSTALL_PREFIX)/bin/rtcd2 $(TARGET)/bin)
 	(cp $(INSTALL_PREFIX)/bin/rtcprof2 $(TARGET)/bin)
 	(cp $(INSTALL_PREFIX)/bin/rtm2-config $(TARGET)/bin)
+	(cp $(INSTALL_PREFIX)/bin/openrtmNames $(TARGET)/bin)
 	(cp -r $(INSTALL_PREFIX)/etc $(TARGET))
 	(mkdir -p $(TARGET)/${RTM_EXT_DIR})
 	(cp -R $(INSTALL_PREFIX)/${RTM_LIB_DIR}/*.so* $(TARGET)/${RTM_LIB_DIR})

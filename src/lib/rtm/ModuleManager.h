@@ -786,7 +786,7 @@ namespace RTC
         std::string file_path = coil::replaceString(
           dllentity->properties.getProperty("file_path"), "\\", "/");
         file_path = coil::replaceString(file_path, "//", "/");
-        return m_filepath == dllentity->properties.getProperty("file_path");
+        return m_filepath == file_path;
       }
     };
     /*!
