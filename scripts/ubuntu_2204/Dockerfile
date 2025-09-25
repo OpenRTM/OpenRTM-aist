@@ -3,7 +3,6 @@ FROM openrtm/devel-rtm:ubuntu22.04
 COPY OpenRTM-aist /root/OpenRTM-aist
 RUN cmake\
  -DSSL_ENABLE=ON\
- -DHTTP_ENABLE=ON\
  -DOBSERVER_ENABLE=ON\
  -DFLUENTBIT_ENABLE=ON\
  -DFLUENTBIT_ROOT=/usr/local\
