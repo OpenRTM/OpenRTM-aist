@@ -1372,20 +1372,20 @@ namespace RTC
     for (auto const &mod : coil::split(m_config["logger.plugins"], ","))
     {
       std::string initfunc;
-      std::string mm(coil::replaceEnv(mod));
-      if (coil::isAbsolutePath(mm))
+
+      if (coil::isAbsolutePath(mod))
       {
-          coil::vstring namelist(coil::split((mm), "/"));
+          coil::vstring namelist(coil::split((mod), "/"));
           namelist = coil::split(namelist.back(), "\\");
           initfunc = coil::split(namelist.back(), ".").operator[](0) + "Init";
       }
       else
       {
-          initfunc = coil::split(mm, ".").operator[](0) + "Init";
+          initfunc = coil::split(mod, ".").operator[](0) + "Init";
       }
       try
         {
-          m_module->load(mm, initfunc);
+          m_module->load(mod, initfunc);
         }
       catch (...)
         {

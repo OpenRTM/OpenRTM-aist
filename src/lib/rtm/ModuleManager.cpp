@@ -97,7 +97,7 @@ namespace RTC
   {
     RTC_TRACE(("load(fname = %s)", file_name.c_str()));
     coil::Properties prop;
-    prop["module_file_name"] = file_name;
+    prop["module_file_name"] = coil::replaceEnv(file_name);
     return load(prop);
   }
 
