@@ -116,6 +116,8 @@ install-arch:
 	(rm -r $(TARGET)/${RTM_EXT_DIR}/py_helper)
 	(rm -r $(TARGET)/${RTM_EXT_DIR}/transport)
 	(cp -r $(INSTALL_PREFIX)/${RTM_LIB_DIR}/pkgconfig $(TARGET)/${RTM_LIB_DIR})
+	(mkdir -p $(TARGET)/share/openrtm-$(SHORT_VER))
+	(cp -R $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/ssl $(TARGET)/share/openrtm-$(SHORT_VER))
 
 	# for openrtm2-naming package
 	(mkdir -p $(TARGET_naming)/bin)

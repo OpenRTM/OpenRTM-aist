@@ -7,8 +7,8 @@ naming.formats: %h.host_cxt/%n.rtc
 manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_HTTPTRANSPORT_DIR@
 manager.preload.modules: HTTPTransport@CMAKE_SHARED_LIBRARY_SUFFIX@
 
-corba.http.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/root.crt
-corba.http.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_ETC_DIR@/ssl/server.pem
+corba.http.certificate_authority_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_SSL_CERTIFICATE_DIR@/root-sample.crt
+corba.http.key_file:@CMAKE_INSTALL_PREFIX@/@INSTALL_RTM_SSL_CERTIFICATE_DIR@/server-sample.pem
 corba.http.key_file_password:password
 
 corba.args:-ORBserverTransportRule "* http" -ORBclientTransportRule "* http" -ORBendPoint giop:http:https:///call
