@@ -1,4 +1,9 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
+
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW)
+endif()
+
 set(target openrtmNames)
 project (${target}
 	VERSION ${RTM_VERSION}

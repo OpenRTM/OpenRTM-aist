@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 project (OpenRTM_aist
 	VERSION 2.1.0
@@ -347,11 +347,13 @@ elseif(CORBA STREQUAL "omniORB")
 			if((NOT (${library} STREQUAL "optimized")) AND (NOT (${library} STREQUAL "debug")))
 				string(REPLACE "_rt" "*" dll "${library}")
 				file(GLOB OMNIORB_DLLS "${OMNIORB_BINARY_DIR}/${dll}.dll")
-				install(PROGRAMS ${OMNIORB_DLLS} DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+				cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/${ARCH_NAME}")
+				install(PROGRAMS ${OMNIORB_DLLS} DESTINATION "${_dest}" COMPONENT corbalib)
 				file(GLOB OMNIORB_PDBS "${OMNIORB_BINARY_DIR}/${dll}.pdb")
-				install(PROGRAMS ${OMNIORB_PDBS} DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+				install(PROGRAMS ${OMNIORB_PDBS} DESTINATION "${_dest}" COMPONENT corbalib)
 				
-				install(PROGRAMS "${ORB_LINK_DIR}/${library}.lib" DESTINATION ${ORB_INSTALL_DIR}/lib/${ARCH_NAME} COMPONENT corbalib)
+				cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/lib/${ARCH_NAME}")
+				install(PROGRAMS "${ORB_LINK_DIR}/${library}.lib" DESTINATION "${_dest}" COMPONENT corbalib)
 			endif()
 		endforeach()
 
@@ -372,7 +374,8 @@ elseif(CORBA STREQUAL "omniORB")
 		foreach(file_path ${OMNIORB_HEADERFILES})
 			get_filename_component(dir_path "${file_path}" DIRECTORY)
 			string(REPLACE "${ORB_ROOT}/include" "" file "${dir_path}")
-			install(FILES ${file_path} DESTINATION ${ORB_INSTALL_DIR}/include/${file} COMPONENT corbalib)
+			cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/include/${file}")
+			install(FILES ${file_path} DESTINATION "${_dest}" COMPONENT corbalib)
 		endforeach()
 
 
@@ -383,17 +386,21 @@ elseif(CORBA STREQUAL "omniORB")
 		foreach(file_path ${OMNIORB_IDLFILES})
 			get_filename_component(dir_path "${file_path}" DIRECTORY)
 			string(REPLACE "${ORB_ROOT}/idl" "" file "${dir_path}")
-			install(FILES ${file_path} DESTINATION ${ORB_INSTALL_DIR}/idl/${file} COMPONENT corbalib)
+			cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/idl/${file}")
+			install(FILES ${file_path} DESTINATION "${_dest}" COMPONENT corbalib)
 		endforeach()
 
 		file(GLOB OMNIORB_SCRIPTS "${ORB_ROOT}/bin/scripts/*.py")
 		
-		install(FILES ${OMNIORB_SCRIPTS} DESTINATION ${ORB_INSTALL_DIR}/bin/scripts COMPONENT corbalib)
-		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl DESTINATION ${ORB_INSTALL_DIR}/lib/python/ COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
-		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl_be DESTINATION ${ORB_INSTALL_DIR}/lib/python/ COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/scripts")
+		install(FILES ${OMNIORB_SCRIPTS} DESTINATION "${_dest}" COMPONENT corbalib)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/lib/python/")
+		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl DESTINATION "${_dest}" COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
+		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl_be DESTINATION "${_dest}" COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
 
-		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniidl.exe DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
-		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniNames.exe DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/${ARCH_NAME}")
+		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniidl.exe DESTINATION "${_dest}" COMPONENT corbalib)
+		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniNames.exe DESTINATION "${_dest}" COMPONENT corbalib)
 
 
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.16)
 
 if(OpenRTM_aist_BINARY_DIR)
   set(srcs src/Controller.cpp include/Controller/Controller.h)

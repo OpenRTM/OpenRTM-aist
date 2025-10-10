@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 if(UNIX)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/rtc.conf.sample ${CMAKE_CURRENT_SOURCE_DIR}/rtc.conf.sample2 COPYONLY)

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 set(target rtcprof2)
 project (${target}
 	VERSION ${RTM_VERSION}
