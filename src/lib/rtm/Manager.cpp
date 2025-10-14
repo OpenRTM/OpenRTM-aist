@@ -431,7 +431,7 @@ namespace RTC
     RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
                prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
 
-    std::string file_name(prop["module_file_name"]);
+    std::string file_name(coil::replaceEnv(prop["module_file_name"]));
     std::string init_func(initfunc);
     m_listeners.module_.preLoad(file_name, init_func);
     try
@@ -1372,20 +1372,21 @@ namespace RTC
     for (auto const &mod : coil::split(m_config["logger.plugins"], ","))
     {
       std::string initfunc;
+      const std::string mm(coil::replaceEnv(mod));
 
-      if (coil::isAbsolutePath(mod))
+      if (coil::isAbsolutePath(mm))
       {
-          coil::vstring namelist(coil::split((mod), "/"));
+          coil::vstring namelist(coil::split(mm, "/"));
           namelist = coil::split(namelist.back(), "\\");
           initfunc = coil::split(namelist.back(), ".").operator[](0) + "Init";
       }
       else
       {
-          initfunc = coil::split(mod, ".").operator[](0) + "Init";
+          initfunc = coil::split(mm, ".").operator[](0) + "Init";
       }
       try
         {
-          m_module->load(mod, initfunc);
+          m_module->load(mm, initfunc);
         }
       catch (...)
         {
