@@ -31,6 +31,7 @@ openrtm_set_link_props_shared(${target})
 openrtm_include_rtm(${target})
 
 add_library(${targetDLL} SHARED OpenrtmNamesPlugin.cpp OpenrtmNamesPlugin.h ${OPENRTMNAMES_FILES})
+set_target_properties(${targetDLL} PROPERTIES PREFIX "")
 openrtm_common_set_compile_props(${targetDLL})
 openrtm_set_link_props_shared(${targetDLL})
 openrtm_include_rtm(${targetDLL})
