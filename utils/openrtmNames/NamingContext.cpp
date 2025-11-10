@@ -14,6 +14,10 @@
 #endif
 #include <iostream>
 
+#ifdef ORB_IS_RTORB
+#include <rtm/Typename.h>
+#endif
+
 
 #define RTOBJECT_KIND "rtc"
 #define MANAGER_KIND "mgr"
@@ -316,7 +320,11 @@ namespace RTM
       }
       catch (...) {
         nc->destroy();
+#ifndef ORB_IS_RTORB
         CORBA::release(nc);
+#else
+        nc->release();
+#endif
         throw;
       }
       return nc;
@@ -378,7 +386,11 @@ namespace RTM
    * @endif
    */
   void NamingContext::list(CORBA::ULong how_many, CosNaming::BindingList_out bl,
+  #ifndef ORB_IS_RTORB
             CosNaming::BindingIterator_out bi)
+  #else
+            CosNaming::BindingIterator_ptr bi)
+  #endif
   {
     CosNaming::BindingList_var all;
     {
@@ -438,11 +450,19 @@ namespace RTM
     std::string str_name;
     for (CORBA::ULong i = 0; i < name.length(); i++)
     {
+#ifndef ORB_IS_RTORB
       std::string id(name[i].id.in());
+#else
+      std::string id(name[i].id);
+#endif
       id = coil::replaceString(id, ".", "\\.");
       id = coil::replaceString(id, "\\", "\\\\");
       id = coil::replaceString(id, "/", "\\/");
+#ifndef ORB_IS_RTORB
       std::string kind(name[i].kind.in());
+#else
+      std::string kind(name[i].kind);
+#endif
       kind = coil::replaceString(kind, ".", "\\.");
       kind = coil::replaceString(kind, "\\", "\\\\");
       kind = coil::replaceString(kind, "/", "\\/");
@@ -617,6 +637,24 @@ namespace RTM
     return resolve(name);
 #endif
   }
+
+#ifdef ORB_IS_RTORB
+  CORBA::Boolean NamingContext::_is_a(const CORBA_char * id)
+  {
+    CORBA::Boolean  retval;
+   if(strcmp(TC_CosNaming_NamingContext->repository_id, id) == 0){
+      retval = TRUE;
+   }else{
+     if(strcmp(TC_CosNaming_NamingContextExt->repository_id, id) == 0){
+       retval = TRUE;
+     }else{
+      retval = FALSE;
+     }
+   }
+
+  return retval;
+  }
+#endif
 
   /*!
    * @if jp

@@ -35,7 +35,12 @@ namespace OpenRTMNames
     void postReinit() override;
     void preReinit() override;
   private:
+#ifndef ORB_IS_RTORB
     PortableServer::Servant_var<RTM::NamingContext> m_nameservice;
+#else
+    RTM::NamingContext* m_nameservice = nullptr;
+#endif
+
     RTC::Manager* m_manager;
   };
 }
