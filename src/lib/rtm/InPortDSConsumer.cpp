@@ -18,6 +18,10 @@
 #include <rtm/NVUtil.h>
 #include <rtm/InPortDSConsumer.h>
 
+#if defined(minor)
+#undef minor
+#endif
+
 namespace RTC
 {
   /*!
@@ -82,6 +86,27 @@ namespace RTC
         // (IDL)OpenRTM::DataPort::ReturnCode_t -> DataPortStatus
         return convertReturnCode(_ptr()->push(m_data));
       }
+#ifdef ORB_IS_OMNIORB
+    catch (const CORBA::COMM_FAILURE& ex)
+      {
+        if (ex.minor() == omni::COMM_FAILURE_WaitingForReply)
+          {
+            RTC_DEBUG(("Retry push message"));
+            try
+              {
+                return convertReturnCode(_ptr()->push(m_data));
+              }
+            catch (...)
+              {
+                return DataPortStatus::CONNECTION_LOST;
+              }
+          }
+        else
+          {
+            return DataPortStatus::CONNECTION_LOST;
+          }
+      }
+#endif
     catch (...)
       {
         return DataPortStatus::CONNECTION_LOST;
