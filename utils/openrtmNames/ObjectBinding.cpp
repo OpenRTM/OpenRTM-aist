@@ -182,7 +182,7 @@ namespace RTM
    */
   CORBA::Object_ptr ObjectBinding::get_object()
   {
-    return m_object.inout();
+    return m_object.out();
   }
   /*!
    * @if jp

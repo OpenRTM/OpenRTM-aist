@@ -8,6 +8,8 @@
 #include <omniORB4/Naming.hh>
 #elif defined(ORB_IS_TAO)
 #include <orbsvcs/CosNamingS.h>
+#elif defined(ORB_IS_RTORB)
+#include <CosName/CosNaming.h>
 #endif
 
 
@@ -270,7 +272,11 @@ namespace RTM
      * @endif
      */
     void list(CORBA::ULong how_many, CosNaming::BindingList_out bl,
+#ifndef ORB_IS_RTORB
         CosNaming::BindingIterator_out bi) override;
+#else
+        CosNaming::BindingIterator_ptr bi) override;
+#endif
 
     /*!
      * @if jp
@@ -360,6 +366,11 @@ namespace RTM
      */
     CORBA::Object_ptr resolve_str(const char* n) override;
 
+
+
+#ifdef ORB_IS_RTORB
+    CORBA::Boolean _is_a(const CORBA_char * id) override;
+#endif
     /*!
      * @if jp
      *

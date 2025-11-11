@@ -59,11 +59,19 @@ namespace RTM
     b = new CosNaming::Binding;
     if (ret)
     {
+#ifndef ORB_IS_RTORB
       *b = bl[0];
+#else
+      b = &bl[0];
+#endif
     }
     else
     {
+#ifndef ORB_IS_RTORB
       b->binding_type = CosNaming::nobject;
+#else
+      b.ptr()->binding_type = CosNaming::nobject;
+#endif
     }
     return ret;
   }
@@ -108,7 +116,11 @@ namespace RTM
     m_list->length(bl->length() - how_many);
 
     for (CORBA::ULong i = 0; i < m_list->length(); i++) {
+#ifndef ORB_IS_RTORB
       m_list[i] = (*bl)[i + how_many];
+#else
+      m_list[i] = (*(bl.ptr()))[i + how_many];
+#endif
     }
 
     bl->length(how_many);

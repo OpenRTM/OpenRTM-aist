@@ -40,6 +40,7 @@ namespace OpenRTMNames
       std::cout << sior << std::endl;
 
 #ifndef ORB_IS_TAO
+#ifndef ORB_IS_RTORB
       CORBA::Object_var ins_obj = orb->resolve_initial_references("omniINSPOA");
 
       ins_poa = PortableServer::POA::_narrow(ins_obj);
@@ -48,6 +49,9 @@ namespace OpenRTMNames
       PortableServer::ObjectId_var id = PortableServer::string_to_ObjectId("NameService");
       ins_poa->activate_object_with_id(id.in(), m_nameservice);
 #else
+      root_poa->reinstall_object(m_nameservice, "NameService");
+#endif
+#else
       CORBA::Object_var obj = orb->resolve_initial_references("IORTable");
       adapter = IORTable::Table::_narrow(obj.in());
 
@@ -55,6 +59,7 @@ namespace OpenRTMNames
       adapter->bind("NameService", ior.in());
 #endif
     }
+#ifndef ORB_IS_RTORB
     catch (const CORBA::INITIALIZE& ex) {
 #ifdef ORB_IS_OMNIORB
       std::cerr << "Failed to initialise: " << ex.NP_minorString() << std::endl;
@@ -63,15 +68,22 @@ namespace OpenRTMNames
 #endif
       return;
     }
+#endif
     catch (CORBA::SystemException& ex) {
+#ifndef ORB_IS_RTORB
       std::cerr << "Caught CORBA::" << ex._name() << std::endl;
+#else
+      std::cerr << "Caught CORBA::" << ex.msg() << std::endl;
+#endif
       return;
     }
     catch (CORBA::Exception& ex) {
+#ifndef ORB_IS_RTORB
       std::cerr << "Caught CORBA::Exception: " << ex._name() << std::endl;
-      return;
+#else
+      std::cerr << "Caught CORBA::Exception: " << ex.msg() << std::endl;
+#endif
     }
-
 
   }
   ManagerActionListener::~ManagerActionListener()
@@ -89,6 +101,7 @@ namespace OpenRTMNames
 
 
 #ifndef ORB_IS_TAO
+#ifndef ORB_IS_RTORB
     CORBA::Object_var obj = m_manager->theORB()->resolve_initial_references("omniINSPOA");
 
     PortableServer::POA_var ins_poa = PortableServer::POA::_narrow(obj);
@@ -96,6 +109,7 @@ namespace OpenRTMNames
     id = ins_poa->servant_to_id(m_nameservice);
 
     ins_poa->deactivate_object(id.in());
+#endif
 #else
     CORBA::Object_var obj = m_manager.theORB()->resolve_initial_references("IORTable");
     IORTable::Table_var adapter = IORTable::Table::_narrow(obj.in());
