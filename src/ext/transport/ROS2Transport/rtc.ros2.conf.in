@@ -1,0 +1,12 @@
+logger.enable: YES
+logger.log_level: DEBUG
+#logger.file_name: stdout
+
+manager.modules.load_path: @CMAKE_INSTALL_PREFIX@/@INSTALL_ROS2TRANSPORT_DIR@
+manager.preload.modules: FastRTPSTransport@CMAKE_SHARED_LIBRARY_SUFFIX@, ROS2Transport@CMAKE_SHARED_LIBRARY_SUFFIX@
+
+manager.components.preactivation: ConsoleOut0, ConsoleIn0
+manager.components.preconnect: ConsoleOut0.in?interface_type=fast-rtps&marshaling_type=ros2:std_msgs/Float32&fast-rtps.subscriber.name=subscriber_openrtm, ConsoleIn0.out?interface_type=fast-rtps&marshaling_type=ros2:std_msgs/Float32&fast-rtps.publisher.name=publisher_openrtm
+
+fast-rtps.xmlprofile.filename: @CMAKE_INSTALL_PREFIX@/@INSTALL_SAMPLEQOSPROFILE_DIR@/FastRTPsQoSExample.xml
+fast-rtps.participant.name: participant_openrtm
