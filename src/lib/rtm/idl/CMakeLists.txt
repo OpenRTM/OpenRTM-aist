@@ -38,9 +38,11 @@ link_directories(${ORB_LINK_DIR})
 if(CORBA MATCHES "RtORB")
 	foreach(IDLSOURCE ${${PROJECT_NAME}_IDLSKEL};${${PROJECT_NAME}_IDLSTUB})
 		get_filename_component(IDLNAME ${IDLSOURCE} NAME_WE)
-		add_library(${IDLNAME} SHARED ${IDLSOURCE})
+		add_library(${IDLNAME}_objlib OBJECT ${IDLSOURCE})
+		add_library(${IDLNAME} SHARED $<TARGET_OBJECTS:${IDLNAME}_objlib>)
+		openrtm_gencode_set_compile_props(${IDLNAME}_objlib)
 		openrtm_gencode_set_compile_props(${IDLNAME})
-		target_include_directories(${IDLNAME} SYSTEM
+		target_include_directories(${IDLNAME}_objlib SYSTEM
 			PUBLIC ${PROJECT_BINARY_DIR}
 			PRIVATE ${CMAKE_BINARY_DIR}/src/lib
 			${CMAKE_SOURCE_DIR}/src/lib
@@ -50,9 +52,12 @@ if(CORBA MATCHES "RtORB")
 					ARCHIVE DESTINATION ${INSTALL_RTM_LIB_DIR}
 					RUNTIME DESTINATION ${INSTALL_RTM_BIN_DIR}
 					COMPONENT openrtm)
+
 		set(RTM_IDL_LIBS ${RTM_IDL_LIBS};${IDLNAME})
+		set(RTM_IDL_OBJECTS ${RTM_IDL_OBJECTS};$<TARGET_OBJECTS:${IDLNAME}_objlib>)
 	endforeach()
 	set(RTM_IDL_LIBS ${RTM_IDL_LIBS} PARENT_SCOPE)
+	set(RTM_IDL_OBJECTS ${RTM_IDL_OBJECTS} PARENT_SCOPE)
 else()
 	add_library(${PROJECT_NAME}_objlib OBJECT ${${PROJECT_NAME}_IDLSKEL})
 	openrtm_gencode_set_compile_props(${PROJECT_NAME}_objlib)
