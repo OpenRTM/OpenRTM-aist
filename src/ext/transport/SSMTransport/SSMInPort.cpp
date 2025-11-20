@@ -80,6 +80,7 @@ namespace RTC
     if(!coil::stringTo(m_stream_id, stream_id_str.c_str()))
     {
       RTC_ERROR(("stream_id is invalid value"));
+      throw std::bad_alloc();
     }
 
   }
