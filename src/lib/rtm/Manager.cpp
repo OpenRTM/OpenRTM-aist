@@ -1795,8 +1795,19 @@ namespace RTC
           opt += "-ORBIIOPAddr " + endpoint;
         }
       }
+      else if (corba == "RtORB")
+      {
+        opt += " -ORBListenEndpoints " + endpoint;
+        std::vector<std::string> addr_port(coil::split(endpoint, ":"));
+        if(addr_port.size() > 1)
+        {
+          opt += " -ORBServerPort " + addr_port.back();
+        }
+        std::cerr << opt << std::endl;
+      }
       else
       {
+        std::cout << corba << std::endl;
       }
     }
   }

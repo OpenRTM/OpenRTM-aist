@@ -50,7 +50,6 @@ namespace RTC
           PortProfile *pp;
           pp = p->get_port_profile();
           std::string name(pp->name);
-          delete pp;
 #endif  // ORB_IS_RTORB
           return m_name == name;
         }
@@ -121,7 +120,13 @@ namespace RTC
   PortServiceList* PortAdmin::getPortServiceList() const
   {
     PortServiceList_var ports;
+#ifndef ORB_IS_RTORB
     ports = new PortServiceList(m_portRefs);
+#else  // ORB_IS_RTORB
+    RTC_PortServiceList* _ports = RTC_PortServiceList__calloc();
+    *_ports = m_portRefs;
+    ports = _ports;
+#endif  // ORB_IS_RTORB
     return ports._retn();
   }
 
@@ -151,7 +156,11 @@ namespace RTC
           {
             pp = m_portRefs[i]->get_port_profile();
             port_profs[i] = *(pp);
+#ifndef ORB_IS_RTORB
             delete pp;
+#else  // ORB_IS_RTORB
+            RtORB_free_by_typecode_cpp(TC_RTC_PortProfile, pp, 0);
+#endif  // ORB_IS_RTORB
           }
         catch (...)
           {

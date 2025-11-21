@@ -397,7 +397,8 @@ else(VXWORKS)
 		if(CORBA MATCHES "RtORB")
 			add_library(${PROJECT_NAME}-static STATIC
 				$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
-				$<TARGET_OBJECTS:${COIL_PROJECT_NAME}_objlib>)
+				$<TARGET_OBJECTS:${COIL_PROJECT_NAME}_objlib>
+				${RTM_IDL_OBJECTS})
 			add_library(${PROJECT_NAME} SHARED
 				$<TARGET_OBJECTS:${PROJECT_NAME}_objlib>
 				$<TARGET_OBJECTS:${COIL_PROJECT_NAME}_objlib>)

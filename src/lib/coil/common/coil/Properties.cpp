@@ -90,8 +90,7 @@ namespace coil
     : name(prop.name), value(prop.value),
       default_value(prop.default_value), set_value(prop.set_value), root(nullptr), m_empty("")
   {
-    std::vector<std::string> keys;
-    keys = prop.propertyNames();
+    const std::vector<std::string> keys(prop.propertyNames());
     for (const auto & key : keys)
       {
         const Properties* node(nullptr);
@@ -121,8 +120,7 @@ namespace coil
     default_value = prop.default_value;
     set_value = prop.set_value;
 
-    std::vector<std::string> keys;
-    keys = prop.propertyNames();
+    const std::vector<std::string> keys(prop.propertyNames());
     for (const auto & key : keys)
       {
         const Properties* node(prop.findNode(key));
@@ -569,8 +567,7 @@ namespace coil
    */
   Properties& Properties::operator<<(const Properties& prop)
   {
-    std::vector<std::string> keys;
-    keys = prop.propertyNames();
+    const std::vector<std::string> keys(prop.propertyNames());
     for (size_t i(0), len(prop.size()); i < len; ++i)
       {
         (*this)[keys[i]] = prop[keys[i]];
