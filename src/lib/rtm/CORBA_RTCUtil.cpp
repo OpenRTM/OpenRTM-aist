@@ -818,7 +818,11 @@ namespace CORBA_RTCUtil
                                              const RTC::PortService_ptr port1)
   {
     coil::Properties prop = prop_arg;
+#ifndef ORB_IS_RTORB
     RTC::ConnectorProfile_var conn_prof = new RTC::ConnectorProfile();
+#else  // ORB_IS_RTORB
+    RTC::ConnectorProfile_var conn_prof = RTC_ConnectorProfile__calloc();
+#endif  // ORB_IS_RTORB
     std::string prof_name;
     conn_prof->name = CORBA::string_dup(name.c_str());
     conn_prof->connector_id = CORBA::string_dup("");

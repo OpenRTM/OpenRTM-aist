@@ -25,16 +25,29 @@ set(OPENRTMNAMES_FILES NamingContext.h NamingContext.cpp
 		BindingIterator.h BindingIterator.cpp ObjectBinding.h ObjectBinding.cpp
 		RTObjectBinding.h RTObjectBinding.cpp ManagerBinding.h ManagerBinding.cpp)
 
-add_executable(${target} openrtmNames.cpp ${OPENRTMNAMES_FILES})
+add_library(${target}_objlib OBJECT ${OPENRTMNAMES_FILES})
+openrtm_common_set_compile_props(${target}_objlib)
+openrtm_set_link_props_shared(${target}_objlib)
+openrtm_include_rtm(${target}_objlib)
+
+add_executable(${target} openrtmNames.cpp $<TARGET_OBJECTS:${target}_objlib>)
 openrtm_common_set_compile_props(${target})
 openrtm_set_link_props_shared(${target})
 openrtm_include_rtm(${target})
 
-add_library(${targetDLL} SHARED OpenrtmNamesPlugin.cpp OpenrtmNamesPlugin.h ${OPENRTMNAMES_FILES})
+add_library(${targetDLL} SHARED OpenrtmNamesPlugin.cpp OpenrtmNamesPlugin.h $<TARGET_OBJECTS:${target}_objlib>)
 set_target_properties(${targetDLL} PROPERTIES PREFIX "")
 openrtm_common_set_compile_props(${targetDLL})
 openrtm_set_link_props_shared(${targetDLL})
 openrtm_include_rtm(${targetDLL})
+
+if(NOT WIN32)
+	add_library(${targetDLL}-static STATIC OpenrtmNamesPlugin.cpp OpenrtmNamesPlugin.h $<TARGET_OBJECTS:${target}_objlib>)
+	set_target_properties(${targetDLL}-static PROPERTIES OUTPUT_NAME ${targetDLL} CLEAN_DIRECT_OUTPUT 1)
+	openrtm_common_set_compile_props(${targetDLL}-static)
+	openrtm_set_link_props_shared(${targetDLL}-static)
+	openrtm_include_rtm(${targetDLL}-static)
+endif()
 
 
 set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES})
@@ -99,6 +112,12 @@ else(WIN32)
 			ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/naming
 			RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/naming
 			COMPONENT utils)
+
+	install(TARGETS ${targetDLL}-static LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/naming
+			ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/naming
+			RUNTIME DESTINATION ${INSTALL_RTM_EXT_DIR}/naming
+			COMPONENT utils)
+	install(FILES  OpenrtmNamesPlugin.h DESTINATION ${INSTALL_RTM_EXT_DIR}/naming COMPONENT headers)
 endif(WIN32)
 
 if(SSL_ENABLE)

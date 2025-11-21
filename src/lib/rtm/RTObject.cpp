@@ -654,9 +654,10 @@ namespace RTC
     RTC_TRACE(("get_component_profile()"));
     try
       {
+#ifndef ORB_IS_RTORB
         ComponentProfile_var profile
           = new ComponentProfile();
-#ifndef ORB_IS_RTORB
+
         profile->instance_name =
           CORBA::string_dup(m_properties["instance_name"].c_str());
         profile->type_name     =
@@ -671,6 +672,8 @@ namespace RTC
           CORBA::string_dup(m_properties["category"].c_str());
         profile->port_profiles = m_portAdmin.getPortProfileList();
 #else  // ORB_IS_RTORB
+        ComponentProfile_var profile
+          = RTC_ComponentProfile__calloc();
         profile->instance_name =
           CORBA::string_dup(m_properties["instance_name"].c_str());
         profile->type_name     =

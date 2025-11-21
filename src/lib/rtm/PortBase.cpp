@@ -101,7 +101,13 @@ namespace RTC
     updateConnectors();
     std::lock_guard<std::mutex> guard(m_profile_mutex);
     PortProfile_var prof;
+#ifndef ORB_IS_RTORB
     prof = new PortProfile(m_profile);
+#else  // ORB_IS_RTORB
+    PortProfile* _prof = RTC_PortProfile__calloc();
+    *_prof = m_profile;
+    prof = _prof;
+#endif  // ORB_IS_RTORB
     return prof._retn();
   }
 
@@ -134,7 +140,13 @@ namespace RTC
 
     std::lock_guard<std::mutex> guard(m_profile_mutex);
     ConnectorProfileList_var conn_prof;
+#ifndef ORB_IS_RTORB
     conn_prof = new ConnectorProfileList(m_profile.connector_profiles);
+#else  // ORB_IS_RTORB
+    RTC_ConnectorProfileList* _conn_prof = RTC_ConnectorProfileList__calloc();
+    *_conn_prof = m_profile.connector_profiles;
+    conn_prof = _conn_prof;
+#endif  // ORB_IS_RTORB
     return conn_prof._retn();
   }
 
@@ -157,11 +169,21 @@ namespace RTC
     if (index < 0)
       {
         ConnectorProfile_var conn_prof;
+#ifndef ORB_IS_RTORB
         conn_prof = new ConnectorProfile();
+#else  // ORB_IS_RTORB
+        conn_prof = RTC_ConnectorProfile__calloc();
+#endif  // ORB_IS_RTORB
         return conn_prof._retn();
       }
     ConnectorProfile_var conn_prof;
+#ifndef ORB_IS_RTORB
     conn_prof = new ConnectorProfile(m_profile.connector_profiles[index]);
+#else  // ORB_IS_RTORB
+    RTC_ConnectorProfile* _conn_prof = RTC_ConnectorProfile__calloc();
+    *_conn_prof = m_profile.connector_profiles[index];
+    conn_prof = _conn_prof;
+#endif  // ORB_IS_RTORB
     return conn_prof._retn();
   }
 
@@ -930,8 +952,10 @@ namespace RTC
             }
         }
 #else  // ORB_IS_RTORB
-      ConnectorProfileList* clist;
-      clist = new ConnectorProfileList(m_profile.connector_profiles);
+      ConnectorProfileList_var clist;
+      RTC_ConnectorProfileList* _clist = RTC_ConnectorProfileList__calloc();
+      *_clist = m_profile.connector_profiles;
+      clist = _clist;
 
       for (CORBA::ULong i(0); i < clist->length(); ++i)
         {
@@ -942,7 +966,6 @@ namespace RTC
               RTC_WARN(("Dead connection: %s", id));
             }
         }
-      delete clist;
 #endif  // ORB_IS_RTORB
     }
 

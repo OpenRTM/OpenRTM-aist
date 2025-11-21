@@ -97,11 +97,10 @@ namespace NVUtil
 #ifndef ORB_IS_RTORB
   void copyFromProperties(SDOPackage::NVList& nv, const coil::Properties& prop)
 #else  // ORB_IS_RTORB
-    void copyFromProperties(SDOPackage_NVList& nv, const coil::Properties& prop)
+  void copyFromProperties(SDOPackage_NVList& nv, const coil::Properties& prop)
 #endif  // ORB_IS_RTORB
   {
-    std::vector<std::string> keys;
-    keys = prop.propertyNames();
+    const std::vector<std::string> keys(prop.propertyNames());
     CORBA::ULong len(static_cast<CORBA::ULong>(keys.size()));
     nv.length(len);
 
@@ -109,7 +108,11 @@ namespace NVUtil
       {
 // Why RtORB does not copy string to Properties.
         nv[i].name = CORBA::string_dup(keys[i].c_str());
+#ifndef ORB_IS_RTORB
         nv[i].value <<= prop[keys[i]].c_str();
+#else  // ORB_IS_RTORB
+        nv[i].value <<= CORBA::string_dup(prop[keys[i]].c_str());
+#endif  // ORB_IS_RTORB
       }
   }
 
@@ -127,8 +130,7 @@ namespace NVUtil
   void mergeFromProperties(SDOPackage_NVList& nv, const coil::Properties& prop)
 #endif  // ORB_IS_RTORB
   {
-    std::vector<std::string> keys;
-    keys = prop.propertyNames();
+    const std::vector<std::string> keys(prop.propertyNames());
 #ifndef ORB_IS_RTORB
     SDOPackage::NVList nve;
 #else  // ORB_IS_RTORB
@@ -153,7 +155,11 @@ namespace NVUtil
     for (CORBA::ULong i = 0; i < ksize; ++i)
       {
         nv[i].name = CORBA::string_dup(keys[i].c_str());
+#ifndef ORB_IS_RTORB
         nv[i].value <<= prop[keys[i]].c_str();
+#else  // ORB_IS_RTORB
+        nv[i].value <<= CORBA::string_dup(prop[keys[i]].c_str());
+#endif  // ORB_IS_RTORB
       }
 
     for (CORBA::ULong i = 0; i < nsize; ++i)
@@ -178,7 +184,11 @@ namespace NVUtil
         if (nv[i].value >>= value)
           {
             const char* name(nv[i].name);
+#ifndef ORB_IS_RTORB
             prop[name] = value;
+#else  // ORB_IS_RTORB
+            prop[std::string(name)] = std::string(value);
+#endif  // ORB_IS_RTORB
           }
       }
   }
