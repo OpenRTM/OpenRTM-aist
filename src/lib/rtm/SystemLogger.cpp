@@ -279,8 +279,8 @@ namespace RTC
   {
       if (ostream_type != nullptr)
       {
-          std::vector<std::string> vec(prop);
-          for (auto & str : vec)
+          const std::vector<std::string>& vec(prop);
+          for (const auto & str : vec)
           {
               ostream_type->write(level, m_name, getDate(), str);
           }
