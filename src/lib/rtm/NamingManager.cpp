@@ -849,15 +849,7 @@ namespace RTC
     {
       try
       {
-        try
-        {
-          ns->bindObject(compName->name.c_str(), compName->rtobj);
-        }
-        catch(...)
-        {
-        }
-        
-        
+        ns->bindObject(compName->name.c_str(), compName->rtobj);
       }
       catch (...)
       {
