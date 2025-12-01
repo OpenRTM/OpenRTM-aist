@@ -32,14 +32,6 @@
 #include <coil/stringutil.h>
 #include <rtm/LogstreamBase.h>
 
-#ifndef LINE_MAX
-#define LINE_MAX  1024
-#endif
-
-#ifndef BUFFER_LEN
-#define BUFFER_LEN LINE_MAX
-#endif
-
 namespace RTC
 {
   /*!
@@ -78,12 +70,9 @@ namespace RTC
     void write(int level, const std::string &name, const std::string &date, const std::string &mes) override;
 
   protected:
-    std::streamsize pushLogger(int level, const std::string &name, const std::string &date, const char* mes);
+    std::streamsize pushLogger(int level, const std::string &name, const std::string &date, const std::string &mes);
 
   private:
-    char m_buf[BUFFER_LEN];
-    size_t m_pos{0};
-
     using FlbHandler = int;
 
     std::vector<FlbHandler> m_flbIn;

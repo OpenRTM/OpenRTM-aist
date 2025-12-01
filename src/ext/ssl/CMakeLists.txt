@@ -1,12 +1,21 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
+
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW)
+endif()
 
 project (SSLTransport
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)
 
 
-set(SSL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/root.crt ${CMAKE_CURRENT_SOURCE_DIR}/server.pem)
-install(FILES ${SSL_FILES} DESTINATION ${INSTALL_RTM_ETC_DIR}/ssl COMPONENT ext)
+set(SSL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/root-sample.crt ${CMAKE_CURRENT_SOURCE_DIR}/server-sample.pem)
+if(WIN32)
+  install(FILES ${SSL_FILES} DESTINATION ${INSTALL_RTM_SSL_CERTIFICATE_DIR} COMPONENT ext)
+else(WIN32)
+  install(FILES ${SSL_FILES} DESTINATION ${INSTALL_RTM_SSL_CERTIFICATE_DIR})
+endif(WIN32)
+
 
 if(NOT CORBA STREQUAL "omniORB")
   return()
@@ -65,6 +74,9 @@ endif(WIN32)
 
 
 set(INSTALL_SSLTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/ssl)
+if(BUILD_RTM_LINUX_PKGS)
+	set(CMAKE_INSTALL_PREFIX "/usr")
+endif()
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ssl.conf.in ${PROJECT_BINARY_DIR}/rtc.ssl.conf @ONLY)
 install(

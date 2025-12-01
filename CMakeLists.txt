@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 project (OpenRTM_aist
-	VERSION 2.0.2
+	VERSION 2.1.0
 	LANGUAGES CXX)
 
 set(CORBA omniORB CACHE STRING "set CORBA ")
@@ -97,6 +97,7 @@ if(MSVC)
 	set(INSTALL_RTM_EXT_DIR ${OPENRTM_VERSION}/ext/${RTM_VC_VER})
 	set(INSTALL_RTM_CMAKE_DIR ${OPENRTM_VERSION}/cmake)
 	set(INSTALL_RTM_ETC_DIR ${OPENRTM_VERSION}/ext)
+	set(INSTALL_RTM_SSL_CERTIFICATE_DIR ${INSTALL_RTM_ETC_DIR}/ssl)
 	# For setting warning options manually, delete CMake default options.
 	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -119,8 +120,13 @@ elseif(UNIX)
 	set(INSTALL_RTM_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/openrtm-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
 	set(INSTALL_RTM_ETC_DIR ${CMAKE_INSTALL_SYSCONFDIR})
 	set(INSTALL_RTM_SHARE_DIR ${CMAKE_INSTALL_DATAROOTDIR})
+	set(INSTALL_RTM_SSL_CERTIFICATE_DIR ${CMAKE_INSTALL_DATAROOTDIR}/openrtm-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/ssl)
 	if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 12.0.0)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aggressive-loop-optimizations --param max-inline-insns-single=1000 --param inline-unit-growth=1000 --param large-function-growth=2000")
+		if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aggressive-loop-optimizations --param max-inline-insns-single=1000 --param inline-unit-growth=1000 --param large-function-growth=2000")
+		else()
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --param max-inline-insns-single=1000 --param inline-unit-growth=1000 --param large-function-growth=2000")
+		endif()
 	endif()
 else()
 	set(INSTALL_RTM_SCRIPT_DIR lib/openrtm-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/py_helper)
@@ -343,11 +349,13 @@ elseif(CORBA STREQUAL "omniORB")
 			if((NOT (${library} STREQUAL "optimized")) AND (NOT (${library} STREQUAL "debug")))
 				string(REPLACE "_rt" "*" dll "${library}")
 				file(GLOB OMNIORB_DLLS "${OMNIORB_BINARY_DIR}/${dll}.dll")
-				install(PROGRAMS ${OMNIORB_DLLS} DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+				cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/${ARCH_NAME}")
+				install(PROGRAMS ${OMNIORB_DLLS} DESTINATION "${_dest}" COMPONENT corbalib)
 				file(GLOB OMNIORB_PDBS "${OMNIORB_BINARY_DIR}/${dll}.pdb")
-				install(PROGRAMS ${OMNIORB_PDBS} DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+				install(PROGRAMS ${OMNIORB_PDBS} DESTINATION "${_dest}" COMPONENT corbalib)
 				
-				install(PROGRAMS "${ORB_LINK_DIR}/${library}.lib" DESTINATION ${ORB_INSTALL_DIR}/lib/${ARCH_NAME} COMPONENT corbalib)
+				cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/lib/${ARCH_NAME}")
+				install(PROGRAMS "${ORB_LINK_DIR}/${library}.lib" DESTINATION "${_dest}" COMPONENT corbalib)
 			endif()
 		endforeach()
 
@@ -368,7 +376,8 @@ elseif(CORBA STREQUAL "omniORB")
 		foreach(file_path ${OMNIORB_HEADERFILES})
 			get_filename_component(dir_path "${file_path}" DIRECTORY)
 			string(REPLACE "${ORB_ROOT}/include" "" file "${dir_path}")
-			install(FILES ${file_path} DESTINATION ${ORB_INSTALL_DIR}/include/${file} COMPONENT corbalib)
+			cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/include/${file}")
+			install(FILES ${file_path} DESTINATION "${_dest}" COMPONENT corbalib)
 		endforeach()
 
 
@@ -379,17 +388,21 @@ elseif(CORBA STREQUAL "omniORB")
 		foreach(file_path ${OMNIORB_IDLFILES})
 			get_filename_component(dir_path "${file_path}" DIRECTORY)
 			string(REPLACE "${ORB_ROOT}/idl" "" file "${dir_path}")
-			install(FILES ${file_path} DESTINATION ${ORB_INSTALL_DIR}/idl/${file} COMPONENT corbalib)
+			cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/idl/${file}")
+			install(FILES ${file_path} DESTINATION "${_dest}" COMPONENT corbalib)
 		endforeach()
 
 		file(GLOB OMNIORB_SCRIPTS "${ORB_ROOT}/bin/scripts/*.py")
 		
-		install(FILES ${OMNIORB_SCRIPTS} DESTINATION ${ORB_INSTALL_DIR}/bin/scripts COMPONENT corbalib)
-		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl DESTINATION ${ORB_INSTALL_DIR}/lib/python/ COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
-		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl_be DESTINATION ${ORB_INSTALL_DIR}/lib/python/ COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/scripts")
+		install(FILES ${OMNIORB_SCRIPTS} DESTINATION "${_dest}" COMPONENT corbalib)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/lib/python/")
+		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl DESTINATION "${_dest}" COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
+		install(DIRECTORY ${ORB_ROOT}/lib/python/omniidl_be DESTINATION "${_dest}" COMPONENT corbalib FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)
 
-		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniidl.exe DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
-		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniNames.exe DESTINATION ${ORB_INSTALL_DIR}/bin/${ARCH_NAME} COMPONENT corbalib)
+		cmake_path(SET _dest NORMALIZE "${ORB_INSTALL_DIR}/bin/${ARCH_NAME}")
+		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniidl.exe DESTINATION "${_dest}" COMPONENT corbalib)
+		install(PROGRAMS ${ORB_ROOT}/bin/${ARCH_NAME}/omniNames.exe DESTINATION "${_dest}" COMPONENT corbalib)
 
 
 

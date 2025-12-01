@@ -1,4 +1,8 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
+
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW)
+endif()
 
 project (HTTPTransport
 	VERSION ${RTM_VERSION}
@@ -47,6 +51,9 @@ set(INSTALL_HTTPTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/http)
 
 set(PROTOCOLS ${PROTOCOLS} http https ws wss)
 
+if(BUILD_RTM_LINUX_PKGS)
+	set(CMAKE_INSTALL_PREFIX "/usr")
+endif()
 foreach(PROTOCOL ${PROTOCOLS})
 	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/rtc.${PROTOCOL}.conf.in ${PROJECT_BINARY_DIR}/rtc.${PROTOCOL}.conf @ONLY)

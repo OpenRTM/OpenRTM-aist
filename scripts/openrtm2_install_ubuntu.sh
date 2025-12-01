@@ -14,7 +14,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.0.2.04
+VERSION=2.1.0.02
 FILENAME=openrtm2_install_ubuntu.sh
 
 #
@@ -92,7 +92,6 @@ cmake_tools="cmake doxygen graphviz nkf"
 build_tools="subversion git"
 deb_pkg="uuid-dev libboost-filesystem-dev"
 pkg_tools="build-essential debhelper devscripts"
-fluentbit19="td-agent-bit"
 fluentbit="fluent-bit"
 omni_devel="libomniorb4-dev omniidl"
 omni_runtime="omniorb-nameserver"
@@ -420,7 +419,7 @@ create_srclist () {
     echo $msg3
     exit
   fi
-  openrtm_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/openrtm.key] http://$reposerver/pub/Linux/ubuntu/ $code_name main"
+  openrtm_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/openrtm-keyring.gpg] http://$reposerver/pub/Linux/ubuntu/ $code_name main"
   fluent_repo="deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/fluentbit-keyring.gpg] https://packages.fluentbit.io/ubuntu/$code_name $code_name main"
 }
 
@@ -445,14 +444,27 @@ update_source_list () {
       if [ ! -d /etc/apt/keyrings ]; then
         sudo mkdir -p /etc/apt/keyrings
       fi
-      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key -O /etc/apt/keyrings/openrtm.key
+      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate http://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
     fi
-  elif test "x$rtmsite2" != "x" &&
-       [ ! -e /etc/apt/keyrings/openrtm.key ]; then
-    sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key -O /etc/apt/keyrings/openrtm.key
+  elif [ ! -e /etc/apt/keyrings/openrtm-keyring.gpg ]; then
+    if test "x$rtmsite1" != "x" ; then
+      sudo sed -i '/http:\/\/openrtm.org\/pub\/Linux\/ubuntu\//d' /etc/apt/sources.list
+    fi
+    if test "x$rtmsite2" != "x" ; then
+      sudo rm /etc/apt/sources.list.d/openrtm.list
+    fi
+    echo $openrtm_repo | sudo tee /etc/apt/sources.list.d/openrtm.list > /dev/null
+    sudo wget --secure-protocol=TLSv1_2 --no-check-certificate http://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
   fi
-  fluentsite=`apt-cache policy | grep "https://packages.fluentbit.io"`
-  if test "x$fluentsite" = "x" &&
+  # If FluentBit's old public key is registered, delete it.
+  fingerprint=$(apt-key list | awk '$1 == "pub" {getline; gsub(" ", "", $0); fpr=$0}
+  /Fluentbit releases/ {print substr(fpr, length(fpr)-7)}')
+  if test "x$fingerprint" != "x" &&
+     test "x$OPT_COREDEVEL" = "xtrue" ; then
+    sudo apt-key del $fingerprint
+    sudo sed -i '/https:\/\/packages.fluentbit.io\/ubuntu\//d' /etc/apt/sources.list
+  fi
+  if [ ! -e /usr/share/keyrings/fluentbit-keyring.gpg ] &&
      test "x$OPT_COREDEVEL" = "xtrue" ; then
     echo $fluent_repo | sudo tee /etc/apt/sources.list.d/fluentbit.list > /dev/null
     wget -O - https://packages.fluentbit.io/fluentbit.key | gpg --dearmor | sudo tee /usr/share/keyrings/fluentbit-keyring.gpg >/dev/null
@@ -569,11 +581,7 @@ u_src_pkgs="$omni_runtime $omni_devel"
 dev_pkgs="$runtime_pkgs $src_pkgs $openrtm2_devel"
 u_dev_pkgs="$u_runtime_pkgs $openrtm2_devel"
 
-if test "x$code_name" = "xfocal" || test "x$code_name" = "xjammy" ; then
-  core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools $fluentbit19"
-else
-  core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools"
-fi
+core_pkgs="$src_pkgs $autotools $build_tools $pkg_tools $fluentbit"
 u_core_pkgs="$u_src_pkgs"
 
 ros_pkg="$openrtm2_ros"
@@ -643,9 +651,16 @@ install_proc()
     if test "x$OPT_COREDEVEL" = "xtrue" ; then
       select_opt_p="[python] ${op_c_msg}"
       install_packages $python_core_pkgs
-      pip3 install fluent-logger
-      tmp_pkg="$install_pkgs fluent-logger"
-      install_pkgs=$tmp_pkg
+      ret=`sudo python3 -m pip install fluent-logger`
+      if test "x$ret" != "x"; then
+        tmp_pkg="$install_pkgs fluent-logger"
+        install_pkgs=$tmp_pkg
+      else
+        rts_msg="[ERROR] Failed to install fluent-logger."
+	rts_msg2="Please add the following text to /etc/pip.conf and run the script again."
+	rts_msg3="[global]"
+	rts_msg4="break-system-packages = true"
+      fi
     elif test "x$OPT_RUNTIME" = "xtrue" ; then
       select_opt_p="[python] ${op_r_msg}"
       install_packages $python_runtime_pkgs

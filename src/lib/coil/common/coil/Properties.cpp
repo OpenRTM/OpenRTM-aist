@@ -841,23 +841,25 @@ namespace coil
 
   void Properties::_dump(std::vector<std::string>& out, const Properties& curr, size_t index) const
   {
-      if (index != 0) out.emplace_back(indent(index) + "- " + curr.name);
+      std::string tmp;
+      if (index != 0) { tmp = indent(index) + "- " + curr.name; }
       if (curr.leaf.empty())
       {
-          if (!curr.set_value)
-          {
-              out.emplace_back(": " + curr.default_value);
-          }
-          else
-          {
-              out.emplace_back(": " + curr.value);
-          }
-          return;
+        if (!curr.set_value)
+        {
+          tmp += ": " + curr.default_value;
+        }
+        else
+        {
+          tmp += ": " + curr.value;
+        }
+        out.emplace_back(tmp);
+        return;
       }
-      if (index != 0) { out.emplace_back(""); }
+      if (index != 0) { out.emplace_back(tmp); }
       for (auto prop : curr.leaf)
       {
-          _dump(out, *prop, index + 1);
+        _dump(out, *prop, index + 1);
       }
   }
 } // namespace coil

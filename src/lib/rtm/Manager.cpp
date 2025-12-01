@@ -59,6 +59,7 @@
 #include <iostream>
 #include <utility>
 #include <iterator>
+#include <list>
 
 #if defined(minor)
 #undef minor
@@ -431,7 +432,7 @@ namespace RTC
     RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
                prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
 
-    std::string file_name(prop["module_file_name"]);
+    std::string file_name(coil::replaceEnv(prop["module_file_name"]));
     std::string init_func(initfunc);
     m_listeners.module_.preLoad(file_name, init_func);
     try
@@ -1372,26 +1373,28 @@ namespace RTC
     for (auto const &mod : coil::split(m_config["logger.plugins"], ","))
     {
       std::string initfunc;
-      if (coil::isAbsolutePath(mod))
+      const std::string mm(coil::replaceEnv(mod));
+
+      if (coil::isAbsolutePath(mm))
       {
-        coil::vstring namelist(coil::split((mod), "/"));
-        namelist = coil::split(namelist.back(), "\\");
-        initfunc = coil::split(namelist.back(), ".").operator[](0) + "Init";
+          coil::vstring namelist(coil::split(mm, "/"));
+          namelist = coil::split(namelist.back(), "\\");
+          initfunc = coil::split(namelist.back(), ".").operator[](0) + "Init";
       }
       else
       {
-        initfunc = coil::split(mod, ".").operator[](0) + "Init";
+          initfunc = coil::split(mm, ".").operator[](0) + "Init";
       }
       try
-      {
-        m_module->load(mod, initfunc);
-      }
+        {
+          m_module->load(mm, initfunc);
+        }
       catch (...)
-      {
-        RTC_WARN(("Logstream plugin module load failed: %s",
-                  mod.c_str()));
-        continue;
-      }
+        {
+          RTC_WARN(("Logstream plugin module load failed: %s",
+                    mod.c_str()));
+          continue;
+        }
     }
   }
 
@@ -1454,7 +1457,7 @@ namespace RTC
     // Initialize other logstreams
     initLogstreamOthers();
 
-    RTC_INFO(("%s", m_config["openrtm.version"].c_str()));
+    RTC_INFO(("OpenRTM %s", m_config["openrtm.version"].c_str()));
     RTC_INFO(("Copyright (C) 2003-2024, Noriaki Ando and OpenRTM development team,"));
     RTC_INFO(("  Intelligent Systems Research Institute, AIST,"));
     RTC_INFO(("Copyright (C) 2024, Noriaki Ando and OpenRTM development team,"));
@@ -1669,37 +1672,17 @@ namespace RTC
    */
   bool Manager::isORBEndPoint(const std::string &endpoint)
   {
-    if (endpoint.find("giop:") != std::string::npos)
+    const std::list<std::string> headers{ "giop:", "iiop://",
+                                        "diop://", "uiop://",
+                                        "ssliop://", "shmiop://",
+                                        "htiop://", "inet:"};
+
+    for (const auto &header : headers)
     {
-      return true;
-    }
-    else if (endpoint.find("iiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("diop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("uiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("ssliop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("shmiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("htiop://") != std::string::npos)
-    {
-      return true;
-    }
-    else if (endpoint.find("inet:") != std::string::npos)
-    {
-      return true;
+      if (endpoint.find(header) != std::string::npos)
+      {
+        return true;
+      }
     }
     return false;
   }

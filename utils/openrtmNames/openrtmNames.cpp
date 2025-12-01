@@ -56,7 +56,12 @@ int main(int argc, char **argv)
 #else
   IORTable::Table_var adapter;
 #endif
+
+#ifndef ORB_IS_RTORB
   PortableServer::Servant_var<RTM::NamingContext> nameservice = nullptr;
+#else
+  RTM::NamingContext* nameservice = nullptr;
+#endif
 
   try {
 #ifdef ORB_IS_OMNIORB
@@ -130,10 +135,14 @@ int main(int argc, char **argv)
     CORBA::Object_var root_obj = orb->resolve_initial_references("RootPOA");
     root_poa = PortableServer::POA::_narrow(root_obj);
 
+
+#ifdef ORB_IS_OMNIORB
+      CORBA::PolicyList pl;
+      pl.length(1);
+      pl[0] = static_cast<CORBA::Policy_ptr>(root_poa->create_lifespan_policy(PortableServer::PERSISTENT));
+#endif
+
     
-    CORBA::PolicyList pl;
-    pl.length(1);
-    pl[0] = static_cast<CORBA::Policy_ptr>(root_poa->create_lifespan_policy(PortableServer::PERSISTENT));
 
     nameservice = new RTM::NamingContext(root_poa);
 
@@ -144,6 +153,7 @@ int main(int argc, char **argv)
 
     
 #ifndef ORB_IS_TAO
+#ifndef ORB_IS_RTORB
     PortableServer::POAManager_var pman = root_poa->the_POAManager();
     pman->activate();
     CORBA::Object_var ins_obj = orb->resolve_initial_references("omniINSPOA");
@@ -153,6 +163,10 @@ int main(int argc, char **argv)
 
     PortableServer::ObjectId_var id = PortableServer::string_to_ObjectId("NameService");
     ins_poa->activate_object_with_id(id.in(), nameservice);
+#else
+    root_poa->reinstall_object(nameservice, "NameService");
+    root_poa->the_POAManager()->activate();
+#endif
 #else
     CORBA::Object_var obj = orb->resolve_initial_references("IORTable");
     adapter = IORTable::Table::_narrow(obj.in());
@@ -164,6 +178,7 @@ int main(int argc, char **argv)
     orb->run();
 
   }
+#ifndef ORB_IS_RTORB
   catch (const CORBA::INITIALIZE& ex) {
 #ifdef ORB_IS_OMNIORB
     std::cerr << "Failed to initialise: " << ex.NP_minorString() << std::endl;
@@ -172,12 +187,22 @@ int main(int argc, char **argv)
 #endif
     return -1;
   }
+#endif
    catch (CORBA::SystemException& ex) {
+#ifndef ORB_IS_RTORB
     std::cerr << "Caught CORBA::" << ex._name() << std::endl;
+#else
+    std::cerr << "Caught CORBA::" << ex.msg() << std::endl;
+#endif
     return -1;
   }
   catch (CORBA::Exception& ex) {
+#ifndef ORB_IS_RTORB
     std::cerr << "Caught CORBA::Exception: " << ex._name() << std::endl;
+#else
+    std::cerr << "Caught CORBA::Exception: " << ex.msg() << std::endl;
+#endif
+
     return -1;
   }
 

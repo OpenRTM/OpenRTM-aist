@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 add_subdirectory(logger)
 add_subdirectory(extended_fsm)

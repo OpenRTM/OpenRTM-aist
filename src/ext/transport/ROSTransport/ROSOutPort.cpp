@@ -22,10 +22,15 @@
 #include <chrono>
 #include <rtm/NVUtil.h>
 #include <ros/xmlrpc_manager.h>
-#include <coil/OS.h>
-#include <coil/stringutil.h>
 #include "ROSOutPort.h"
 #include "ROSTopicManager.h"
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#ifdef getpid
+#undef getpid
+#endif
+#endif
+#include <coil/OS.h>
+#include <coil/stringutil.h>
 
 #define ROS_MASTER_URI "ROS_MASTER_URI"
 #define ROS_DEFAULT_MASTER_ADDRESS "localhost"
@@ -42,7 +47,7 @@ namespace RTC
    * @endif
    */
   ROSOutPort::ROSOutPort(void)
-    : rtclog("ROSOutPort"), m_start(false), m_roscoreport(ROS_DEFAULT_MASTER_PORT), m_message_data_sent(0)
+    : rtclog("ROSOutPort"), m_start(false), m_tcp_nodelay(true), m_roscoreport(ROS_DEFAULT_MASTER_PORT), m_message_data_sent(0)
   {
   }
   
@@ -90,6 +95,8 @@ namespace RTC
 
     m_topic = prop.getProperty("ros.topic", "chatter");
     m_topic = "/" + m_topic;
+
+    m_tcp_nodelay = coil::toBool(prop["ros.tcp_nodelay"], "YES", "NO", true);
 
     m_roscorehost = prop.getProperty("ros.roscore.host");
     std::string tmp_port = prop.getProperty("ros.roscore.port");
@@ -167,7 +174,7 @@ namespace RTC
     if(!info)
     {
       RTC_ERROR(("Can not find message type(%s)", m_messageType.c_str()));
-      return;
+      throw std::bad_alloc();
     }
 
 
@@ -182,6 +189,7 @@ namespace RTC
     if(!b)
     {
       RTC_ERROR(("XML-RCP Error"));
+      throw std::bad_alloc();
     }
   }
 
@@ -375,6 +383,14 @@ namespace RTC
     m["callerid"] = m_callerid;
     m["latching"] = "0";
     m["topic"] = topic;
+    if (m_tcp_nodelay)
+    {
+      m["tcp_nodelay"] = "1";
+    }
+    else
+    {
+      m["tcp_nodelay"] = "0";
+    }
     
 
     RTC_VERBOSE(("TCPTransPort created"));
@@ -383,6 +399,7 @@ namespace RTC
     RTC_VERBOSE(("Message Definition:%s", info->message_definition().c_str()));
     RTC_VERBOSE(("Caller ID:%s", m_callerid.c_str()));
     RTC_VERBOSE(("Topic Name:%s", topic.c_str()));
+    RTC_VERBOSE(("TCP Nodelay:%s", (m_tcp_nodelay ? "true" : "false")));
     RTC_VERBOSE(("TCPTransPort created"));
 
 

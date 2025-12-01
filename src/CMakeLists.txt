@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 add_subdirectory(lib)
 set(EXTLIB_ENABLE TRUE CACHE BOOL "set EXTLIB_ENABLE ")

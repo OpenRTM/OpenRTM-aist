@@ -6,7 +6,7 @@
 #         Nobu Kawauchi
 #
 
-VERSION=2.0.2.03
+VERSION=2.1.0.00
 FILENAME=openrtm2_install_raspbian.sh
 BIT=`getconf LONG_BIT`
 
@@ -347,7 +347,7 @@ check_reposerver()
 # リポジトリサーバ
 #---------------------------------------
 create_srclist () {
-  openrtm_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/openrtm.key] http://$reposerver/pub/Linux/raspbian/ $code_name main"
+  openrtm_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/openrtm-keyring.gpg] http://$reposerver/pub/Linux/raspbian/ $code_name main"
 }
 
 #---------------------------------------
@@ -371,11 +371,20 @@ update_source_list () {
       if [ ! -d /etc/apt/keyrings ]; then
         sudo mkdir -p /etc/apt/keyrings
       fi
-      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key -O /etc/apt/keyrings/openrtm.key
+      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
     fi
-  elif test "x$rtmsite2" != "x" &&
-       [ ! -e /etc/apt/keyrings/openrtm.key ]; then
-    sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://openrtm.org/pub/openrtm.key -O /etc/apt/keyrings/openrtm.key
+  elif [ ! -e /etc/apt/keyrings/openrtm-keyring.gpg ]; then
+    if test "x$rtmsite1" != "x" ; then
+      sudo sed -i.bak '/http:\/\/openrtm.org\/pub\/Linux\/raspbian\//d' /etc/apt/sources.list
+    fi
+    if test "x$rtmsite2" != "x" ; then
+      sudo rm /etc/apt/sources.list.d/openrtm.list
+    fi
+    echo $openrtm_repo | sudo tee /etc/apt/sources.list.d/openrtm.list > /dev/null
+    if [ ! -d /etc/apt/keyrings ]; then
+      sudo mkdir -p /etc/apt/keyrings
+    fi
+    sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
   fi
   
   if test "x$FORCE_YES" = "xtrue" ; then

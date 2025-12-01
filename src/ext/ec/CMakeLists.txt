@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 if(NOT CORBA MATCHES "RtORB")
 	add_subdirectory(logical_time)

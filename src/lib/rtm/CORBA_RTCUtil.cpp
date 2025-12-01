@@ -24,6 +24,7 @@
 #endif
 
 #include <utility>
+#include <unordered_map>
 
 namespace CORBA_RTCUtil
 {
@@ -1486,50 +1487,56 @@ namespace CORBA_RTCUtil
   */
   CorbaURI::CorbaURI(std::string uri, const std::string &objkey) : m_port(0), m_addressonly(false)
   {
-    if(uri.find("giop:tcp:") == 0)
+
+    const std::unordered_map<std::string, std::string>  protocols_str{ {"giop:tcp:", "corbaloc:iiop:"},
+                                                                  {"giop:ssl:", "corbaloc:ssliop:"},
+                                                                  {"giop:http:", ""},
+                                                                  {"giop::", "corbaloc:iiop:"},
+                                                                  {"iiop://", "corbaloc:iiop:"},
+                                                                  {"diop://", "corbaloc:diop:"},
+                                                                  {"uiop://", "corbaloc:uiop:"},
+                                                                  {"ssliop://", "corbaloc:ssliop:"},
+                                                                  {"shmiop://", "corbaloc:shmiop:"},
+                                                                  {"htiop://", "corbaloc:htiop:"},
+                                                                  {"inet:", "corbaloc:iiop:"}
+                                                                  };
+
+    bool converted = false;
+    for (const auto &protocol : protocols_str)
     {
-      uri = coil::replaceString(uri, "giop:tcp:", "corbaloc:iiop:");
+      if (uri.find(protocol.first) == 0)
+      {
+        uri = coil::replaceString(uri, protocol.first, protocol.second);
+        converted = true;
+        break;
+      }
     }
-    else if(uri.find("giop:ssl:") == 0)
+
+
+
+
+    const std::unordered_map<std::string, std::string>  protocols_o_str{ 
+                                                                        {"iiop:", "corbaloc:iiop:"},
+                                                                        {"ssliop:", "corbaloc:ssliop:"},
+                                                                        {"diop:", "corbaloc:diop:"},
+                                                                        {"shmiop:", "corbaloc:shmiop:" },
+                                                                        {"htiop:", "corbaloc:htiop:" }
+                                                                      };
+
+    if (!converted)
     {
-      uri = coil::replaceString(uri, "giop:ssl:", "corbaloc:ssliop:");
+      for (const auto& protocol : protocols_o_str)
+      {
+        if (uri.find(protocol.first) == 0)
+        {
+          uri = coil::replaceString(uri, protocol.first, protocol.second);
+          break;
+        }
+      }
     }
-    else if(uri.find("giop:http:") == 0)
-    {
-      uri = coil::replaceString(uri, "giop:http:", "");
-    }
-    else if(uri.find("giop::") == 0)
-    {
-      uri = coil::replaceString(uri, "giop::", "corbaloc:iiop:");
-    }
-    else if(uri.find("iiop://") == 0)
-    {
-      uri = coil::replaceString(uri, "iiop://", "corbaloc:iiop:");
-    }
-    else if(uri.find("diop://") == 0)
-    {
-      uri = coil::replaceString(uri, "diop://", "corbaloc:diop:");
-    }
-    else if(uri.find("uiop://") == 0)
-    {
-      uri = coil::replaceString(uri, "uiop://", "corbaloc:uiop:");
-    }
-    else if(uri.find("ssliop://") == 0)
-    {
-      uri = coil::replaceString(uri, "ssliop://", "corbaloc:ssliop:");
-    }
-    else if(uri.find("shmiop://") == 0)
-    {
-      uri = coil::replaceString(uri, "shmiop://", "corbaloc:shmiop:");
-    }
-    else if(uri.find("htiop://") == 0)
-    {
-      uri = coil::replaceString(uri, "htiop://", "corbaloc:htiop:");
-    }
-    else if(uri.find("inet:") == 0)
-    {
-      uri = coil::replaceString(uri, "inet:", "corbaloc:iiop:");
-    }
+
+
+
 #ifdef RTM_OMNIORB_43
     CORBA::String_var scheme, host, path, fragment;
     CORBA::UShort port;

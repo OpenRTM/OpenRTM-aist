@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5.1)
+cmake_minimum_required (VERSION 3.16)
 
 project (ROSTransport
 	VERSION ${RTM_VERSION}
@@ -22,8 +22,13 @@ if(UNIX)
 	endif()
 endif()
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(roscpp roscpp)
+if(WIN32)
+	find_package(roscpp REQUIRED
+	)
+else()
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(roscpp roscpp)
+endif()
 
 if(NOT roscpp_FOUND)
 	message(FATAL_ERROR "can not find roscpp.")
@@ -32,8 +37,13 @@ endif()
 
 find_package(Boost 1.69 COMPONENTS chrono filesystem system)
 if(NOT Boost_FOUND)
-	find_package(Boost REQUIRED COMPONENTS chrono filesystem signals system)
+	if(WIN32)
+		find_package(Boost REQUIRED COMPONENTS chrono filesystem signals system thread)
+	else()
+		find_package(Boost REQUIRED COMPONENTS chrono filesystem signals system)
+	endif()
 endif()
+
 
 link_directories(${ORB_LINK_DIR})
 link_directories(${roscpp_LIBRARY_DIRS})
@@ -43,6 +53,10 @@ if(WIN32)
 	add_definitions(-DRTM_SKEL_IMPORT_SYMBOL)
 	add_definitions(-DNOGDI)
 	add_definitions(-DTRANSPORT_PLUGIN)
+	add_definitions(-D_RTLDLL)
+	add_definitions(-DBOOST_ALL_DYN_LINK)
+
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/install_manifest.txt.in ${PROJECT_BINARY_DIR}/install_manifest.txt @ONLY)
 endif()
 
 
@@ -79,7 +93,11 @@ else()
 	target_include_directories(${target} SYSTEM
 		PRIVATE ${roscpp_INCLUDE_DIRS}
 		PRIVATE ${Boost_INCLUDE_DIRS})
-	target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${roscpp_LIBRARIES} ${Boost_LIBRARIES})
+	if(WIN32)
+		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${roscpp_LIBRARIES} ${Boost_LIBRARIES})
+	else()
+		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${roscpp_LINK_LIBRARIES} ${Boost_LIBRARIES})
+	endif()
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
 	install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_ROSTRANSPORT_LIB_DIR}
@@ -107,3 +125,11 @@ endif(VXWORKS)
 
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/devel/include/ros)
+
+set(INSTALL_ROSTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ros.conf.in ${PROJECT_BINARY_DIR}/rtc.ros.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ros.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)
