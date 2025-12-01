@@ -33,7 +33,7 @@ namespace RTC
 {
   FastRTPSManager* FastRTPSManager::manager = nullptr;
   std::mutex FastRTPSManager::mutex;
-
+  std::once_flag FastRTPSManager::m_once;
 
   /*!
    * @if jp
@@ -48,13 +48,8 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager::FastRTPSManager(std::string& xml_profile_file)
+  FastRTPSManager::FastRTPSManager() : m_participant(nullptr)
   {
-      if (!xml_profile_file.empty())
-      {
-          eprosima::fastrtps::Domain::loadXMLProfilesFile(xml_profile_file);
-          m_xml_profile_file = std::move(xml_profile_file);
-      }
   }
 
   /*!
@@ -70,7 +65,7 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager::FastRTPSManager(const FastRTPSManager &/*mgr*/)
+  FastRTPSManager::FastRTPSManager(const FastRTPSManager &/*mgr*/) : m_participant(nullptr)
   {
     
   }
@@ -104,23 +99,47 @@ namespace RTC
    *
    * @endif
    */
-  void FastRTPSManager::start()
+  void FastRTPSManager::start(coil::Properties& prop)
   {
-      if(m_xml_profile_file.empty())
+      Logger rtclog("FastRTPSManager");
+      RTC_INFO(("FastRTPSManager::start()"));
+      RTC_INFO_STR((prop));
+      
+
+      m_xml_profile_file = std::move(prop["xmlprofile.filename"]);
+      if (!m_xml_profile_file.empty())
+      {
+        eprosima::fastrtps::Domain::loadXMLProfilesFile(m_xml_profile_file);
+        RTC_INFO(("Load XMl file: %s", m_xml_profile_file.c_str()));
+
+        const std::string paticipant_name = std::move(prop["participant.name"]);
+        RTC_INFO(("Create participant: %s", paticipant_name.c_str()));
+        m_participant = eprosima::fastrtps::Domain::createParticipant(paticipant_name);
+      }
+
+      else
       {
         eprosima::fastrtps::ParticipantAttributes PParam;
 #if (FASTRTPS_VERSION_MAJOR >= 2)
+        coil::stringTo<uint32_t>(PParam.domainId, prop["domain.id"].c_str());
+        RTC_INFO(("Domain ID: %d", PParam.domainId));
 #else
         PParam.rtps.builtin.domainId = 0;
+        coil::stringTo<uint32_t>(PParam.rtps.builtin.domainId, prop["domain.id"].c_str());
+        RTC_INFO(("Domain ID: %d", PParam.rtps.builtin.domainId));
 #endif
-        PParam.rtps.setName("participant_openrtm");
+
         
+        const std::string paticipant_name = std::move(prop.getProperty("participant.name", "participant_openrtm").c_str());
+        RTC_INFO(("Participant name: %s", paticipant_name.c_str()));
+        PParam.rtps.setName(paticipant_name.c_str());
+        
+        setParticipantSecParam(prop, PParam);
+
+
         m_participant = eprosima::fastrtps::Domain::createParticipant(PParam);
       }
-      else
-      {
-          m_participant = eprosima::fastrtps::Domain::createParticipant("participant_openrtm");
-      }
+
    
   }
 
@@ -138,6 +157,8 @@ namespace RTC
    */
   void FastRTPSManager::shutdown()
   {
+      Logger rtclog("FastRTPSManager");
+      RTC_INFO(("FastRTPSManager::shutdown()"));
       eprosima::fastrtps::Domain::removeParticipant(m_participant);
       manager = nullptr;
   }
@@ -246,14 +267,12 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager* FastRTPSManager::init(std::string xml_profile_file)
+  FastRTPSManager* FastRTPSManager::init(coil::Properties& prop)
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
-      manager = new FastRTPSManager(xml_profile_file);
-      manager->start();
-    }
+    std::call_once(m_once, [&] {
+      manager = new FastRTPSManager();
+      manager->start(prop);
+      });
     return manager;
   }
 
@@ -271,14 +290,13 @@ namespace RTC
    *
    * @endif
    */
-  FastRTPSManager& FastRTPSManager::instance(std::string xml_profile_file)
+  FastRTPSManager& FastRTPSManager::instance()
   {
-    std::lock_guard<std::mutex> guard(mutex);
-    if (!manager)
-    {
-      manager = new FastRTPSManager(xml_profile_file);
-      manager->start();
-    }
+    std::call_once(m_once, [&] {
+      coil::Properties prop;
+      manager = new FastRTPSManager();
+      manager->start(prop);
+      });
     return *manager;
   }
 
@@ -302,6 +320,97 @@ namespace RTC
       {
           manager->shutdown();
       }
+  }
+
+
+  /*!
+   * @if jp
+   * @brief プロパティからeprosima::fastrtps::ParticipantAttributesを設定する
+   *
+   * @param prop プロパティ
+   * @param PParam Participantの属性
+   *
+   * @else
+   * @brief
+   *
+   * @param prop
+   * @param PParam
+   *
+   *
+   * @endif
+   */
+  void FastRTPSManager::setParticipantSecParam(coil::Properties& prop, eprosima::fastrtps::ParticipantAttributes &PParam)
+  {
+    std::string auth_plugin{ std::move(prop["dds.sec.auth.plugin"]) };
+    if (!auth_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.auth.plugin", auth_plugin);
+      const std::string path = "dds.sec.auth." + auth_plugin;
+      const std::vector<Properties*>& auth_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : auth_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string access_plugin{ std::move(prop["dds.sec.access.plugin"]) };
+    if (!access_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.access.plugin", access_plugin);
+      const std::string path = "dds.sec.access." + access_plugin;
+      const std::vector<Properties*>& access_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : access_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string crypto_plugin{ std::move(prop["dds.sec.crypto.plugin"]) };
+    if (!crypto_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.crypto.plugin", crypto_plugin);
+      const std::string path = "dds.sec.crypto." + crypto_plugin;
+      const std::vector<Properties*>& crypto_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : crypto_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+
+    std::string log_plugin{ std::move(prop["dds.sec.log.plugin"]) };
+    if (!log_plugin.empty())
+    {
+      PParam.rtps.properties.properties().emplace_back("dds.sec.log.plugin", log_plugin);
+      const std::string path = "dds.sec.log." + log_plugin;
+      const std::vector<Properties*>& log_leaf = prop.getNode(path).getLeaf();
+      for (auto& lprop : log_leaf)
+      {
+        std::string key(path + "." + lprop->getName()), value(lprop->getValue());
+        PParam.rtps.properties.properties().emplace_back(key, value);
+      }
+    }
+  }
+
+  /*!
+   * @if jp
+   * @brief XMLファイルが設定済みかを判定
+   *
+   * @return true：設定済み、false：未設定
+   *
+   * @else
+   * @brief
+   *
+   * @return
+   *
+   *
+   * @endif
+   */
+  bool FastRTPSManager::xmlConfigured()
+  {
+    return !m_xml_profile_file.empty();
   }
 }
 

@@ -26,11 +26,19 @@
 #include <rtm/Manager.h>
 #include <rtm/ConnectorListener.h>
 #include <rtm/ConnectorBase.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(push)
+#pragma warning(disable:4819)
+#endif
+#include <fastrtps/fastrtps_all.h>
 #include <fastrtps/subscriber/Subscriber.h>
 #include <fastrtps/Domain.h>
 #include <fastrtps/fastrtps_fwd.h>
 #include <fastrtps/subscriber/SubscriberListener.h>
 #include <fastrtps/subscriber/SampleInfo.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#pragma warning(pop)
+#endif
 #include "CORBACdrDataPubSubTypes.h"
 
 
@@ -377,6 +385,60 @@ namespace RTC
      * @endif
      */
     void convertReturn(BufferStatus status, ByteData& data);
+
+    /*!
+     * @if jp
+     * @brief プロパティからfastrtps::Duration_tを設定する
+     *
+     * @param prop プロパティ(seconds、nanosecの要素に値を格納する)
+     * @param time fastrtps::Duration_t
+     *
+     * @else
+     * @brief
+     *
+     * @param prop
+     * @param time
+     *
+     *
+     * @endif
+     */
+#if (FASTRTPS_VERSION_MAJOR <= 1) && (FASTRTPS_VERSION_MINOR <= 7)
+    static void setDuration(coil::Properties& prop, eprosima::fastrtps::rtps::Duration_t& time);
+#else
+    static void setDuration(coil::Properties& prop, eprosima::fastrtps::Duration_t& time);
+#endif
+    /*!
+     * @if jp
+     * @brief プロパティからeprosima::fastrtps::SubscriberAttributesを設定する
+     *
+     * @param fastrtps_prop プロパティ
+     * @param Rparam Subscriberの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param fastrtps_prop
+     * @param Rparam
+     *
+     *
+     * @endif
+     */
+    static void setSubParam(coil::Properties& fastrtps_prop, eprosima::fastrtps::SubscriberAttributes* Rparam);
+    /*!
+     * @if jp
+     * @brief eprosima::fastrtps::SubscriberAttributesのパラメータをログに出力する
+     *
+     * @param Rparam Subscriberの属性
+     *
+     * @else
+     * @brief
+     *
+     * @param Rparam
+     *
+     *
+     * @endif
+     */
+    void outputLog(const eprosima::fastrtps::SubscriberAttributes* Rparam);
 
     CdrBufferBase* m_buffer;
     ConnectorInfo m_profile;
