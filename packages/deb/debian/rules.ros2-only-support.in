@@ -122,8 +122,7 @@ install-arch:
 
 	# for openrtm2-ros2 package
 	(mkdir -p $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
-	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/ROS2*.so $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
-	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/Fast*.so $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
+	(cp -r $(INSTALL_PREFIX)/${RTM_EXT_DIR}/transport/*.so $(TARGET_ros2)/${RTM_EXT_DIR}/transport)
 	(mkdir -p $(TARGET_ros2)/${ROS2TRANSPORT_CMAKE_DIR})
 	(cp -r $(INSTALL_PREFIX)/${ROS2TRANSPORT_CMAKE_DIR}/* $(TARGET_ros2)/${ROS2TRANSPORT_CMAKE_DIR})
 
