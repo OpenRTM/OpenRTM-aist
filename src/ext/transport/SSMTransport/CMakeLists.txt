@@ -4,22 +4,30 @@ project (SSMTransport
 	VERSION ${RTM_VERSION}
 	LANGUAGES CXX)
 
+
+set(SSM_ROOT ${SSM_ROOT} CACHE PATH "set SSM_ROOT")
+
+
+
+
+if(SSM_ROOT)
+	link_directories(${SSM_ROOT}/lib ${SSM_ROOT}/lib64)
+	set(SSM_LIBRARY "-Wl,--whole-archive" "${SSM_ROOT}/lib64/libssm.a" "-Wl,--no-whole-archive")
+endif()
+
+if(WIN32)
+	add_definitions(-DRTM_SKEL_IMPORT_SYMBOL)
+	add_definitions(-DNOGDI)
+	add_definitions(-DNOMINMAX)
+	add_definitions(-DTRANSPORT_PLUGIN)
+endif()
+
+
 set(target SSMTransport)
 set(srcs SSMTransport.cpp SSMTransport.h SSMInPort.cpp SSMInPort.h SSMOutPort.cpp SSMOutPort.h)
 
 
 if(OpenRTM_aist_BINARY_DIR)
-
-	link_directories(${ORB_LINK_DIR})
-	add_definitions(${ORB_C_FLAGS_LIST})
-
-	if(WIN32)
-		add_definitions(-DRTM_SKEL_IMPORT_SYMBOL)
-		add_definitions(-DNOGDI)
-		add_definitions(-DNOMINMAX)
-		add_definitions(-DTRANSPORT_PLUGIN)
-	endif()
-
 
 	if(VXWORKS AND NOT RTP)
 		set(libs ${RTCSKEL_PROJECT_NAME})
@@ -28,7 +36,10 @@ if(OpenRTM_aist_BINARY_DIR)
 		openrtm_common_set_compile_props(${target})
 		openrtm_set_link_props_shared(${target})
 		openrtm_include_rtm(${target})
-		target_link_libraries(${target} ${libs} ssm)
+		target_link_libraries(${target} ${SSM_LIBRARY} -lpthread -lrt ${libs})
+		if(SSM_ROOT)
+			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+		endif()
 
 		install(TARGETS ${target} LIBRARY DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
 					ARCHIVE DESTINATION ${INSTALL_RTM_EXT_DIR}/transport
@@ -42,7 +53,10 @@ if(OpenRTM_aist_BINARY_DIR)
 		openrtm_common_set_compile_props(${target})
 		openrtm_include_rtm(${target})
 		openrtm_set_link_props_shared(${target})
-		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ssm)
+		target_link_libraries(${target} PRIVATE ${SSM_LIBRARY} -lpthread -lrt ${libs} ${RTM_LINKER_OPTION})
+		if(SSM_ROOT)
+			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+		endif()
 		set_target_properties(${target} PROPERTIES PREFIX "")
 
 		set_target_properties(${target} PROPERTIES
@@ -106,7 +120,10 @@ else(OpenRTM_aist_BINARY_DIR)
 		set(libs ${RTCSKEL_PROJECT_NAME})
 
 		add_executable(${target} ${srcs})
-		target_link_libraries(${target} ${libs} ssm ${OPENRTM_LIBRARIES})
+		target_link_libraries(${target} ${SSM_LIBRARY} -lpthread -lrt ${libs} ${OPENRTM_LIBRARIES})
+		if(SSM_ROOT)
+			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+		endif()
 
 		set(SSM_TRANSPORT_INSTALL_DIR lib/openrtm-${OPENRTM_VERSION_MAJOR}.${OPENRTM_VERSION_MINOR}/transport)
 
@@ -119,7 +136,10 @@ else(OpenRTM_aist_BINARY_DIR)
 
 
 		add_library(${target} SHARED ${srcs})
-		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ssm ${OPENRTM_LIBRARIES})
+		target_link_libraries(${target} PRIVATE ${SSM_LIBRARY} -lpthread -lrt ${libs} ${RTM_LINKER_OPTION} ${OPENRTM_LIBRARIES})
+		if(SSM_ROOT)
+			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
+		endif()
 		set_target_properties(${target} PROPERTIES PREFIX "")
 
 		set_target_properties(${target} PROPERTIES
@@ -138,7 +158,7 @@ else(OpenRTM_aist_BINARY_DIR)
 				ARCHIVE DESTINATION ${SSM_TRANSPORT_INSTALL_DIR}
 				RUNTIME DESTINATION ${SSM_TRANSPORT_INSTALL_DIR}
 				COMPONENT ext)
-	endif()
+endif()
 
 endif(OpenRTM_aist_BINARY_DIR)
 
@@ -149,3 +169,10 @@ if(VXWORKS)
 	endif(RTP)
 endif(VXWORKS)
 
+set(INSTALL_SSMTRANSPORT_DIR ${INSTALL_RTM_EXT_DIR}/transport)
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/rtc.ssm.conf.in ${PROJECT_BINARY_DIR}/rtc.ssm.conf @ONLY)
+install(
+	FILES ${PROJECT_BINARY_DIR}/rtc.ssm.conf
+	DESTINATION ${INSTALL_RTM_ETC_DIR}/transport
+	COMPONENT ext)

@@ -7,10 +7,26 @@ RUN apt-get update\
  build-essential\
  debhelper\
  devscripts\
- fakeroot
+ fakeroot\
+ git\
+ autoconf\
+ automake\
+ libtool
+
+WORKDIR /root
+RUN git clone https://github.com/sitRyo/Distributed-Streaming-data-Sharing-Manager
+WORKDIR /root/Distributed-Streaming-data-Sharing-Manager
+RUN autoreconf -i -f \
+ && ./configure --with-pic CFLAGS="-fPIC -w" CXXFLAGS="-fPIC -w" \
+ && find . -name "Makefile" -exec sed -i 's/-Werror//g' {} + \
+ && make AM_CFLAGS="-fPIC" -j$(nproc) \
+ && make install
+WORKDIR /root
 
 COPY OpenRTM-aist /root/OpenRTM-aist
 RUN cmake\
+ -DSSM_ENABLE=ON\
+ -DSSM_ROOT=/usr/local\
  -DSSL_ENABLE=ON\
  -DHTTP_ENABLE=ON\
  -DOBSERVER_ENABLE=ON\

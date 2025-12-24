@@ -17,13 +17,47 @@
  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <ssm.h>
+#ifdef __cplusplus
+}
+#endif
 #include "SSMTransport.h"
 #include "SSMOutPort.h"
 #include "SSMInPort.h"
 
 namespace SSMRTM
 {
+  static const char* const ssm_inport_option[] =
+  {
+    "stream_name.__value__", "sensor_test",
+    "stream_name.__widget__", "text",
+    "stream_id.__value__", "0",
+    "stream_id.__widget__", "spin",
+    "stream_id.__constraint__", "0 <= x <= 10000",
+    ""
+  };
+  static const char* const ssm_outport_option[] =
+  {
+    "stream_name.__value__", "sensor_test",
+    "stream_name.__widget__", "text",
+    "stream_id.__value__", "0",
+    "stream_id.__widget__", "spin",
+    "stream_id.__constraint__", "0 <= x <= 10000",
+    "stream_size.__value__", "0",
+    "stream_size.__widget__", "spin",
+    "stream_size.__constraint__", "0 <= x <= 2147483647",
+    "life_ssm_time.__value__", "5.0",
+    "life_ssm_time.__widget__", "slider.0.01",
+    "life_ssm_time.__constraint__", "0.00 <= x <= 1000.00",
+    "cycle_ssm_time.__value__", "0.05",
+    "cycle_ssm_time.__widget__", "slider.0.01",
+    "cycle_ssm_time.__constraint__", "0.00 <= x <= 1000.00",
+    ""
+  };
+
 
   ManagerActionListener::ManagerActionListener()
   {
@@ -69,25 +103,29 @@ extern "C"
   {
     if(!initSSM())
     {
-      return;
+      throw;
     }
 
     {
+      coil::Properties prop(SSMRTM::ssm_inport_option);
       RTC::OutPortConsumerFactory& factory(RTC::OutPortConsumerFactory::instance());
       factory.addFactory("ssm",
                         ::coil::Creator< ::RTC::OutPortConsumer,
                                           ::RTC::SSMInPort>,
                         ::coil::Destructor< ::RTC::OutPortConsumer,
-                                            ::RTC::SSMInPort>);
+                                            ::RTC::SSMInPort>,
+                        prop);
     }
 
     {
+      coil::Properties prop(SSMRTM::ssm_outport_option);
       RTC::InPortConsumerFactory& factory(RTC::InPortConsumerFactory::instance());
       factory.addFactory("ssm",
                         ::coil::Creator< ::RTC::InPortConsumer,
                                           ::RTC::SSMOutPort>,
                         ::coil::Destructor< ::RTC::InPortConsumer,
-                                            ::RTC::SSMOutPort>);
+                                            ::RTC::SSMOutPort>,
+                        prop);
     }
 
 

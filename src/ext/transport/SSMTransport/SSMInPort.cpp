@@ -21,7 +21,13 @@
 #include <rtm/Manager.h>
 #include "SSMInPort.h"
 #include <rtm/NVUtil.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <libssm.h>
+#ifdef __cplusplus
+}
+#endif
 
 
 
@@ -80,6 +86,7 @@ namespace RTC
     if(!coil::stringTo(m_stream_id, stream_id_str.c_str()))
     {
       RTC_ERROR(("stream_id is invalid value"));
+      throw std::bad_alloc();
     }
 
   }

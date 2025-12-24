@@ -67,25 +67,29 @@ namespace RTC
     RTC_PARANOID(("SSMOutPort::init()"));
     
     m_stream_name = prop.getProperty("ssm.stream_name", "sensor_test");
-    std::string stream_id_str = prop.getProperty("stream_id", "0");
+    std::string stream_id_str = prop.getProperty("ssm.stream_id", "0");
     if(!coil::stringTo(m_stream_id, stream_id_str.c_str()))
     {
       RTC_ERROR(("stream_id is invalid value"));
+      throw std::bad_alloc();
     }
     std::string stream_size_str = prop.getProperty("ssm.stream_size", "0");
     if(!coil::stringTo(m_stream_size, stream_size_str.c_str()))
     {
       RTC_ERROR(("stream_size is invalid value"));
+      throw std::bad_alloc();
     }
     std::string life_ssm_time_str = prop.getProperty("ssm.life_ssm_time", "5.0");
     if(!coil::stringTo(m_life_ssm_time, life_ssm_time_str.c_str()))
     {
       RTC_ERROR(("life_ssm_time is invalid value"));
+      throw std::bad_alloc();
     }
     std::string cycle_ssm_time_str = prop.getProperty("ssm.cycle_ssm_time", "0.05");
     if(!coil::stringTo(m_cycle_ssm_time, cycle_ssm_time_str.c_str()))
     {
       RTC_ERROR(("cycle_ssm_time is invalid value"));
+      throw std::bad_alloc();
     }
 
     if(m_stream_size > 0)

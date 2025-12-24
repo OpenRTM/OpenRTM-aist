@@ -24,8 +24,13 @@
 #include <map>
 #include <rtm/InPortConsumer.h>
 #include <rtm/Manager.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <ssm.h>
-
+#ifdef __cplusplus
+}
+#endif
 
 
 namespace RTC
