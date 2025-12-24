@@ -21,7 +21,13 @@
 #include <rtm/Manager.h>
 #include "SSMInPort.h"
 #include <rtm/NVUtil.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <libssm.h>
+#ifdef __cplusplus
+}
+#endif
 
 
 

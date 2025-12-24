@@ -23,7 +23,13 @@
 #include <rtm/OutPortConsumer.h>
 #include <rtm/ConnectorListener.h>
 #include <rtm/ConnectorBase.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <ssm.h>
+#ifdef __cplusplus
+}
+#endif
 
 
 

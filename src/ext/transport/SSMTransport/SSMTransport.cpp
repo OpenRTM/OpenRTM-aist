@@ -17,7 +17,13 @@
  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <ssm.h>
+#ifdef __cplusplus
+}
+#endif
 #include "SSMTransport.h"
 #include "SSMOutPort.h"
 #include "SSMInPort.h"

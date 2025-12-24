@@ -12,7 +12,7 @@ set(SSM_ROOT ${SSM_ROOT} CACHE PATH "set SSM_ROOT")
 
 if(SSM_ROOT)
 	link_directories(${SSM_ROOT}/lib ${SSM_ROOT}/lib64)
-	set(SSM_LIBRARY ${SSM_ROOT}/lib/libssm.a ${SSM_ROOT}/lib64/libssm.a)
+	set(SSM_LIBRARY "-Wl,--whole-archive" "${SSM_ROOT}/lib64/libssm.a" "-Wl,--no-whole-archive")
 endif()
 
 if(WIN32)
@@ -29,11 +29,6 @@ set(srcs SSMTransport.cpp SSMTransport.h SSMInPort.cpp SSMInPort.h SSMOutPort.cp
 
 if(OpenRTM_aist_BINARY_DIR)
 
-	if(SSM_ROOT)
-		target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
-	endif()
-
-
 	if(VXWORKS AND NOT RTP)
 		set(libs ${RTCSKEL_PROJECT_NAME})
 
@@ -41,7 +36,7 @@ if(OpenRTM_aist_BINARY_DIR)
 		openrtm_common_set_compile_props(${target})
 		openrtm_set_link_props_shared(${target})
 		openrtm_include_rtm(${target})
-		target_link_libraries(${target} ${libs} ${SSM_LIBRARY})
+		target_link_libraries(${target} ${SSM_LIBRARY} -lpthread -lrt ${libs})
 		if(SSM_ROOT)
 			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
 		endif()
@@ -58,7 +53,7 @@ if(OpenRTM_aist_BINARY_DIR)
 		openrtm_common_set_compile_props(${target})
 		openrtm_include_rtm(${target})
 		openrtm_set_link_props_shared(${target})
-		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${SSM_LIBRARY})
+		target_link_libraries(${target} PRIVATE ${SSM_LIBRARY} -lpthread -lrt ${libs} ${RTM_LINKER_OPTION})
 		if(SSM_ROOT)
 			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
 		endif()
@@ -125,7 +120,7 @@ else(OpenRTM_aist_BINARY_DIR)
 		set(libs ${RTCSKEL_PROJECT_NAME})
 
 		add_executable(${target} ${srcs})
-		target_link_libraries(${target} ${libs} ${SSM_LIBRARY} ${OPENRTM_LIBRARIES})
+		target_link_libraries(${target} ${SSM_LIBRARY} -lpthread -lrt ${libs} ${OPENRTM_LIBRARIES})
 		if(SSM_ROOT)
 			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
 		endif()
@@ -141,7 +136,7 @@ else(OpenRTM_aist_BINARY_DIR)
 
 
 		add_library(${target} SHARED ${srcs})
-		target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION} ${SSM_LIBRARY} ${OPENRTM_LIBRARIES})
+		target_link_libraries(${target} PRIVATE ${SSM_LIBRARY} -lpthread -lrt ${libs} ${RTM_LINKER_OPTION} ${OPENRTM_LIBRARIES})
 		if(SSM_ROOT)
 			target_include_directories(${target} SYSTEM PUBLIC ${SSM_ROOT}/include)									
 		endif()
