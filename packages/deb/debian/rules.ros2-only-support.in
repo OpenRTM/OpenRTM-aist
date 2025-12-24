@@ -89,6 +89,7 @@ install-indep:
 	# for openrtm2-doc package
 	(mkdir -p $(TARGET_doc)/share/openrtm-$(SHORT_VER))
 	(cp -r $(INSTALL_PREFIX)/share/openrtm-$(SHORT_VER)/doc $(TARGET_doc)/share/openrtm-$(SHORT_VER))	
+	(cp $(CURDIR)/debian/copyright $(TARGET_doc)/share/openrtm-$(SHORT_VER)/doc)
 	dh_install -i
 
 install-arch:
