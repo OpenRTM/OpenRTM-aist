@@ -168,6 +168,10 @@ namespace coil
    */
   const std::string& Properties::getProperty(const std::string& key) const
   {
+    if (coil::eraseBothEndsBlank(key).empty())
+      {
+        return m_empty;
+      }
     std::vector<std::string> keys;
     split(key, '.', keys);
     Properties* node(nullptr);
@@ -188,6 +192,10 @@ namespace coil
   const std::string& Properties::getProperty(const std::string& key,
                                              const std::string& def) const
   {
+    if (coil::eraseBothEndsBlank(key).empty())
+      {
+        return m_empty;
+      }
     const std::string& invalue((*this)[key]);
 
     return invalue.empty() ? def : invalue;
@@ -230,6 +238,12 @@ namespace coil
   const std::string& Properties::getDefault(const std::string& key) const
   {
     std::vector<std::string> keys;
+    
+    if (coil::eraseBothEndsBlank(key).empty())
+      {
+        return m_empty;
+      }
+
     split(key, '.', keys);
     Properties* node(nullptr);
     if ((node = _getNode(keys, 0, this)) != nullptr)
@@ -250,6 +264,12 @@ namespace coil
                                       const std::string& invalue)
   {
     std::vector<std::string> keys;
+
+    if (coil::eraseBothEndsBlank(key).empty())
+      {
+        return m_empty;
+      }
+
     split(key, '.', keys);
 
     Properties* curr(this);
@@ -280,6 +300,10 @@ namespace coil
   std::string Properties::setDefault(const std::string& key,
                                      const std::string& invalue)
   {
+    if (coil::eraseBothEndsBlank(key).empty())
+      {
+        return m_empty;
+      }
     std::vector<std::string> keys;
     split(key, '.', keys);
 
@@ -343,7 +367,7 @@ namespace coil
 
     while (!inStream.eof())
       {
-        std::string tmp{coil::eraseHeadBlank(coil::getlinePortable(inStream))};
+        std::string tmp{coil::eraseBothEndsBlank(coil::getlinePortable(inStream))};
 
         // Skip comments or empty lines
         if (tmp.empty())
@@ -446,7 +470,7 @@ namespace coil
    */
   Properties* Properties::findNode(const std::string& key) const
   {
-    if (key.empty())
+    if (coil::eraseBothEndsBlank(key).empty())
       {
         return nullptr;
       }
@@ -464,7 +488,7 @@ namespace coil
    */
   Properties& Properties::getNode(const std::string& key)
   {
-    if (key.empty())
+    if (coil::eraseBothEndsBlank(key).empty())
       {
         return *this;
       }
@@ -486,7 +510,7 @@ namespace coil
    */
   bool Properties::createNode(const std::string& key)
   {
-    if (key.empty())
+    if (coil::eraseBothEndsBlank(key).empty())
       {
         return false;
       }
@@ -532,6 +556,10 @@ namespace coil
    */
   Properties* Properties::hasKey(const char* key) const
   {
+    if (coil::eraseBothEndsBlank(key).empty())
+    {
+      return nullptr;
+    }
     for (auto prop : leaf)
       {
         if (prop->name == key)
