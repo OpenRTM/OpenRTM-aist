@@ -129,6 +129,6 @@ chmod 755 $packagedir/debian/rules
 
 cd $packagedir
 rm -f config.status
-dpkg-buildpackage -W -us -uc -rfakeroot
+dpkg-buildpackage -W -us -uc -b -rfakeroot
 
 mv $packagedir/../openrtm2* $packagedir/packages/

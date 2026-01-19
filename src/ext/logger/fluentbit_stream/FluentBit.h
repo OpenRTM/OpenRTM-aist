@@ -21,11 +21,20 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #pragma warning(push)
 #pragma warning( disable : 4100 4245 4189 4805 4200 4505 )
 #endif
-#include <fluent-bit.h>
+
+#ifdef __cplusplus
+#define MPACK_NO_CPP 1
+#define MPACK_CPLUSPLUS 0
+// 先に C++ モードとして extern "C" 外で読み込ませてしまう
+#include <mpack/mpack.h> 
+#endif
+#include "flb_api_wrapper.h"
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #pragma warning(pop)
 #endif
@@ -82,7 +91,7 @@ namespace RTC
     /*!
      * @brief Fluent-bit context
      */
-    static flb_ctx_t* s_flbContext;
+    static flb_wrapper_ctx_t* s_flbContext;
     /*!
      * @brief Fluent-bit instance count
      */

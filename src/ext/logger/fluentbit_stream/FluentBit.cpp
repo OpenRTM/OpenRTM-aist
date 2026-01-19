@@ -26,7 +26,7 @@
 namespace RTC
 {
   // Static variables initialization
-  flb_ctx_t* FluentBitStream::s_flbContext = nullptr;
+  flb_wrapper_ctx_t* FluentBitStream::s_flbContext = nullptr;
   int FluentBitStream::s_instance = 0;
 
   //============================================================
@@ -35,10 +35,10 @@ namespace RTC
   {
     if (s_flbContext == nullptr)
       {
-        s_flbContext = flb_create();
+        s_flbContext = (flb_wrapper_ctx_t*)wrap_flb_create();
         if (s_flbContext == nullptr)
           {
-            std::cerr << "flb_create() failed." << std::endl;
+            std::cerr << "wrap_flb_create() failed." << std::endl;
             throw std::bad_alloc();
           }
       }
@@ -49,8 +49,8 @@ namespace RTC
     --s_instance;
     if (s_instance == 0)
       {
-        flb_stop(s_flbContext);
-        flb_destroy(s_flbContext);
+        wrap_flb_stop(s_flbContext);
+        wrap_flb_destroy(s_flbContext);
       }
   }
 
@@ -75,9 +75,9 @@ namespace RTC
         }
       }
     // Start the background worker
-    if (flb_start(s_flbContext) < 0)
+    if (wrap_flb_start(s_flbContext) < 0)
       {
-        std::cerr << "flb_start() failed." << std::endl;
+        std::cerr << "wrap_flb_start() failed." << std::endl;
       }
     return true;
   }
@@ -89,7 +89,7 @@ namespace RTC
     for(auto & lprop : leaf)
       {
         std::string key(lprop->getName()), value(lprop->getValue());
-        ret = flb_service_set(s_flbContext, key.c_str(), value.c_str(), NULL);
+        ret = wrap_flb_service_set(s_flbContext, key.c_str(), value.c_str());
       }
     return ret;
   }
@@ -97,7 +97,7 @@ namespace RTC
   bool FluentBitStream::createOutputStream(const coil::Properties& prop)
   {
     std::string plugin = prop["plugin"];
-    FlbHandler flbout = flb_output(s_flbContext,
+    FlbHandler flbout = wrap_flb_output(s_flbContext,
                                    (char*)plugin.c_str(), nullptr);
     m_flbOut.emplace_back(flbout);
     
@@ -112,14 +112,14 @@ namespace RTC
 //オプション有効チェック
 //FluentBit v1.9では動作していたが v3.2では無効と判断されてしまう
 //コードはコメントアウトして残した
-//                int ret = flb_output_property_check(s_flbContext,
+//                int ret = wrap_flb_output_property_check(s_flbContext,
 //                                                flbout, &key[0], &value[0]);
 //            if (ret == FLB_LIB_ERROR || ret == FLB_LIB_NO_CONFIG_MAP)
 //              {
 //                std::cerr << "Unknown property for \"" << plugin << "\" plugin: ";
 //                std::cerr << key << ": " << value << std::endl;
 //              }
-            flb_output_set(s_flbContext, flbout, key.c_str(), value.c_str(), NULL);
+            wrap_flb_output_set(s_flbContext, flbout, key.c_str(), value.c_str());
           }
       }
     return true;
@@ -128,11 +128,11 @@ namespace RTC
   bool FluentBitStream::createInputStream(const coil::Properties& prop)
   {
     std::string plugin = prop["plugin"];
-    FlbHandler flbin = flb_input(s_flbContext,
+    FlbHandler flbin = wrap_flb_input(s_flbContext,
                                  (char*)plugin.c_str(), nullptr);
     if (flbin < 0) {
       plugin = "lib";
-      flbin = flb_input(s_flbContext,
+      flbin = wrap_flb_input(s_flbContext,
                                  (char*)plugin.c_str(), nullptr);
     }
     m_flbIn.emplace_back(flbin);
@@ -147,19 +147,19 @@ namespace RTC
 //オプション有効チェック
 //FluentBit v1.9では動作していたが v3.2では無効と判断されてしまう
 //コードはコメントアウトして残した
-//            int ret = flb_input_property_check(s_flbContext,
+//            int ret = wrap_flb_input_property_check(s_flbContext,
 //                                              flbin, &key[0], &value[0]);
 //            if (ret == FLB_LIB_ERROR || ret == FLB_LIB_NO_CONFIG_MAP)
 //              {
 //                std::cerr << "Unknown property for \"" << plugin << "\" plugin: ";
 //                std::cerr << key << ": " << value << std::endl;
 //              }
-            flb_input_set(s_flbContext, flbin, key.c_str(), value.c_str(), NULL);
+            wrap_flb_input_set(s_flbContext, flbin, key.c_str(), value.c_str());
           }
       }
     else {
       std::cout << "createInputStream : Default settings for input.conf : tag:rtclog" << std::endl;
-      flb_input_set(s_flbContext, flbin, "tag", "rtclog", NULL);
+      wrap_flb_input_set(s_flbContext, flbin, "tag", "rtclog");
     }
     return true;
   }
@@ -190,7 +190,7 @@ namespace RTC
 		    std::string formatted = oss.str();
 		    n = formatted.size();
 
-        flb_lib_push(s_flbContext, flb, formatted.c_str(), n);
+        wrap_flb_lib_push(s_flbContext, flb, formatted.c_str(), n);
       }
     return n;
   }

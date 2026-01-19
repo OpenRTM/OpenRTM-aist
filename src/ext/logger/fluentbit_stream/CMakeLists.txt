@@ -1,4 +1,14 @@
-cmake_minimum_required (VERSION 3.16)
+﻿cmake_minimum_required (VERSION 3.16)
+
+# mpack の C++ オーバーロードを強制無効化
+add_compile_definitions(MPACK_NO_CPP=1)
+# 念のため、古い名称や別名も定義しておく
+add_compile_definitions(MPACK_CPLUSPLUS=0)
+
+# /permissive- を無効化（または /permissive を有効化）して、標準への厳格な準拠を緩和する
+if(MSVC)
+	add_compile_options(/permissive)
+endif()
 
 set(FLUENTBIT_ROOT ${FLUENTBIT_ROOT} CACHE PATH "set FLUENTBIT_ROOT")
 if(NOT FLUENTBIT_ROOT)
@@ -22,7 +32,7 @@ endif()
 
 project (FluentBit
 	VERSION ${RTM_VERSION}
-	LANGUAGES CXX)
+	LANGUAGES C CXX)
 
 link_directories(${ORB_LINK_DIR} ${FLB_LIBRARY_DIR})
 add_definitions(${ORB_C_FLAGS_LIST})
@@ -36,6 +46,23 @@ add_definitions(-Dtypeof=decltype)
 
 set(target FluentBit)
 set(srcs FluentBit.cpp FluentBit.h)
+
+# ----------------------------------------------------------------------
+# C言語専用のラッパーライブラリを独立させる (C++フラグの混入を防ぐ)
+# ----------------------------------------------------------------------
+add_library(flb_wrapper STATIC flb_api_wrapper.c)
+
+# インクルードディレクトリの追加（Monkeyヘッダーの検索パスを通す）
+target_include_directories(flb_wrapper PRIVATE
+    /usr/local/include
+    /usr/local/include/monkey
+)
+
+# 言語規格の設定 (CMake標準機能なので OS を問わず安全)
+set_target_properties(flb_wrapper PROPERTIES
+    C_STANDARD 11
+    C_EXTENSIONS ON
+)
 
 if(VXWORKS AND NOT RTP)
 	set(libs ${RTCSKEL_PROJECT_NAME})
@@ -53,6 +80,27 @@ else()
 	set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES})
 
 	add_library(${target} SHARED ${srcs})
+	if(MSVC)
+		# 発生している警告をすべて抑制リストに追加
+		# /wd4127: 条件式が定数 (mpack.h)
+		# /wd4819: 文字コード (ファイル保存形式)
+		# /wd4100: 未使用の引数 (ラッパー関数)
+		# /wd4245: 符号付き/符号なしの混在 (型の変換)
+		# /wd4189: ローカル変数の初期化後、参照なし
+		# /wd4200: サイズ 0 の配列 (非標準の拡張機能)
+		# /wd4201: 無名の構造体または共用体 (非標準の拡張機能)
+		# /wd4098: void関数が値を返す
+		target_compile_options(${target} PRIVATE /wd4127 /wd4819 /wd4100 /wd4245
+				 /wd4189 /wd4200 /wd4201 /wd4098)
+
+		# 念のため、このターゲットだけは警告があってもビルドを止めない設定を明示
+		set_target_properties(${target} PROPERTIES COMPILE_FLAGS "/WX-")
+	else()
+		# Linux / GCC の場合：gnu11 を明示してマクロを正常展開 ＆ 警告抑制 
+		target_compile_options(flb_wrapper PRIVATE -std=gnu11)
+		# GNU 拡張機能を明示的に有効化
+		target_compile_definitions(flb_wrapper PRIVATE _GNU_SOURCE)
+	endif()
 	if(FLB_PROJECT)
 		add_dependencies(${target} ${FLB_PROJECT})
 	endif()
@@ -79,6 +127,7 @@ else()
 	target_link_libraries(${target} PRIVATE 
 			${libs}
 			${RTM_LINKER_OPTION}
+			flb_wrapper
 			fluent-bit)
 	set_target_properties(${target} PROPERTIES PREFIX "")
 
