@@ -87,10 +87,16 @@ namespace coil
         0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0,
       } };
     unsigned short crc16(0xffff);
-    const unsigned char* p = reinterpret_cast<const unsigned char*>(str);
-    for (size_t i(0); i < len; ++i, ++p)
+    for (size_t i(0); i < len; ++i)
       {
-        crc16 = crc16tab[(crc16 >> 8) ^ *p] ^ (crc16 << 8);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
+        crc16 = crc16tab[(crc16 >> 8) ^ str[i]] ^ (crc16 << 8);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
       }
     return crc16 ^ 0x0000;
   }
@@ -185,10 +191,16 @@ namespace coil
         0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
       }};
     unsigned long c(0xffffffffL);
-    const unsigned char* p = reinterpret_cast<const unsigned char*>(str);
-    for (size_t i(0); i < len; ++i, ++p)
+    for (size_t i(0); i < len; ++i)
       {
-        c = crc32tab[(0xff ^ *p) & 0xff] ^ (c >> 8);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
+        c = crc32tab[(0xff ^ str[i]) & 0xff] ^ (c >> 8);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
       }
     return c ^ 0xffffffffL;
   }
