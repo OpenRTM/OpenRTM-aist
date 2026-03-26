@@ -16,6 +16,7 @@
  */
 
 #include <coil/crc.h>
+#include <array>
 
 namespace coil
 {
@@ -46,8 +47,8 @@ namespace coil
    */
   unsigned short crc16(const char* str, size_t len)
   {
-    static const unsigned short crc16tab[256] =
-      {
+      static constexpr std::array<uint16_t, 256> crc16tab{ {
+
         0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
         0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
         0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
@@ -83,7 +84,7 @@ namespace coil
         0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
         0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
         0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0,
-      };
+      } };
     unsigned short crc16(0xffff);
     for (size_t i(0); i < len; ++i)
       {
@@ -135,8 +136,8 @@ namespace coil
      *      crc32table[n] = c;
      *   }
      */
-    static const unsigned int crc32tab[256] =
-      {
+
+    static constexpr std::array<uint32_t, 256> crc32tab{ {
         0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
         0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
         0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
@@ -180,7 +181,7 @@ namespace coil
         0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
         0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
         0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
-      };
+      }};
     unsigned long c(0xffffffffL);
     for (size_t i(0); i < len; ++i)
       {
