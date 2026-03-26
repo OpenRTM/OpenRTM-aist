@@ -17,6 +17,7 @@
 
 #include <coil/crc.h>
 #include <array>
+#include <cstdint>
 
 namespace coil
 {
