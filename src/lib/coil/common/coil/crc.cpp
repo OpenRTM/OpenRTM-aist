@@ -92,6 +92,7 @@ namespace coil
       {
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #endif
         crc16 = crc16tab[(crc16 >> 8) ^ p[i]] ^ (crc16 << 8);
@@ -197,6 +198,7 @@ namespace coil
       {
 #ifdef __clang__
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #endif
         c = crc32tab[(0xff ^ p[i]) & 0xff] ^ (c >> 8);
