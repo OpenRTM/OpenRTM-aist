@@ -20,6 +20,8 @@
 #ifndef COIL_PROPERTIES_H
 #define COIL_PROPERTIES_H
 
+#include <coil/stringutil.h>
+
 #include <limits>
 #include <string>
 #include <vector>
