@@ -25,10 +25,12 @@ namespace utils
     : coil::Properties("", "")
   {
   }
+  /*
   Properties::Properties(const char* const defaults[], long num)
     : coil::Properties(defaults, num)
   {
   }
+  */
   Properties::~Properties() = default;
 } // namespace utils
 } // namespace hrtm

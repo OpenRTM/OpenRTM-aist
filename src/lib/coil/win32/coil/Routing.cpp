@@ -147,10 +147,18 @@ namespace coil
 
     for (int i(0); i < static_cast<int>(ipaddr_table->dwNumEntries); ++i)
       {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
         if (bestifindex == ipaddr_table->table[i].dwIndex)
           {
             IN_ADDR inipaddr;
             inipaddr.S_un.S_addr = static_cast<u_long>(ipaddr_table->table[i].dwAddr);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
             char str_buffer[INET_ADDRSTRLEN] = { 0 };
             if (inet_ntop(AF_INET, &inipaddr.S_un, str_buffer, sizeof(str_buffer)) != nullptr)
             {

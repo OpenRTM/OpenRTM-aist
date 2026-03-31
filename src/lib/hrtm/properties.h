@@ -29,8 +29,13 @@ namespace utils
   {
   public:
     explicit Properties();
-    explicit Properties(const char* const defaults[],
-                        long num = std::numeric_limits<size_t>::max());
+    //explicit Properties(const char* const defaults[],
+    //                    long num = std::numeric_limits<size_t>::max());
+    template <size_t N>
+    explicit Properties(const char* const (&defaults)[N], size_t num = N)
+        : coil::Properties(defaults, num)
+    {
+    }
     ~Properties() override;
   };
 } // namespace utils

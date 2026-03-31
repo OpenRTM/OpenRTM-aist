@@ -50,10 +50,9 @@ namespace coil
   {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     int buff_size = MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, (wchar_t*)nullptr, 0);
-    wchar_t* ret = new wchar_t[buff_size];
-    MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, ret, buff_size);
-    std::wstring wstr(ret, ret + buff_size - 1);
-    delete[] ret;
+    std::wstring wstr(buff_size, 0);
+
+    MultiByteToWideChar(CP_UTF7, 0, str.c_str(), -1, &wstr[0], buff_size);
 #else
     std::wstring wstr(str.length(), L' ');
     std::copy(str.begin(), str.end(), wstr.begin());
@@ -72,10 +71,8 @@ namespace coil
   {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
       int buff_size = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, (char*)nullptr, 0, nullptr, nullptr);
-      CHAR* ret = new CHAR[buff_size];
-      WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, ret, buff_size, nullptr, nullptr);
-      std::string str(ret, ret + buff_size - 1);
-      delete[] ret;
+      std::string str(buff_size, 0);
+      WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], buff_size, nullptr, nullptr);
 #else
       std::string str(wstr.length(), ' ');
       std::copy(wstr.begin(), wstr.end(), str.begin());
@@ -853,7 +850,13 @@ namespace coil
     m_args.reserve(args.size());
     for (auto&& arg : args)
       {
-        m_args.emplace_back(arg.c_str(), arg.c_str() + arg.size() + 1);
+        std::vector<char> buf;
+        buf.reserve(arg.size() + 1);
+
+        buf.insert(buf.end(), arg.begin(), arg.end());
+        buf.push_back('\0');
+
+        m_args.emplace_back(std::move(buf));
       }
     // make m_argv.
     m_argv.reserve(m_args.size() + 1);

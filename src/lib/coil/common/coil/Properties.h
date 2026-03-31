@@ -20,6 +20,8 @@
 #ifndef COIL_PROPERTIES_H
 #define COIL_PROPERTIES_H
 
+#include <coil/stringutil.h>
+
 #include <limits>
 #include <string>
 #include <vector>
@@ -205,8 +207,14 @@ namespace coil
      *
      * @endif
      */
-    explicit Properties(const char* const defaults[],
-                        size_t num = std::numeric_limits<size_t>::max());
+    //explicit Properties(const char* const defaults[],
+    //                    size_t num = std::numeric_limits<size_t>::max());
+    template <size_t N>
+    explicit Properties(const char* const (&defaults)[N], size_t num = N)
+    {
+        leaf.clear();
+        setDefaults(defaults, num);
+    }
 
     /*!
      * @if jp
@@ -594,8 +602,17 @@ namespace coil
      *
      * @endif
      */
-    void setDefaults(const char* const defaults[],
-                     size_t num = std::numeric_limits<size_t>::max());
+    //void setDefaults(const char* const defaults[],
+    //                 size_t num = std::numeric_limits<size_t>::max());
+    template <size_t N>
+    void setDefaults(const char* const (&defaults)[N], size_t num = N)
+    {
+        for (size_t i = 0; i + 1 < N && i + 1 < num && defaults[i][0] != '\0'; i += 2)
+        {
+            setDefault(eraseBothEndsBlank(defaults[i]),
+                eraseBothEndsBlank(defaults[i + 1]));
+        }
+    }
 
     //============================================================
     // load and save functions

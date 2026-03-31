@@ -18,7 +18,6 @@
  */
 
 #include <coil/Properties.h>
-#include <coil/stringutil.h>
 
 #include <iostream>
 #include <map>
@@ -73,11 +72,13 @@ namespace coil
    * @brief Constructor(Give the default value with char*[])
    * @endif
    */
+  /*
   Properties::Properties(const char* const defaults[], size_t num)
   {
     leaf.clear();
     setDefaults(defaults, num);
   }
+  */
 
   /*!
    * @if jp
@@ -306,14 +307,16 @@ namespace coil
    * @brief Set a default value together in the property list
    * @endif
    */
+  /*
   void Properties::setDefaults(const char* const defaults[], size_t num)
   {
-    for (size_t i = 0; i < num && defaults[i][0] != '\0' ; i += 2)
+    for (size_t i = 0; i+1 < num && defaults[i] && defaults[i][0] != '\0' ; i += 2)
       {
         setDefault(eraseBothEndsBlank(defaults[i]),
                    eraseBothEndsBlank(defaults[i + 1]));
       }
   }
+  */
 
   //============================================================
   // load and save functions
