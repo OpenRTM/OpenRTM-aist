@@ -1670,7 +1670,7 @@ namespace RTC
    *
    * @endif
    */
-  bool Manager::isORBEndPoint(const std::string& endpoint)
+  bool Manager::isORBEndPoint(const std::string &endpoint)
   {
     const std::list<std::string> headers{ "giop:", "iiop://",
                                         "diop://", "uiop://",
@@ -2771,7 +2771,18 @@ namespace RTC
         }
       }
 
-      RTC::PortService_var port0_var = CORBA_RTCUtil::get_port_by_name(comp0_ref.in(), port0_name);
+      RTC::PortService_var port0_var = RTC::PortService::_nil();
+
+      try
+      {
+        port0_var = CORBA_RTCUtil::get_port_by_name(comp0_ref.in(), port0_name);
+      }
+      catch (...)
+      {
+        RTC_ERROR(("Could not get port %s: ", port0_str.c_str()));
+        continue;
+      }
+
       if (CORBA::is_nil(port0_var))
       {
         RTC_DEBUG(("port %s not found: ", port0_str.c_str()));
@@ -2791,7 +2802,19 @@ namespace RTC
           prop["dataport." + key] = value;
         }
 
-        if (RTC::RTC_OK != CORBA_RTCUtil::connect(connector, prop, port0_var.in(), RTC::PortService::_nil()))
+        RTC::ReturnCode_t retcon{RTC::RTC_OK};
+
+        try
+        {
+          retcon = CORBA_RTCUtil::connect(connector, prop, port0_var.in(), RTC::PortService::_nil());
+        }
+        catch (...)
+        {
+          RTC_ERROR(("Connection failed: %s: ", connector.c_str()));
+          continue;
+        }
+
+        if (RTC::RTC_OK != retcon)
         {
           RTC_ERROR(("Connection error: %s", connector.c_str()));
         }
@@ -2839,7 +2862,17 @@ namespace RTC
           port_name = port.substr(pos_port_name + 1);
         }
 
-        RTC::PortService_var port_var = CORBA_RTCUtil::get_port_by_name(comp_ref.in(), port_name);
+        RTC::PortService_var port_var = RTC::PortService::_nil();
+
+        try
+        {
+          port_var = CORBA_RTCUtil::get_port_by_name(comp_ref.in(), port_name);
+        }
+        catch (...)
+        {
+          RTC_ERROR(("Could not get port %s: ", port0_str.c_str()));
+          continue;
+        }
 
         if (CORBA::is_nil(port_var))
         {
@@ -2855,7 +2888,19 @@ namespace RTC
           prop["dataport." + key] = std::move(value);
         }
 
-        if (RTC::RTC_OK != CORBA_RTCUtil::connect(connector, prop, port0_var.in(), port_var.in()))
+        RTC::ReturnCode_t retcon{RTC::RTC_OK};
+
+        try
+        {
+          retcon = CORBA_RTCUtil::connect(connector, prop, port0_var.in(), port_var.in());
+        }
+        catch (...)
+        {
+          RTC_ERROR(("Connection failed: %s: ", connector.c_str()));
+          continue;
+        }
+
+        if (RTC::RTC_OK != retcon)
         {
           RTC_ERROR(("Connection error: %s", connector.c_str()));
         }
@@ -2908,7 +2953,17 @@ namespace RTC
           }
           comp_ref = RTObject::_duplicate(rtcs[0]);
         }
-        RTC::ReturnCode_t ret = CORBA_RTCUtil::activate(comp_ref.in());
+
+        RTC::ReturnCode_t ret{RTC::RTC_OK};
+        try
+        {
+          ret = CORBA_RTCUtil::activate(comp_ref.in());
+        }
+        catch (...)
+        {
+          RTC_ERROR(("%s activation filed.", c.c_str()));
+          continue;
+        }
         if (ret != RTC::RTC_OK)
         {
           RTC_ERROR(("%s activation filed.", c.c_str()));
@@ -3148,8 +3203,16 @@ namespace RTC
       {
         continue;
       }
-      if (CORBA_RTCUtil::already_connected(port, target_ports[i]))
+      try
       {
+        if (CORBA_RTCUtil::already_connected(port, target_ports[i]))
+        {
+          continue;
+        }
+      }
+      catch (...)
+      {
+        RTC_ERROR(("error in already_connected function."));
         continue;
       }
       std::string con_name;
@@ -3159,10 +3222,17 @@ namespace RTC
       con_name += ":";
       con_name += p1->name;
       coil::Properties prop;
-      if (RTC::RTC_OK !=
-          CORBA_RTCUtil::connect(con_name, prop, port, target_ports[i]))
+      try
       {
-        RTC_ERROR(("Connection error in topic connection."));
+        if (RTC::RTC_OK !=
+            CORBA_RTCUtil::connect(con_name, prop, port, target_ports[i]))
+        {
+          RTC_ERROR(("Connection error in topic connection."));
+        }
+      }
+      catch (...)
+      {
+        RTC_ERROR(("connection failed: %s", con_name.c_str()));
       }
     }
   }
@@ -3176,8 +3246,16 @@ namespace RTC
       {
         continue;
       }
-      if (CORBA_RTCUtil::already_connected(port, target_ports[i]))
+      try
       {
+        if (CORBA_RTCUtil::already_connected(port, target_ports[i]))
+        {
+          continue;
+        }
+      }
+      catch (...)
+      {
+        RTC_ERROR(("error in already_connected function."));
         continue;
       }
       std::string con_name;
@@ -3187,10 +3265,17 @@ namespace RTC
       con_name += ":";
       con_name += p1->name;
       coil::Properties prop;
-      if (RTC::RTC_OK !=
-          CORBA_RTCUtil::connect(con_name, prop, port, target_ports[i]))
+      try
       {
-        RTC_ERROR(("Connection error in topic connection."));
+        if (RTC::RTC_OK !=
+            CORBA_RTCUtil::connect(con_name, prop, port, target_ports[i]))
+        {
+          RTC_ERROR(("Connection error in topic connection."));
+        }
+      }
+      catch (...)
+      {
+        RTC_ERROR(("connection failed: %s", con_name.c_str()));
       }
     }
   }
