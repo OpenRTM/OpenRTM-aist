@@ -732,7 +732,7 @@ namespace RTC
       }
       // module loading
       RTC_INFO(("Loading module: %s", (*it)["module_file_path"].c_str()));
-      load((*it), "");
+      load((*it)["module_file_path"], "");
       factory = m_factory.find(comp_id);
       if (factory == nullptr)
       {
@@ -1670,7 +1670,7 @@ namespace RTC
    *
    * @endif
    */
-  bool Manager::isORBEndPoint(const std::string& endpoint)
+  bool Manager::isORBEndPoint(const std::string &endpoint)
   {
     const std::list<std::string> headers{ "giop:", "iiop://",
                                         "diop://", "uiop://",

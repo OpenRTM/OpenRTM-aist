@@ -1304,13 +1304,8 @@ namespace CORBA_RTCUtil
      * @brief 通信先のアドレスを取得する
      *
      * 
-     * context1.kind1/context2.kind2/..../RTC_name
      *
-     * rtcloc形式の場合はカテゴリ名/RTC名で取得できる。
-     * 
-     * category_name/RTC_name
-     *
-     * @return RTC名
+     * @return 通信先のアドレス
      *
      * @else
      *
