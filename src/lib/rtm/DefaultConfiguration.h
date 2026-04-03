@@ -69,7 +69,7 @@ namespace RTC {
     "timer.enable",                          "YES",
     "timer.tick",                            "0.1",
 #ifdef ORB_IS_OMNIORB
-    "corba.args",                            "-ORBclientCallTimeOutPeriod 10000",
+    "corba.args",                            "-ORBclientCallTimeOutPeriod 10000 -ORBinConScanPeriod 0",
     "corba.endpoints", "all",
 #else
     "corba.args",                            "",
