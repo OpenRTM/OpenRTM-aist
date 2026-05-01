@@ -575,7 +575,7 @@ namespace RTC
          *
          * @endif
          */
-        CORBA_CdrSerializer<DataType>(const CORBA_CdrSerializer<DataType> &rhs)
+        CORBA_CdrSerializer(const CORBA_CdrSerializer<DataType> &rhs)
         {
             m_cdr = rhs.m_cdr;
         }
