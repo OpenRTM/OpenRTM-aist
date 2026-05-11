@@ -11,8 +11,8 @@ set(SSM_ROOT ${SSM_ROOT} CACHE PATH "set SSM_ROOT")
 
 
 if(SSM_ROOT)
-	link_directories(${SSM_ROOT}/lib ${SSM_ROOT}/lib64)
-	set(SSM_LIBRARY "-Wl,--whole-archive" "${SSM_ROOT}/lib64/libssm.a" "-Wl,--no-whole-archive")
+	link_directories(${SSM_LIB_PATH})
+	set(SSM_LIBRARY "-Wl,--whole-archive" "${SSM_LIB_PATH}/libssm.a" "-Wl,--no-whole-archive")
 endif()
 
 if(WIN32)

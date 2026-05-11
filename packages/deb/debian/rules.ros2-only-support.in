@@ -20,6 +20,7 @@ INSTALL_PREFIX = @CMAKE_INSTALL_PREFIX@
 RTM_LIB_DIR=@INSTALL_RTM_LIB_DIR@
 RTM_EXT_DIR=@INSTALL_RTM_EXT_DIR@
 ROS2TRANSPORT_CMAKE_DIR=@INSTALL_ROS2TRANSPORT_CMAKE_DIR@
+SSM_LIB_DIR=@SSM_LIB_PATH@
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -158,7 +159,7 @@ install-arch:
 	(mkdir -p $(TARGET_ssm)/etc/transport)
 	(cp $(INSTALL_PREFIX)/etc/transport/rtc.ssm.conf $(TARGET_ssm)/etc/transport)
 	(mkdir -p $(TARGET_ssm)/${RTM_LIB_DIR})
-	(cp -a /usr/local/lib64/libssm.so* $(TARGET_ssm)/${RTM_LIB_DIR})
+	(cp -a ${SSM_LIB_DIR}/libssm.so* $(TARGET_ssm)/${RTM_LIB_DIR})
 	(mkdir -p $(TARGET_ssm)/bin)
 	(cp -r /usr/local/bin/*ssm* $(TARGET_ssm)/bin)
 
