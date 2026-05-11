@@ -14,7 +14,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.1.0.02
+VERSION=2.1.0.03
 FILENAME=openrtm2_install_ubuntu.sh
 
 #
@@ -30,7 +30,7 @@ usage()
   cat <<EOF
   Usage: 
 
-    ${FILENAME} -l {all|c++} [-r|-d|-s|-c] [-e ros|ros2|all] [--ros|--ros2] [-u|--yes]
+    ${FILENAME} -l {all|c++} [-r|-d|-s|-c] [-e ros|ros2|all] [--ros|--ros2] [--ssm] [-u|--yes]
     ${FILENAME} [-u]
     ${FILENAME} -l {python} [-r|-d|-c] [-u|--yes]
     ${FILENAME} -l {java} [-r|-d|-c] [-u|--yes]
@@ -54,6 +54,7 @@ usage()
     -e <argument>  install extension packages [ros|ros2|all]
     --ros          install extension package for ROS
     --ros2         install extension package for ROS2
+    --ssm          install extension package for SSM
     -s             ${op_s_msg}
     -c             ${op_c_msg}
     -u             uninstall packages
@@ -99,6 +100,7 @@ openrtm2_devel="openrtm2-doc openrtm2-idl openrtm2-dev"
 openrtm2_runtime="openrtm2 openrtm2-naming openrtm2-example"
 openrtm2_ros="openrtm2-ros-tp"
 openrtm2_ros2="openrtm2-ros2-tp"
+openrtm2_ssm="openrtm2-ssm-tp"
 
 #--------------------------------------- Python
 omnipy="omniidl-python3"
@@ -128,6 +130,7 @@ OPT_UNINST=true
 OPT_OLD_RTM=false
 OPT_ROS=false
 OPT_ROS2=false
+OPT_SSM=false
 install_pkgs=""
 uninstall_pkgs=""
 arg_all=false
@@ -247,7 +250,7 @@ get_opt()
   fi
   arg_num=$#
  
-  OPT=`getopt -o l:rcsdte:hu -l help,yes,version,ros,ros2 -- $@` > /dev/null 2>&1
+  OPT=`getopt -o l:rcsdte:hu -l help,yes,version,ros,ros2,ssm -- $@` > /dev/null 2>&1
   # return code check
   if [ $? -ne 0 ] ; then
     echo "[ERROR] Invalid option '$1'"
@@ -279,6 +282,7 @@ get_opt()
         --yes ) FORCE_YES=true ;;
         --ros ) OPT_ROS=true ;;
         --ros2 ) OPT_ROS2=true ;;
+        --ssm ) OPT_SSM=true ;;
         -l )  if [ -z "$2" ] ; then
                 echo "$1 option requires an argument." 1>&2
                 exit
@@ -590,6 +594,9 @@ u_ros_pkg=$ros_pkg
 ros2_pkg="$openrtm2_ros2"
 u_ros2_pkg=$ros2_pkg
 
+ssm_pkg="$openrtm2_ssm"
+u_ssm_pkg=$ssm_pkg
+
 #--------------------------------------- Python
 python_runtime_pkgs="$omni_runtime $python_runtime $openrtm2_py_runtime"
 u_python_runtime_pkgs="$openrtm2_py_runtime"
@@ -643,6 +650,12 @@ install_proc()
       if test "x$OPT_DEVEL" = "xtrue" || test "x$OPT_RUNTIME" = "xtrue" ; then
         select_opt_c="$select_opt_c\n[c++] install ROS2 expansion package"
         install_packages $ros2_pkg
+      fi
+    fi
+    if test "x$OPT_SSM" = "xtrue" ; then
+      if test "x$OPT_DEVEL" = "xtrue" || test "x$OPT_RUNTIME" = "xtrue" ; then
+        select_opt_c="$select_opt_c\n[c++] install SSM expansion package"
+        install_packages $ssm_pkg
       fi
     fi
   fi
@@ -735,6 +748,12 @@ uninstall_proc()
       if test "x$OPT_DEVEL" = "xtrue" || test "x$OPT_RUNTIME" = "xtrue" ; then
         select_opt_c="$select_opt_c\n[c++] uninstall ROS2 expansion package"
         uninstall_packages `reverse $ros2_pkg`
+      fi
+    fi
+    if test "x$OPT_SSM" = "xtrue" ; then
+      if test "x$OPT_DEVEL" = "xtrue" || test "x$OPT_RUNTIME" = "xtrue" ; then
+        select_opt_c="$select_opt_c\n[c++] uninstall SSM expansion package"
+        uninstall_packages `reverse $ssm_pkg`
       fi
     fi
   fi
