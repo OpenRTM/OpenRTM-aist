@@ -6,7 +6,7 @@
 #         Nobu Kawauchi
 #
 
-VERSION=2.1.0.00
+VERSION=2.1.0.01
 FILENAME=openrtm2_install_raspbian.sh
 BIT=`getconf LONG_BIT`
 
@@ -22,7 +22,7 @@ usage()
   cat <<EOF
   Usage: 
 
-    ${FILENAME} -l {all|c++} [-r|-d|-s|-c] [-u|--yes]
+    ${FILENAME} -l {all|c++} [-r|-d|-s|-c] [--ssm] [-u|--yes]
     ${FILENAME} [-u]
     ${FILENAME} -l {python} [-r|-d|-c] [-u|--yes]
     ${FILENAME} -l {java} [-r|-d|-c] [-u|--yes]
@@ -40,6 +40,7 @@ usage()
         all        install packages of all the supported languages and tools
     -r             ${op_r_msg}
     -d             ${op_d_msg} [default]
+    --ssm          install extension package for SSM
     -s             ${op_s_msg}
     -c             ${op_c_msg}
     -u             uninstall packages
@@ -73,10 +74,12 @@ cmake_tools="cmake doxygen graphviz nkf"
 build_tools="subversion git"
 deb_pkg="uuid-dev libboost-filesystem-dev"
 pkg_tools="build-essential debhelper devscripts"
+fluentbit="fluent-bit"
 omni_devel="libomniorb4-dev omniidl"
 omni_runtime="omniorb-nameserver"
 openrtm2_devel="openrtm2-doc openrtm2-idl openrtm2-dev"
 openrtm2_runtime="openrtm2 openrtm2-naming openrtm2-example"
+openrtm2_ssm="openrtm2-ssm-tp"
 
 #--------------------------------------- Python
 omnipy="omniidl-python3"
@@ -102,6 +105,7 @@ OPT_SRC=false
 OPT_CORE=false
 OPT_FLG=true
 OPT_OLD_RTM=false
+OPT_SSM=false
 install_pkgs=""
 uninstall_pkgs=""
 arg_all=false
@@ -182,7 +186,7 @@ get_opt()
   fi
   arg_num=$#
  
-  OPT=`getopt -o l:rcsdt:hu -l help,yes,version -- $@` > /dev/null 2>&1
+  OPT=`getopt -o l:rcsdt:hu -l help,yes,version,ssm -- $@` > /dev/null 2>&1
   # return code check
   if [ $? -ne 0 ] ; then
     echo "[ERROR] Invalid option '$1'"
@@ -212,6 +216,7 @@ get_opt()
         -h|--help ) usage ; exit ;;
 	--version ) version ; exit ;;
         --yes ) FORCE_YES=true ;;
+        --ssm ) OPT_SSM=true ;;
         -l )  if [ -z "$2" ] ; then
                 echo "$1 option requires an argument." 1>&2
                 exit
@@ -348,6 +353,7 @@ check_reposerver()
 #---------------------------------------
 create_srclist () {
   openrtm_repo="deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/openrtm-keyring.gpg] http://$reposerver/pub/Linux/raspbian/ $code_name main"
+  fluent_repo="deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/fluentbit-keyring.gpg] https://packages.fluentbit.io/debian/$code_name $code_name main"
 }
 
 #---------------------------------------
@@ -371,7 +377,7 @@ update_source_list () {
       if [ ! -d /etc/apt/keyrings ]; then
         sudo mkdir -p /etc/apt/keyrings
       fi
-      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
+      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate http://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
     fi
   elif [ ! -e /etc/apt/keyrings/openrtm-keyring.gpg ]; then
     if test "x$rtmsite1" != "x" ; then
@@ -392,12 +398,11 @@ update_source_list () {
   else
     sudo apt install dirmngr
   fi
-#  fluentsite=`apt-cache policy | grep "https://packages.fluentbit.io"`
-#  if test "x$fluentsite" = "x" &&
-#     test "x$OPT_CORE" = "xtrue" ; then
-#    echo $fluent_repo | sudo tee /etc/apt/sources.list.d/fluentbit.list > /dev/null
-#    wget -O - https://packages.fluentbit.io/fluentbit.key | gpg --dearmor | sudo tee /usr/share/keyrings/fluentbit-keyring.gpg >/dev/null
-#  fi
+  if [ ! -e /usr/share/keyrings/fluentbit-keyring.gpg ] &&
+     test "x$OPT_CORE" = "xtrue" ; then
+    echo $fluent_repo | sudo tee /etc/apt/sources.list.d/fluentbit.list > /dev/null
+    wget -O - https://packages.fluentbit.io/fluentbit.key | gpg --dearmor | sudo tee /usr/share/keyrings/fluentbit-keyring.gpg >/dev/null
+  fi
 }
 
 #----------------------------------------
@@ -508,10 +513,11 @@ u_src_pkgs="$omni_runtime $omni_devel"
 dev_pkgs="$runtime_pkgs $src_pkgs $openrtm2_devel"
 u_dev_pkgs="$u_runtime_pkgs $openrtm2_devel"
 
-#core_pkgs="$src_pkgs $build_tools $pkg_tools $fluentbit"
-core_pkgs="$src_pkgs $build_tools $pkg_tools"
+core_pkgs="$src_pkgs $build_tools $pkg_tools $fluentbit"
 u_core_pkgs="$u_src_pkgs"
 
+ssm_pkg="$openrtm2_ssm"
+u_ssm_pkg=$ssm_pkg
 
 #--------------------------------------- Python
 python_runtime_pkgs="$omni_runtime $python_runtime $openrtm2_py_runtime"
@@ -556,15 +562,28 @@ install_proc()
       select_opt_c="[c++] ${op_d_msg}"
       install_packages $dev_pkgs
     fi
+    if test "x$OPT_SSM" = "xtrue" ; then
+      if test "x$OPT_DEV" = "xtrue" || test "x$OPT_RT" = "xtrue" ; then
+        select_opt_c="$select_opt_c\n[c++] install SSM expansion package"
+        install_packages $ssm_pkg
+      fi
+    fi
   fi
 
   if test "x$arg_python" = "xtrue" ; then
     if test "x$OPT_CORE" = "xtrue" ; then
       select_opt_p="[python] ${op_c_msg}"
       install_packages $python_core_pkgs
-      #pip3 install fluent-logger
-      #tmp_pkg="$install_pkgs fluent-logger"
-      #install_pkgs=$tmp_pkg
+      ret=`sudo python3 -m pip install fluent-logger`
+      if test "x$ret" != "x"; then
+        tmp_pkg="$install_pkgs fluent-logger"
+        install_pkgs=$tmp_pkg
+      else
+        rts_msg="[ERROR] Failed to install fluent-logger."
+	rts_msg2="Please add the following text to /etc/pip.conf and run the script again."
+	rts_msg3="[global]"
+	rts_msg4="break-system-packages = true"
+      fi
     elif test "x$OPT_RT" = "xtrue" ; then
       select_opt_p="[python] ${op_r_msg}"
       install_packages $python_runtime_pkgs
@@ -595,7 +614,7 @@ install_proc()
       sudo rtshell_post_install -n
     else
       rts_msg="[ERROR] Failed to install rtshell-aist."
-      rts_msg2="Please add the following two lines to /etc/pip.conf and run the script again."
+      rts_msg2="Please add the following text to /etc/pip.conf and run the script again."
       rts_msg3="[global]"
       rts_msg4="break-system-packages = true"
     fi
@@ -623,6 +642,12 @@ uninstall_proc()
       OPT_DEV=true
       select_opt_c="[c++] un${op_d_msg}"
       uninstall_packages `reverse $u_dev_pkgs`
+    fi
+    if test "x$OPT_SSM" = "xtrue" ; then
+      if test "x$OPT_DEVEL" = "xtrue" || test "x$OPT_RUNTIME" = "xtrue" ; then
+        select_opt_c="$select_opt_c\n[c++] uninstall SSM expansion package"
+        uninstall_packages `reverse $ssm_pkg`
+      fi
     fi
   fi
 
@@ -800,14 +825,13 @@ else
   uninstall_proc
 fi
 
-# install openjdk-8-jdk
-#codename=`sed -n /VERSION_CODENAME=/p /etc/os-release`
-#CNAME=`echo "$codename" | sed 's/VERSION_CODENAME=//'`
-if test "x$OPT_FLG" = "xtrue" &&
-    test "x$BIT" = "x32" &&
-    test "x$code_name" = "xbullseye"; then
-  sudo apt -y install openjdk-8-jdk
-  JAVA8=`update-alternatives --list java | grep java-8`
+# install temurin-8-jdk
+if ! java -version 2>&1 | grep -q "1.8."; then
+  wget --no-check-certificate -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb ${code_name} main" | sudo tee /etc/apt/sources.list.d/adoptium.list > /dev/null
+  sudo apt update
+  sudo apt -y install temurin-8-jdk
+  JAVA8=`update-alternatives --list java | grep 8-jdk`
   sudo update-alternatives --set java ${JAVA8}
 fi
 
@@ -828,18 +852,21 @@ if test ! "x$rts_msg" = "x" ; then
   echo "${ESC}[33m${rts_msg4}${ESC}[m"
 fi
 
-#ESC=$(printf '\033')
-#if test "x$OPT_FLG" = "xtrue" &&
-#   test "x$arg_cxx" = "xtrue" &&
-#   test "x$OPT_COREDEVEL" = "xfalse" ; then
-#  msg1='To use the log collection extension using the Fluentd logger,'
-#  msg2='please install Fluent Bit by following the steps on the following web page.'
-#  msg3='https://docs.fluentbit.io/manual/installation/linux/raspbian-raspberry-pi'
-#  echo $LF
-#  echo "${ESC}[33m${msg1}${ESC}[m"
-#  echo "${ESC}[33m${msg2}${ESC}[m"
-#  echo "${ESC}[33m${msg3}${ESC}[m"
-#fi
+ESC=$(printf '\033')
+dpkg-query -W -f='${Status}' fluent-bit 2>/dev/null | grep -q "ok installed"
+IS_INSTALLED=$?
+if test "x$OPT_FLG" = "xtrue" &&
+   test "x$arg_cxx" = "xtrue" &&
+   test "x$OPT_CORE" = "xfalse" &&
+   test "x$IS_INSTALLED" != "x0" ; then
+  msg1='To use the log collection extension using the Fluentd logger,'
+  msg2='please install Fluent Bit by following the steps on the following web page.'
+  msg3='https://docs.fluentbit.io/manual/installation/downloads/linux/raspbian-raspberry-pi'
+  echo $LF
+  echo "${ESC}[33m${msg1}${ESC}[m"
+  echo "${ESC}[33m${msg2}${ESC}[m"
+  echo "${ESC}[33m${msg3}${ESC}[m"
+fi
 if test "x$OPT_FLG" = "xfalse" ; then
   ESC=$(printf '\033')
   msg1='omniorb or other OpenRTM dependent packages may still exist. '
