@@ -6,7 +6,7 @@
 #         Nobu Kawauchi
 #
 
-VERSION=2.1.0.01
+VERSION=2.1.0.02
 FILENAME=openrtm2_install_raspbian.sh
 BIT=`getconf LONG_BIT`
 
@@ -361,7 +361,11 @@ create_srclist () {
 #---------------------------------------
 update_source_list () {
   rtmsite1=`grep $reposerver /etc/apt/sources.list`
-  rtmsite2=`grep -r $reposerver /etc/apt/sources.list.d`
+  if test -f "/etc/apt/sources.list.d/openrtm.list"; then
+    rtmsite2=`grep $reposerver /etc/apt/sources.list.d/openrtm.list`
+  else
+    rtmsite2=""
+  fi
   if test "x$rtmsite1" = "x" &&
      test "x$rtmsite2" = "x" ; then
     echo $msg4

@@ -14,7 +14,7 @@
 # = OPT_UNINST   : uninstallation
 #
 
-VERSION=2.1.0.03
+VERSION=2.1.0.04
 FILENAME=openrtm2_install_ubuntu.sh
 
 #
@@ -432,7 +432,11 @@ create_srclist () {
 #---------------------------------------
 update_source_list () {
   rtmsite1=`grep $reposerver /etc/apt/sources.list`
-  rtmsite2=`grep -r $reposerver /etc/apt/sources.list.d`
+  if test -f "/etc/apt/sources.list.d/openrtm.list"; then
+    rtmsite2=`grep $reposerver /etc/apt/sources.list.d/openrtm.list`
+  else
+    rtmsite2=""
+  fi
   if test "x$rtmsite1" = "x" &&
      test "x$rtmsite2" = "x" ; then
     echo $msg4
@@ -461,12 +465,15 @@ update_source_list () {
     sudo wget --secure-protocol=TLSv1_2 --no-check-certificate http://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
   fi
   # If FluentBit's old public key is registered, delete it.
-  fingerprint=$(apt-key list | awk '$1 == "pub" {getline; gsub(" ", "", $0); fpr=$0}
-  /Fluentbit releases/ {print substr(fpr, length(fpr)-7)}')
-  if test "x$fingerprint" != "x" &&
-     test "x$OPT_COREDEVEL" = "xtrue" ; then
-    sudo apt-key del $fingerprint
-    sudo sed -i '/https:\/\/packages.fluentbit.io\/ubuntu\//d' /etc/apt/sources.list
+  # 従来の trusted.gpg 内から Fluentbit のキー ID を検索して削除
+  if [ -f /etc/apt/trusted.gpg ]; then
+    fingerprint=$(gpg --no-default-keyring --keyring /etc/apt/trusted.gpg --list-keys 2>/dev/null | \
+      awk '/Fluentbit releases/ {print fpr} $1 == "pub" {getline; gsub(" ", "", $0); fpr=$0}')
+    if test "x$fingerprint" != "x" &&
+       test "x$OPT_COREDEVEL" = "xtrue" ; then
+      sudo gpg --no-default-keyring --keyring /etc/apt/trusted.gpg --batch --yes --delete-keys "$fingerprint"
+      sudo sed -i '/https:\/\/packages.fluentbit.io\/ubuntu\//d' /etc/apt/sources.list
+    fi
   fi
   if [ ! -e /usr/share/keyrings/fluentbit-keyring.gpg ] &&
      test "x$OPT_COREDEVEL" = "xtrue" ; then
