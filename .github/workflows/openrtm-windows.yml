@@ -1,0 +1,50 @@
+name: Windows Build (VS2022)
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.12'
+  PYTHON_SHORT_VERSION: '312'
+  BOOST_VERSION: '1.83.0'
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Configure Boost Environment Variables
+      shell: powershell
+      run: |
+        # windows-2022 にプリインストールされている Boost のパスを取得
+        $verUnderscore = "${{ env.BOOST_VERSION }}".Replace('.', '_')
+        $boostEnvName = "BOOST_ROOT_$verUnderscore" 
+        $boostPath = [System.Environment]::GetEnvironmentVariable($boostEnvName)
+
+        # もし特定の環境変数がない場合のフォールバック（デフォルトパス）
+        if (-not $boostPath) {
+          $boostPath = "C:\hostedtoolcache\windows\Boost\${{ env.BOOST_VERSION }}\x86_64" 
+        }
+        # 後続のcmdステップで使えるようにGITHUB_ENVへ出力
+        "BOOST_PATH=$boostPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "Boost_DIR=$boostPath\lib\cmake\Boost-${{ env.BOOST_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Setup Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Run Windows Build Script
+      shell: cmd
+      run: |
+        call OpenRTM-build-Windows.bat
