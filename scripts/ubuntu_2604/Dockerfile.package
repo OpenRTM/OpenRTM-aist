@@ -1,0 +1,56 @@
+FROM openrtm/devel-rtm:ubuntu26.04
+
+RUN apt-get update\
+ && apt-get install -y --no-install-recommends\
+ doxygen\
+ graphviz\
+ build-essential\
+ debhelper\
+ devscripts\
+ fakeroot\
+ git\
+ autoconf\
+ automake\
+ libtool\
+ ros-lyrical-rmw-fastrtps-cpp\
+ ros-lyrical-fastdds
+
+WORKDIR /root
+RUN git clone https://github.com/sitRyo/Distributed-Streaming-data-Sharing-Manager
+WORKDIR /root/Distributed-Streaming-data-Sharing-Manager
+RUN autoreconf -i -f \
+ && ./configure --with-pic CFLAGS="-fPIC -w" CXXFLAGS="-fPIC -w" \
+ && find . -name "Makefile" -exec sed -i 's/-Werror//g' {} + \
+ && make AM_CFLAGS="-fPIC" -j$(nproc) \
+ && make install
+WORKDIR /root
+
+COPY OpenRTM-aist /root/OpenRTM-aist
+RUN cmake\
+ -DSSM_ENABLE=ON\
+ -DSSM_ROOT=/usr/local\
+ -DSSL_ENABLE=ON\
+ -DHTTP_ENABLE=ON\
+ -DOBSERVER_ENABLE=ON\
+ -DFLUENTBIT_ENABLE=ON\
+ -DFLUENTBIT_ROOT=/usr/local\
+ -DFLUENTBIT_ADD_INCLUDE=ON\
+ -DFASTDDS_ENABLE=ON\
+ -DROS2_ENABLE=ON\
+ -DDOCUMENTS_ENABLE=ON\
+ -DBUILD_RTM_LINUX_PKGS=ON\
+ -DCMAKE_BUILD_TYPE=Release\
+ -DCMAKE_INSTALL_PREFIX=/tmp/rtm/install\
+ -S /root/OpenRTM-aist\
+ -B/tmp/rtm/build\
+ && cmake --build /tmp/rtm/build --target install/strip -- -j$(nproc)
+
+WORKDIR /root/OpenRTM-aist/packages/deb/
+RUN mkdir -p /root/cxx-deb-pkgs\
+ && cp /tmp/rtm/build/rules debian/\
+ && cp /tmp/rtm/build/control debian/\
+ && chmod 775 dpkg_build.sh\
+ && export LD_LIBRARY_PATH=/opt/ros/jazzy/lib\
+ && ./dpkg_build.sh
+
+RUN cp /root/OpenRTM-aist/packages/openrtm* /root/cxx-deb-pkgs/

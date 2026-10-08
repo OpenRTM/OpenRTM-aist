@@ -27,13 +27,18 @@
 #pragma warning(push)
 #pragma warning(disable:4819)
 #endif
-#include <rmw_fastrtps_cpp/TypeSupport.hpp>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #pragma warning(pop)
 #endif
 
 #include <fastcdr/FastBuffer.h>
 #include <fastcdr/Cdr.h>
+#include <fastdds/rtps/common/SerializedPayload.hpp>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <new>
+#include <stdexcept>
 
 #if (STD_MSGS_VERSION_MAJOR >= 2)
 #include <std_msgs/msg/detail/float32__rosidl_typesupport_fastrtps_cpp.hpp>
@@ -131,9 +136,7 @@ namespace RTC
      *
      * @endif
      */
-    ROS2SerializerBase(){
-      m_message.reserve(2147483647);
-    }
+    ROS2SerializerBase() = default;
 
     /*!
      * @if jp
@@ -169,11 +172,27 @@ namespace RTC
      */
     void writeData(const unsigned char* buffer, unsigned long length) override
     {
-      m_message.reserve(length);
-      m_message.length = length;
-      m_message.max_size = length;
-      m_message.data = new eprosima::fastrtps::rtps::octet[length];
-      memcpy(m_message.data, buffer, length);
+      if (length > UINT32_MAX)
+      {
+        throw std::length_error("Serialized payload too large");
+      }
+
+      if (length > m_message.max_size)
+      {
+        m_message.reserve(static_cast<uint32_t>(length));
+      }
+
+      if (length > 0)
+      {
+        if (buffer == nullptr)
+        {
+          throw std::invalid_argument("Null data buffer");
+        }
+
+        std::memcpy(m_message.data, buffer, length);
+      }
+
+      m_message.length = static_cast<uint32_t>(length);
     }
 
     /*!
@@ -477,7 +496,7 @@ namespace RTC
     }
 
   protected:
-    eprosima::fastrtps::rtps::SerializedPayload_t m_message;
+    eprosima::fastdds::rtps::SerializedPayload_t m_message;
   };
 
   template <class DataType>
