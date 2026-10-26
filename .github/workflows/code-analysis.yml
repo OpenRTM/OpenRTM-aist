@@ -1,0 +1,19 @@
+name: Code Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:  
+
+jobs:
+
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Code analysis 
+        run: docker build .. --file scripts/code_analysis/Dockerfile --tag openrtm:code_analysis
+
