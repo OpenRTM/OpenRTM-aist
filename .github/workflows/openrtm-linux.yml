@@ -1,4 +1,4 @@
-name: OpenRTM on Linux
+name: Ubuntu Build
 
 on:
   push:
@@ -20,12 +20,3 @@ jobs:
         uses: actions/checkout@v7
       - name: Build ${{matrix.os}}
         run: docker build .. --file scripts/${{matrix.os}}/Dockerfile --tag openrtm:${{matrix.os}}
-
-  code-analysis:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Code analysis 
-        run: docker build .. --file scripts/code_analysis/Dockerfile --tag openrtm:code_analysis
-
