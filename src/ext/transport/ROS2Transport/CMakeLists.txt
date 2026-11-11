@@ -16,8 +16,11 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(fastcdr REQUIRED)
-find_package(fastrtps REQUIRED)
-
+if(FASTDDS_ENABLE)
+	find_package(fastdds REQUIRED CONFIG)
+else()
+	find_package(fastrtps REQUIRED)
+endif()
 
 
 
@@ -36,23 +39,39 @@ set(srcs ROS2Transport.cpp ROS2Transport.h ROS2MessageInfo.cpp ROS2MessageInfo.h
 
 set(INSTALL_ROS2TRANSPORT_LIB_DIR ${INSTALL_RTM_EXT_DIR}/transport)
 set(INSTALL_ROS2TRANSPORT_INCLUDE_DIR ${INSTALL_RTM_INCLUDE_DIR}/rtm/ext)
-set(INSTALL_FASTRTPSTRANSPORT_LIB FastRTPSTransport)
+if(FASTDDS_ENABLE)
+	set(INSTALL_FASTDDSTRANSPORT_LIB FastDDSTransport)
+else()
+	set(INSTALL_FASTRTPSTRANSPORT_LIB FastRTPSTransport)
+endif()
 
 if(VXWORKS AND NOT RTP)
-	set(libs ${RTCSKEL_PROJECT_NAME} fastcdr fastrtps)
-
+	if(FASTDDS_ENABLE)
+		set(libs ${RTCSKEL_PROJECT_NAME} fastcdr fastdds)
+	else()
+		set(libs ${RTCSKEL_PROJECT_NAME} fastcdr fastrtps)
+	endif()
 	add_executable(${target} ${srcs})
 	openrtm_common_set_compile_props(${target})
 	openrtm_set_link_props_shared(${target})
 	openrtm_include_rtm(${target})
 	target_include_directories(${target}
 		PRIVATE ${PROJECT_SOURCE_DIR}/..)
-	target_include_directories(${target} SYSTEM
-		PUBLIC ${rclcpp_INCLUDE_DIRS}
-		PUBLIC ${rmw_fastrtps_cpp_INCLUDE_DIRS}
-		PUBLIC ${std_msgs_INCLUDE_DIRS}
-		PUBLIC ${geometry_msgs_INCLUDE_DIRS}
-		PUBLIC ${sensor_msgs_INCLUDE_DIRS})
+		if(FASTDDS_ENABLE)
+			target_include_directories(${target} SYSTEM
+				PUBLIC ${rclcpp_INCLUDE_DIRS}
+				PUBLIC ${rmw_fastdds_cpp_INCLUDE_DIRS}
+				PUBLIC ${std_msgs_INCLUDE_DIRS}
+				PUBLIC ${geometry_msgs_INCLUDE_DIRS}
+				PUBLIC ${sensor_msgs_INCLUDE_DIRS})
+		else()
+			target_include_directories(${target} SYSTEM
+				PUBLIC ${rclcpp_INCLUDE_DIRS}
+				PUBLIC ${rmw_fastrtps_cpp_INCLUDE_DIRS}
+				PUBLIC ${std_msgs_INCLUDE_DIRS}
+				PUBLIC ${geometry_msgs_INCLUDE_DIRS}
+				PUBLIC ${sensor_msgs_INCLUDE_DIRS})
+		endif()
 	target_link_libraries(${target} ${libs})
 
 
@@ -76,24 +95,42 @@ if(VXWORKS AND NOT RTP)
 				RUNTIME DESTINATION ${INSTALL_ROS2TRANSPORT_LIB_DIR}
 				COMPONENT ext)
 else()
-	set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES} FastRTPSTransport 
-		${rclcpp_LIBRARIES}  
-		${std_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
-		${geometry_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp} 
-		${sensor_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
-		fastcdr fastrtps)
+	if(FASTDDS_ENABLE)
+		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES} FastDDSTransport
+			${rclcpp_LIBRARIES}
+			${std_msgs_LIBRARIES__rosidl_typesupport_fastdds_cpp}
+			${geometry_msgs_LIBRARIES__rosidl_typesupport_fastdds_cpp}
+			${sensor_msgs_LIBRARIES__rosidl_typesupport_fastdds_cpp}
+			fastcdr fastdds)
+	else()
+		set(libs ${RTM_PROJECT_NAME} ${ORB_LIBRARIES} ${DATATYPE_FACTORIES} FastRTPSTransport
+			${rclcpp_LIBRARIES}
+			${std_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
+			${geometry_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
+			${sensor_msgs_LIBRARIES__rosidl_typesupport_fastrtps_cpp}
+			fastcdr fastrtps)
+	endif()
 	add_library(${target} SHARED ${srcs})
 	openrtm_common_set_compile_props(${target})
 	openrtm_include_rtm(${target})
 	openrtm_set_link_props_shared(${target})
 	target_include_directories(${target}
 		PRIVATE ${PROJECT_SOURCE_DIR}/..)
-	target_include_directories(${target} SYSTEM
+	if(FASTDDS_ENABLE)
+		target_include_directories(${target} SYSTEM
+					PUBLIC ${rclcpp_INCLUDE_DIRS}
+					PUBLIC ${rmw_fastdds_cpp_INCLUDE_DIRS}
+					PUBLIC ${std_msgs_INCLUDE_DIRS}
+					PUBLIC ${geometry_msgs_INCLUDE_DIRS}
+					PUBLIC ${sensor_msgs_INCLUDE_DIRS})
+	else()
+		target_include_directories(${target} SYSTEM
 					PUBLIC ${rclcpp_INCLUDE_DIRS}
 					PUBLIC ${rmw_fastrtps_cpp_INCLUDE_DIRS}
 					PUBLIC ${std_msgs_INCLUDE_DIRS}
 					PUBLIC ${geometry_msgs_INCLUDE_DIRS}
 					PUBLIC ${sensor_msgs_INCLUDE_DIRS})
+	endif()
 	target_link_libraries(${target} PRIVATE ${libs} ${RTM_LINKER_OPTION})
 	target_compile_definitions(${target} PRIVATE STD_MSGS_VERSION_MAJOR=${std_msgs_VERSION_MAJOR} 
 								GEOMETORY_MSGS_VERSION_MAJOR=${geometry_msgs_VERSION_MAJOR} 

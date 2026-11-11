@@ -1,0 +1,98 @@
+FROM ubuntu:26.04 as fluent
+
+RUN apt-get update\
+ && apt-get install -y --no-install-recommends\
+ g++\
+ make\
+ cmake\
+ ca-certificates\
+ wget\
+ flex\
+ bison\
+ libyaml-dev\
+ libssl-dev\
+ patch
+
+# downlaod fluent-bit.
+RUN mkdir /root/fluent-bit
+RUN wget -O - https://github.com/fluent/fluent-bit/archive/refs/tags/v5.1.1.tar.gz\
+ | tar xfz - -C /root/fluent-bit --strip-components 1
+RUN sed  -i -e 's/jemalloc-5.3.0\/configure/jemalloc-5.3.0\/configure --disable-initial-exec-tls/g' /root/fluent-bit/CMakeLists.txt
+
+# build fluent-bit.
+RUN cmake -DFLB_TRACE=Off\
+ -DFLB_EXAMPLES=Off\
+ -DFLB_OUT_KAFKA=On\
+ -DCMAKE_BUILD_TYPE=Release\
+ -DCMAKE_INSTALL_PREFIX=/tmp/flb/install\
+ -S /root/fluent-bit\
+ -B/tmp/flb/build
+RUN cmake --build /tmp/flb/build --target install/strip -- -j$(nproc)
+
+# install header files.
+RUN cp -r /root/fluent-bit/lib/msgpack-*/include/msgpack.h\
+ /root/fluent-bit/lib/msgpack-*/include/msgpack\
+ /root/fluent-bit/lib/cfl/include/cfl\
+ /root/fluent-bit/lib/cfl/lib/xxhash/*.h\
+ /root/fluent-bit/lib/cmetrics/include/cmetrics\
+ /root/fluent-bit/lib/cmetrics/include/prometheus_remote_write\
+ /root/fluent-bit/lib/ctraces/include/ctraces\
+ /root/fluent-bit/lib/ctraces/lib/mpack/src/mpack\
+ /root/fluent-bit/lib/cprofiles/include/cprofiles\
+ /root/fluent-bit/lib/c-ares-*/include/*.h\
+ /root/fluent-bit/lib/monkey/mk_core/deps/libevent/include/*.h\
+ /root/fluent-bit/lib/monkey/mk_core/deps/libevent/include/event2\
+ /tmp/flb/build/lib/c-ares-*/ares_config.h\
+ /tmp/flb/install/include/
+RUN cp /tmp/flb/build/lib/cprofiles/include/cprofiles/*.h\
+ /root/fluent-bit/lib/cprofiles/include/cprofiles/*.h\
+ /tmp/flb/install/include/cprofiles/
+RUN cp -r /root/fluent-bit/lib/monkey/include/monkey/mk_core/external\
+ /tmp/flb/build/lib/monkey/include/monkey/mk_core/mk_core_info.h\
+ /tmp/flb/install/include/monkey/mk_core/
+RUN cp /root/fluent-bit/lib/monkey/include/monkey/*.h\
+ /tmp/flb/build/lib/monkey/include/monkey/*.h\
+ /tmp/flb/install/include/monkey/
+RUN mkdir -p /tmp/flb/install/deps/rbtree\
+ && cp /root/fluent-bit/lib/monkey/deps/rbtree/*.h\
+ /tmp/flb/install/deps/rbtree/
+RUN mkdir /tmp/flb/install/include/nghttp2\
+ && cp /root/fluent-bit/lib/nghttp2*/lib/includes/nghttp2/nghttp2.h\
+ /tmp/flb/build/lib/nghttp2*/lib/includes/nghttp2/nghttp2ver.h\
+ /tmp/flb/install/include/nghttp2/
+
+############################################################
+FROM ubuntu:26.04 as rtm-build
+
+ENV ROS2_DISTRO=lyrical
+ENV AMENT_PREFIX_PATH=/opt/ros/${ROS2_DISTRO}
+ENV PYTHONPATH=/opt/ros/${ROS2_DISTRO}/lib/python3.14/site-packages:${PYTHONPATH}
+ENV PATH=/opt/ros/${ROS2_DISTRO}/bin:${PATH}
+ENV CMAKE_PREFIX_PATH=/opt/ros/${ROS2_DISTRO}:${CMAKE_PREFIX_PATH}
+RUN apt-get update\
+ && apt-get install -y --no-install-recommends curl gnupg2 lsb-release ca-certificates software-properties-common\
+ && add-apt-repository universe\
+ && apt-get update\
+ && export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')\
+ && curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"\
+ && dpkg -i /tmp/ros2-apt-source.deb\
+ && apt-get update\
+ && apt-get install -y ros-dev-tools\
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y ros-${ROS2_DISTRO}-ros-core\
+ && apt-get clean\
+ && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update\
+ && apt-get install -y --no-install-recommends\
+ g++\
+ make\
+ cmake\
+ uuid-dev\
+ libboost-filesystem-dev\
+ omniorb-nameserver\
+ libomniorb4-dev\
+ omniidl\
+ && apt-get clean\
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=fluent /tmp/flb/install /usr/local/

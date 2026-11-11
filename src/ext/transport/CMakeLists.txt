@@ -8,10 +8,17 @@ endif()
 
 
 set(FASTRTPS_ENABLE OFF CACHE BOOL "set FASTRTPS_ENABLE")
+set(FASTDDS_ENABLE OFF CACHE BOOL "set FASTDDS_ENABLE")
 set(ROS2_ENABLE OFF CACHE BOOL "set ROS2_ENABLE")
 
 if(FASTRTPS_ENABLE)
 	add_subdirectory(FastRTPS)
+	if(ROS2_ENABLE)
+		add_subdirectory(ROS2Transport)
+	endif(ROS2_ENABLE)
+endif()
+if(FASTDDS_ENABLE)
+	add_subdirectory(FastDDS)
 	if(ROS2_ENABLE)
 		add_subdirectory(ROS2Transport)
 	endif(ROS2_ENABLE)
