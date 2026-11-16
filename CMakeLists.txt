@@ -131,6 +131,11 @@ elseif(UNIX)
 	endif()
 	if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 12.0.0)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aggressive-loop-optimizations --param max-inline-insns-single=1000 --param inline-unit-growth=1000 --param large-function-growth=2000")
+		add_compile_options(
+			-Wno-alloc-zero
+			-Wno-error=alloc-zero
+			-Wno-error=null-dereference
+		)
 	endif()
 	if(SSM_ROOT)
 		if(IS_DIRECTORY "${SSM_ROOT}/lib64")
@@ -1002,17 +1007,6 @@ endif(WIN32)
 
 if(UNIX)
   if(ROS_ENABLE OR ROS2_ENABLE)
-    set(INSTALL_ROS2TRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/ros2transport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
-    if(ROS_ENABLE)
-      set(INSTALL_ROSTRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/rostransport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
-      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.in
-	 ${PROJECT_BINARY_DIR}/rules @ONLY
-      )
-    else()
-      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.ros2-only-support.in
-	 ${PROJECT_BINARY_DIR}/rules @ONLY
-      )
-    endif()
     file(STRINGS "/etc/os-release" data_list REGEX "^(VERSION_CODENAME)=")
     # Look for lines like VERSION_CODENAME="..."
     foreach(var ${data_list})
@@ -1021,12 +1015,32 @@ if(UNIX)
       endif()
     endforeach()
 
+    set(INSTALL_ROS2TRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/ros2transport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
+    if(ROS_ENABLE)
+      set(INSTALL_ROSTRANSPORT_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/rostransport-${RTM_MAJOR_VERSION}.${RTM_MINOR_VERSION}/cmake)
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+      )
+    elseif(${ubuntu_codename} MATCHES "resolute")
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.ros2-only-support-lyrical.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+      )
+    else()
+      configure_file(${PROJECT_SOURCE_DIR}/packages/deb/debian/rules.ros2-only-support.in
+	 ${PROJECT_BINARY_DIR}/rules @ONLY
+      )
+    endif()
+
     if(${ubuntu_codename} MATCHES "focal" OR
        ${ubuntu_codename} MATCHES "jammy")
       configure_file(${PROJECT_SOURCE_DIR}/src/ext/transport/FastRTPS/CORBACdrDataPubSubTypes.cpp.ubuntu2204_earlier
 	      ${PROJECT_SOURCE_DIR}/src/ext/transport/FastRTPS/CORBACdrDataPubSubTypes.cpp @ONLY
       )
       configure_file(${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h.ubuntu2204_earlier
+	      ${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h @ONLY
+      )
+    elseif(${ubuntu_codename} MATCHES "noble")
+      configure_file(${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h.ubuntu2404
 	      ${PROJECT_SOURCE_DIR}/src/ext/transport/ROS2Transport/ROS2Serializer.h @ONLY
       )
     endif()
