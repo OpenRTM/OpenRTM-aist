@@ -36,6 +36,10 @@ namespace RTC
   OutPortSHMConsumer::OutPortSHMConsumer()
   {
     rtclog.setName("OutPortSHMConsumer");
+#ifdef ORB_IS_OMNIORB
+    PortableServer::POA_var poa = RTC::Manager::instance().getShortCutPOA();
+    PortableServer::ObjectId_var id = poa->activate_object(&m_shmem);
+#endif
   }
 
   /*!
@@ -49,7 +53,7 @@ namespace RTC
   {
     try
     {
-      _ptr()->close_memory(true);
+      if (!CORBA::is_nil(_ptr())) { _ptr()->close_memory(true); }
     }
     catch (...)
     {
@@ -101,7 +105,8 @@ namespace RTC
     RTC_PARANOID(("setObject()"));
     if (CorbaConsumer<::OpenRTM::PortSharedMemory>::setObject(obj))
     {
-      _ptr()->setInterface(m_shmem._this());
+      ::OpenRTM::PortSharedMemory_var callback = m_shmem.getObjRef();
+      _ptr()->setInterface(callback);
       return true;
     }
 
@@ -253,6 +258,13 @@ namespace RTC
       CORBA::Object_var var = orb->string_to_object(ior);
       if (_ptr()->_is_equivalent(var))
       {
+        try
+        {
+          _ptr()->close_memory(true);
+        }
+        catch (const CORBA::Exception &)
+        {
+        }
         releaseObject();
         RTC_DEBUG(("CorbaConsumer's reference was released."));
         return;

@@ -92,7 +92,7 @@ namespace RTC
     : m_pManager(nullptr),
       m_pORB(CORBA::ORB::_duplicate(orb)),
       m_pPOA(PortableServer::POA::_duplicate(poa)),
-      m_portAdmin(orb, poa),
+      m_portAdmin(CORBA::ORB::_duplicate(orb), PortableServer::POA::_duplicate(poa)),
       m_created(true), m_exiting(false),
       m_properties(default_conf), m_configsets(m_properties.getNode("conf")),
       m_sdoservice(*this),

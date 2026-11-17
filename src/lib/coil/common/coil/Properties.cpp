@@ -20,8 +20,10 @@
 #include <coil/Properties.h>
 #include <coil/stringutil.h>
 
+#include <algorithm>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -31,6 +33,28 @@ using std::size_t;
 
 namespace coil
 {
+  namespace
+  {
+    /*!
+     * @if jp
+     * @brief 分割したプロパティキーの階層名を検証する
+     * @param keys 階層ごとに分割したプロパティキー
+     * @return 階層名が1つ以上あり、すべての階層名が空白を除いて空でなければ true
+     * @else
+     * @brief Validate the segments of a split property key
+     * @param keys The segments of the property key
+     * @return True if there is at least one segment and none is empty after trimming whitespace
+     * @endif
+     */
+    bool validPropertyPath(const std::vector<std::string>& keys)
+    {
+      return !keys.empty() &&
+        std::none_of(keys.begin(), keys.end(), [](const std::string& key) {
+          return coil::eraseBothEndsBlank(key).empty();
+        });
+    }
+  }
+
   /*!
    * @if jp
    * @brief コンストラクタ(rootノードのみ作成)
@@ -174,6 +198,10 @@ namespace coil
       }
     std::vector<std::string> keys;
     split(key, '.', keys);
+    if (!validPropertyPath(keys))
+      {
+        return m_empty;
+      }
     Properties* node(nullptr);
     if ((node = _getNode(keys, 0, this)) != nullptr)
       {
@@ -245,6 +273,10 @@ namespace coil
       }
 
     split(key, '.', keys);
+    if (!validPropertyPath(keys))
+      {
+        return m_empty;
+      }
     Properties* node(nullptr);
     if ((node = _getNode(keys, 0, this)) != nullptr)
       {
@@ -271,6 +303,10 @@ namespace coil
       }
 
     split(key, '.', keys);
+    if (!validPropertyPath(keys))
+      {
+        return m_empty;
+      }
 
     Properties* curr(this);
     for (auto & k : keys)
@@ -306,6 +342,10 @@ namespace coil
       }
     std::vector<std::string> keys;
     split(key, '.', keys);
+    if (!validPropertyPath(keys))
+      {
+        return m_empty;
+      }
 
     Properties* curr(this);
     for (auto & k : keys)
@@ -485,7 +525,7 @@ namespace coil
       }
     std::vector<std::string> keys;
     split(key, '.', keys);
-    return _getNode(keys, 0, this);
+    return validPropertyPath(keys) ? _getNode(keys, 0, this) : nullptr;
   }
 
   /*!
@@ -506,8 +546,12 @@ namespace coil
       {
         return *leafptr;
       }
-    this->createNode(key);
-    return *findNode(key);
+    setProperty(key, "");
+    if (Properties* node = findNode(key))
+      {
+        return *node;
+      }
+    throw std::invalid_argument("Invalid property key: " + key);
   }
 
   /*!
@@ -528,8 +572,8 @@ namespace coil
       {
         return false;
       }
-    (*this)[key] = "";
-    return true;
+    setProperty(key, "");
+    return findNode(key) != nullptr;
   }
 
   /*!
