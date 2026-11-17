@@ -1090,3 +1090,12 @@ namespace RTC
   }
 
 } // namespace RTC
+
+
+// Bi-Directional GIOP: servants activated by _this() live in the POA of the
+// Manager (see Manager::isBiDirectionalGIOP()).
+#include <rtm/Manager.h>
+PortableServer::POA_ptr RTC::PortBase::_default_POA()
+{
+  return ::RTC::Manager::instance().getPOA();
+}
