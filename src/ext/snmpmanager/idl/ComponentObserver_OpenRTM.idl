@@ -1,0 +1,24 @@
+// コンポーネントオブザーバー (旧来の OpenRTM モジュール版)。
+// OpenRTM-aist-Python の ComponentObserverConsumer が使う (IDL:OpenRTM/ComponentObserver:1.0)。
+// 内容は OpenRTM-aist の ComponentObserver.idl (OpenRTM_aist/ext/sdo/observer/ComponentObserver_OpenRTM.idl) と同じ。
+#include "SDOPackage.idl"
+
+module OpenRTM
+{
+  enum StatusKind
+  {
+    COMPONENT_PROFILE,
+    RTC_STATUS,
+    EC_STATUS,
+    PORT_PROFILE,
+    CONFIGURATION,
+    HEARTBEAT,
+    STATUS_KIND_NUM
+  };
+
+  interface ComponentObserver
+    : SDOPackage::SDOService
+  {
+    oneway void update_status(in StatusKind status_kind, in string hint);
+  };
+};

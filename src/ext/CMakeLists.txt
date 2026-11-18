@@ -20,3 +20,7 @@ if(SSL_ENABLE)
 		add_subdirectory(http)
 	endif(HTTP_ENABLE)
 endif(SSL_ENABLE)
+
+if(SNMPMANAGER_ENABLE)
+	add_subdirectory(snmpmanager)
+endif(SNMPMANAGER_ENABLE)

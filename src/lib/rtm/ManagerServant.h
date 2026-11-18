@@ -758,6 +758,10 @@ namespace RTM
      * @brief An object reference of ManagerServant
      * @endif
      */
+    // Bi-Directional GIOP: the servant in the omniINSPOA that forwards
+    // requests to m_objref (nullptr if not used)
+    PortableServer::ServantBase* m_insServant{nullptr};
+
     ::RTM::Manager_var m_objref{RTM::Manager::_nil()};
 
     /*!

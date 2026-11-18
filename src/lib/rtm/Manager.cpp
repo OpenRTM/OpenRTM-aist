@@ -1162,6 +1162,12 @@ namespace RTC
    * @brief Get the pointer to the RootPOA (ownership duplicated)
    * @endif
    */
+  bool Manager::isBiDirectionalGIOP()
+  {
+    return coil::toBool(m_config["corba.bidirectional_giop"],
+                        "YES", "NO", false);
+  }
+
   PortableServer::POA_ptr Manager::getPOA()
   {
     RTC_TRACE(("Manager::getPOA()"));
@@ -1584,9 +1590,27 @@ namespace RTC
       }
       // Get the POAManager
       m_pPOAManager = m_pPOA->the_POAManager();
+      m_pRootPOA = PortableServer::POA::_duplicate(m_pPOA);
 #ifdef ORB_IS_OMNIORB
+      if (isBiDirectionalGIOP())
+        {
+          // Bi-Directional GIOP: the objects of this process live in a POA
+          // with the BiDirectional policy (BOTH). IMPLICIT_ACTIVATION is for
+          // _this() (see the _default_POA() of the servants).
+          CORBA::PolicyList bp;
+          bp.length(2);
+          bp[0] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+          bp[1] = m_pRootPOA->create_implicit_activation_policy(
+                      PortableServer::IMPLICIT_ACTIVATION);
+          m_pPOA = m_pRootPOA->create_POA("bidir", m_pPOAManager, bp);
+          RTC_INFO(("Bi-Directional GIOP is enabled."));
+        }
       CORBA::PolicyList pl;
-      pl.length(1);
+      pl.length(isBiDirectionalGIOP() ? 2 : 1);
+      if (isBiDirectionalGIOP())
+        {
+          pl[1] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+        }
 #if defined(RTM_OMNIORB_42) || defined(RTM_OMNIORB_43)
       pl[0] = omniPolicy::create_local_shortcut_policy(omniPolicy::LOCAL_CALLS_SHORTCUT);
 #else
@@ -1640,6 +1664,18 @@ namespace RTC
   {
     std::string opt(m_config["corba.args"]);
     RTC_DEBUG(("corba.args: %s", opt.c_str()));
+
+#ifdef ORB_IS_OMNIORB
+    if (isBiDirectionalGIOP() &&
+        opt.find("BiDirectionalGIOP") == std::string::npos)
+      {
+        // The ORB options for Bi-Directional GIOP are not added here; they
+        // are given in corba.args (or the omniORB configuration).
+        RTC_WARN(("corba.bidirectional_giop is YES, but corba.args has no "
+                  "-ORBofferBiDirectionalGIOP / -ORBacceptBiDirectionalGIOP "
+                  "(see the omniORB options for Bi-Directional GIOP)."));
+      }
+#endif
 
     RTC_DEBUG_STR((m_config));
 

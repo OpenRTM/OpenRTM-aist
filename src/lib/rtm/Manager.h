@@ -1148,6 +1148,32 @@ namespace RTC
      * @endif
      */
     PortableServer::POA_ptr getPOA();
+
+    /*!
+     * @if jp
+     * @brief Bi-Directional GIOP を使うか
+     *
+     * corba.bidirectional_giop が YES なら、Manager の POA (getPOA()) は
+     * BiDirectional ポリシー (BOTH) を持つ POA になる。ORB の Bi-Directional
+     * GIOP のオプション (-ORBofferBiDirectionalGIOP など) は、corba.args に書く。
+     * 相手が開いた接続で呼び返すので、外から
+     * 接続できないプロセス (NAT やコンテナの中など) のマネージャを使える。
+     *
+     * @return 使うなら true
+     * @else
+     * @brief Whether Bi-Directional GIOP is used
+     *
+     * If corba.bidirectional_giop is YES, the POA of the Manager (getPOA())
+     * has the BiDirectional policy (BOTH). The ORB options for Bi-Directional
+     * GIOP (-ORBofferBiDirectionalGIOP etc.) are given in corba.args.
+     * Callbacks use the connection that the
+     * other side opened, so a manager in a process that cannot be connected
+     * to from outside (behind NAT, in a container, etc.) can be used.
+     *
+     * @return true if used
+     * @endif
+     */
+    bool isBiDirectionalGIOP();
 #ifdef ORB_IS_OMNIORB
     PortableServer::POA_ptr getShortCutPOA();
 #endif
@@ -2088,6 +2114,9 @@ namespace RTC
      * @endif
      */
     PortableServer::POA_var m_pPOA;
+    // RootPOA (m_pPOA is a child POA with the BiDirectional policy when
+    // Bi-Directional GIOP is used)
+    PortableServer::POA_var m_pRootPOA;
 #ifdef ORB_IS_OMNIORB
     PortableServer::POA_var m_pShortCutPOA;
 #endif
