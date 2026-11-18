@@ -46,11 +46,11 @@ namespace RTC
     CORBA::String_var ior = orb->object_to_string(m_objref.in());
     CORBA_SeqUtil::
       push_back(m_properties,
-                NVUtil::newNV("dataport.corba_cdr.inport_ior", ior.in()));
+                NVUtil::newNV("dataport.shared_memory.inport_ior", ior.in()));
 
     CORBA_SeqUtil::
       push_back(m_properties,
-        NVUtil::newNV("dataport.corba_cdr.inport_ref", m_objref));
+        NVUtil::newNV("dataport.shared_memory.inport_ref", m_objref));
 
   }
   
