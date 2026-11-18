@@ -804,9 +804,9 @@ namespace RTC
       setEndpointProperty(rtobj.in());
     }
 
-    for (int i(0); inherit_prop[i][0] != '\0'; ++i)
+    for (const auto* key : inherit_prop)
     {
-      const char *key(inherit_prop[i]);
+      if (*key == '\0') { break; }
       if (m_config.findNode(key) != nullptr)
       {
         prop[key] = m_config[key];
@@ -2324,8 +2324,9 @@ namespace RTC
     }
     for (unsigned int i(1); i < RTM::CompParam::prof_list_size; ++i)
     {
-      comp_id[RTM::CompParam::prof_list[i]] = id[i];
-      RTC_TRACE(("RTC basic propfile %s: %s", RTM::CompParam::prof_list[i], id[i].c_str()));
+      const auto* key = *std::next(RTM::CompParam::prof_list, i);
+      comp_id[key] = id[i];
+      RTC_TRACE(("RTC basic propfile %s: %s", key, id[i].c_str()));
     }
 
     if (id_and_conf.size() == 2)

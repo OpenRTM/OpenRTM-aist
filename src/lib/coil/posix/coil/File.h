@@ -125,10 +125,9 @@ namespace coil
   {
     struct dirent* ent;
     coil::vstring flist;
-    bool has_glob(false);
+    const std::string glob(glob_str ? glob_str : "");
 
     if (path == nullptr) { return flist; }
-    if (glob_str[0] != '\0') { has_glob = true; }
 
     DIR* dir_ptr(::opendir(path));
     if (dir_ptr == nullptr) { return flist; }
@@ -137,48 +136,48 @@ namespace coil
       {
         std::string fname(ent->d_name);
         bool match(true);
-        if (has_glob)
+        if (!glob.empty())
           {
-            const char* globc(glob_str);
-            for (size_t i(0); i < fname.size() && *globc != '\0'; ++i, ++globc)
+            size_t g(0);
+            for (size_t i(0); i < fname.size() && g < glob.size(); ++i, ++g)
               {
-                if (*globc == '*')
+                if (glob[g] == '*')
                   {
                     // the last '*' matches every thing
-                    if (globc[1] == '\0') { break; }
+                    if (glob[g + 1] == '\0') { break; }
                     // consecutive * or + are skiped, but fname keeps pointer
-                    if (globc[1] == '*' || globc[1] == '+') { --i; continue; }
+                    if (glob[g + 1] == '*' || glob[g + 1] == '+') { --i; continue; }
 
                     // advance pointer and find normal characters
-                    ++globc;
-                    size_t pos(fname.find(*globc, i));
+                    ++g;
+                    size_t pos(fname.find(glob[g], i));
                     if (pos == std::string::npos) { match = false; break; }
                     // matched, and advance i to pos
                     i = pos;
                   }
-                else if (*globc == '+')
+                else if (glob[g] == '+')
                   {
                     // the last '+' matches last one or more characters
-                    if (globc[1] == '\0' && !(i + 1 < fname.size())) { break; }
+                    if (glob[g + 1] == '\0' && !(i + 1 < fname.size())) { break; }
                     // consecutive * or + are skiped, but fname keeps pointer
-                    if (globc[1] == '*' || globc[1] == '+') { --i; continue; }
+                    if (glob[g + 1] == '*' || glob[g + 1] == '+') { --i; continue; }
 
                     // advance pointer and find normal characters
-                    ++globc;
-                    size_t pos(fname.find(*globc, i + 1));
+                    ++g;
+                    size_t pos(fname.find(glob[g], i + 1));
                     if (pos == std::string::npos) { match = false; break; }
                     // matched, and advance i to pos
                     i = pos;
                   }
                 else
                   {
-                    if (fname[i] != *globc) { match = false; }
+                    if (fname[i] != glob[g]) { match = false; }
                   }
 
                 // in the last fname character, if glob is not end,
                 // or *, fname is not matched.
                 if (i + 1 == fname.size() &&
-                    globc[1] != '\0' && globc[1] != '*') { match = false; }
+                    glob[g + 1] != '\0' && glob[g + 1] != '*') { match = false; }
               }
           }
         if (match) { flist.emplace_back(std::move(fname)); }

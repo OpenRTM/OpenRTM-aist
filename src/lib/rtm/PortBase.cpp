@@ -17,6 +17,7 @@
  *
  */
 
+#include <array>
 #include <cassert>
 #include <memory>
 #include <coil/UUID.h>
@@ -277,7 +278,7 @@ namespace RTC
 
 
 
-    ReturnCode_t retval[] = {RTC::RTC_OK, RTC::RTC_OK, RTC::RTC_OK};
+    std::array<ReturnCode_t, 3> retval{{RTC::RTC_OK, RTC::RTC_OK, RTC::RTC_OK}};
 
     onNotifyConnect(getName(), connector_profile);
 
@@ -333,12 +334,12 @@ namespace RTC
         RTC_PARANOID(("Existing connector_id. Updated."));
       }
 
-    for (int i(0), len(sizeof(retval)/sizeof(ReturnCode_t)); i < len; ++i)
+    for (auto result : retval)
       {
-        if (retval[i] != RTC::RTC_OK)
+        if (result != RTC::RTC_OK)
           {
-            onConnected(getName(), connector_profile, retval[i]);
-            return retval[i];
+            onConnected(getName(), connector_profile, result);
+            return result;
           }
       }
 

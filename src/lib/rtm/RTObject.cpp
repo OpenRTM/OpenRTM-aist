@@ -2748,12 +2748,13 @@ namespace RTC
         return RTC::RTC_ERROR;
       }
     RTC_DEBUG(("Copying inherited EC options."));
-    for (size_t i(0); inherited_opts[i][0] != '\0'; ++i)
+    for (const auto* option : inherited_opts)
       {
-        if ((*p).findNode(inherited_opts[i]) != nullptr)
+        if (*option == '\0') { break; }
+        if ((*p).findNode(option) != nullptr)
           {
-            RTC_PARANOID(("Option %s exists.", inherited_opts[i]));
-            default_opts[inherited_opts[i]] = (*p)[inherited_opts[i]];
+            RTC_PARANOID(("Option %s exists.", option));
+            default_opts[option] = (*p)[option];
           }
       }
     return RTC::RTC_OK;
@@ -3021,12 +3022,13 @@ namespace RTC
             return RTC::RTC_ERROR;
           }
         RTC_DEBUG(("Copying inherited EC options."));
-        for (size_t i(0); inherited_opts[i][0] != '\0'; ++i)
+        for (const auto* option : inherited_opts)
           {
-            if ((*p).findNode(inherited_opts[i]) != nullptr)
+            if (*option == '\0') { break; }
+            if ((*p).findNode(option) != nullptr)
               {
-                RTC_PARANOID(("Option %s exists.", inherited_opts[i]));
-                default_opts[inherited_opts[i]] = (*p)[inherited_opts[i]];
+                RTC_PARANOID(("Option %s exists.", option));
+                default_opts[option] = (*p)[option];
               }
           }
         ec->init(default_opts);

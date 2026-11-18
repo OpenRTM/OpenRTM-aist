@@ -101,11 +101,11 @@ namespace RTC
     {
       if (type < ConfigurationParamListenerType::CONFIG_PARAM_LISTENER_NUM)
         {
-          static const char* const typeString[] =
-          {
+          static const std::array<const char*, 2> typeString =
+          {{
             "ON_UPDATE_CONFIG_PARAM",
             "CONFIG_PARAM_LISTENER_NUM"
-          };
+          }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -218,12 +218,12 @@ namespace RTC
     {
       if (type < ConfigurationSetListenerType::CONFIG_SET_LISTENER_NUM)
         {
-          static const char* const typeString[] =
-          {
+          static const std::array<const char*, 3> typeString =
+          {{
             "ON_SET_CONFIG_SET",
             "ON_ADD_CONFIG_SET",
             "CONFIG_SET_LISTENER_NUM"
-          };
+          }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -331,13 +331,13 @@ namespace RTC
     {
       if (type < ConfigurationSetNameListenerType::CONFIG_SET_NAME_LISTENER_NUM)
         {
-          static const char* const typeString[] =
-          {
+          static const std::array<const char*, 4> typeString =
+          {{
             "ON_UPDATE_CONFIG_SET",
             "ON_REMOVE_CONFIG_SET",
             "ON_ACTIVATE_CONFIG_SET",
             "CONFIG_SET_NAME_LISTENER_NUM"
-          };
+          }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";

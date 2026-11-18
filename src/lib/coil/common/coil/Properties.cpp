@@ -17,6 +17,7 @@
  *
  */
 
+#include <iterator>
 #include <coil/Properties.h>
 #include <coil/stringutil.h>
 
@@ -372,10 +373,13 @@ namespace coil
    */
   void Properties::setDefaults(const char* const defaults[], size_t num)
   {
-    for (size_t i = 0; i < num && defaults[i][0] != '\0' ; i += 2)
+    for (size_t i = 0; defaults && i < num; i += 2)
       {
-        setDefault(eraseBothEndsBlank(defaults[i]),
-                   eraseBothEndsBlank(defaults[i + 1]));
+        const auto key = *std::next(defaults, i);
+        if (!key || *key == '\0' || num - i < 2) { break; }
+        const auto defaultValue = *std::next(defaults, i + 1);
+        if (!defaultValue) { break; }
+        setDefault(eraseBothEndsBlank(key), eraseBothEndsBlank(defaultValue));
       }
   }
 
