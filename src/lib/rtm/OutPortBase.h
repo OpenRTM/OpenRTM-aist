@@ -1,6 +1,27 @@
 ﻿// -*- C++ -*-
 /*!
  * @file OutPortBase.h
+ * @if jp
+ * @brief `OutPortBase`の状態と操作をまとめる。 宣言。
+ * @else
+ * @brief Encapsulate the state and operations of OutPortBase. Declarations.
+ * @endif
+ * @date $Date: 2026-11-13 15:32:20 $
+ * @author Nobuhiko Miyamoto <n-miyamoto@aist.go.jp>
+ *
+ * Copyright (C) 2019
+ *     Nobuhiko Miyamoto
+ *     Intelligent Systems Research Institute,
+ *     National Institute of
+ *         Advanced Industrial Science and Technology (AIST), Japan
+ *     All rights reserved.
+ *
+ * $Id$
+ */
+
+// -*- C++ -*-
+/*
+ * @file OutPortBase.h
  * @brief InPortBase base class
  * @date $Date: 2007-12-31 03:08:05 $
  * @author Noriaki Ando <n-ando@aist.go.jp>
@@ -286,7 +307,7 @@ namespace RTC
      *
      * @endif
      */
-    void init(coil::Properties& prop);
+    virtual void init(coil::Properties& prop);
 
     /*!
      * @if jp
