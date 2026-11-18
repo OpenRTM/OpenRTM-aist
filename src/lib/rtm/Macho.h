@@ -205,10 +205,14 @@
 #include <new>
 #include <cassert>
 
+// Limit the suppression for the vendored Macho code to this file.
 #if defined(__clang__)
-#if defined(_WIN32) || defined(_WIN64)
 #pragma clang diagnostic push
+#if __has_warning("-Wreserved-identifier")
 #pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+#if __has_warning("-Wunsafe-buffer-usage")
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #endif
 #endif
 
@@ -1982,9 +1986,7 @@ namespace Macho {
 } // namespace Macho
 
 #if defined(__clang__)
-#if defined(_WIN32) || defined(_WIN64)
 #pragma clang diagnostic pop
-#endif
 #endif
 
 

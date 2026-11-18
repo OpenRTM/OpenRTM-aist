@@ -15,6 +15,8 @@
  *
  */
 
+#include <limits>
+#include <iterator>
 #include <rtm/CORBA_IORUtil.h>
 
 #include <iostream>
@@ -58,68 +60,24 @@ namespace CORBA_IORUtil
   {
 #ifndef ORB_IS_RTORB
     if (iorstr == nullptr) { return false; }
-    size_t size = strlen(iorstr);
-
-    if (size < 4)
+    const std::string text(iorstr);
+    if (text.compare(0, 4, "IOR:") != 0 || text.size() <= 4 ||
+        (text.size() - 4) % 2 != 0)
       {
         return false;
       }
-
-    const char* p = iorstr;
-
-    if (p[0] != 'I' || p[1] != 'O' || p[2] != 'R' || p[3] != ':')
-      {
-        return false;
-      }
-
-    // IOR:xxyyzz......
-    // "IOR:" occupies 4 digits.
-    // two digits express one byte, and all byte sequence express IOR profile
-    size = (size - 4) / 2;  // how many octets are there in the string
-    p += 4;
-
+    const auto size = (text.size() - 4) / 2;
+    if (size > std::numeric_limits<CORBA::ULong>::max()) { return false; }
+    const std::string digits("0123456789abcdefABCDEF");
     cdrMemoryStream buf(static_cast<CORBA::ULong>(size), false);
-    for (int i(0); i < static_cast<int>(size); ++i)
+    for (std::size_t i = 4; i < text.size(); i += 2)
       {
-        CORBA::Octet v;
-        // upper digit
-        int j(i * 2);
-        if (p[j] >= '0' && p[j] <= '9')
-          {
-            v = ((p[j] - '0') << 4);
-          }
-        else if (p[j] >= 'a' && p[j] <= 'f')
-          {
-            v = ((p[j] - 'a' + 10) << 4);
-          }
-        else if (p[j] >= 'A' && p[j] <= 'F')
-          {
-            v = ((p[j] - 'A' + 10) << 4);
-          }
-        else
-          {
-            return false;
-          }
-        // lower digit
-        int k(j + 1);
-        if (p[k] >= '0' && p[k] <= '9')
-          {
-            v += (p[k] - '0');
-          }
-        else if (p[k] >= 'a' && p[k] <= 'f')
-          {
-            v += (p[k] - 'a' + 10);
-          }
-        else if (p[k] >= 'A' && p[k] <= 'F')
-          {
-            v += (p[k] - 'A' + 10);
-          }
-        else
-          {
-            return false;
-          }
-        // push_back to buffer
-        buf.marshalOctet(v);
+        auto upper = digits.find(text[i]);
+        auto lower = digits.find(text[i + 1]);
+        if (upper == std::string::npos || lower == std::string::npos) { return false; }
+        if (upper >= 16) { upper -= 6; }
+        if (lower >= 16) { lower -= 6; }
+        buf.marshalOctet(static_cast<CORBA::Octet>(upper * 16 + lower));
       }
 
     buf.rewindInputPtr();
@@ -154,42 +112,19 @@ namespace CORBA_IORUtil
 
     // turn the encapsulation into a hex string with "IOR:" prepended
     buf.rewindInputPtr();
-    size_t s = buf.bufSize();
-    CORBA::Char* data = static_cast<CORBA::Char *>(buf.bufPtr());
-
-    char *result = new char[4 + s * 2 + 1];
-    result[4 + s * 2] = '\0';
-    result[0] = 'I';
-    result[1] = 'O';
-    result[2] = 'R';
-    result[3] = ':';
-
-    for (int i(0); i < static_cast<int>(s); ++i)
+    const auto size = buf.bufSize();
+    const auto* data = static_cast<const unsigned char*>(buf.bufPtr());
+    const std::string digits("0123456789abcdef");
+    std::string result("IOR:");
+    if (size > (result.max_size() - result.size()) / 2) { return false; }
+    result.reserve(result.size() + size * 2);
+    for (std::size_t i = 0; i < size; ++i)
       {
-        int j = 4 + i * 2;
-        int v = (data[i] & 0xf0);
-
-        v = v >> 4;
-        if (v < 10)
-          {
-            result[j] = '0' + static_cast<char>(v);
-          }
-        else
-          {
-            result[j] = 'a' + (static_cast<char>(v) - 10);
-          }
-        v = ((data[i] & 0xf));
-        if (v < 10)
-          {
-            result[j+1] = '0' + static_cast<char>(v);
-          }
-        else
-          {
-            result[j+1] = 'a' + (static_cast<char>(v) - 10);
-          }
+        const auto byte = *std::next(data, i);
+        result.push_back(digits[byte >> 4]);
+        result.push_back(digits[byte & 0xf]);
       }
-    iorstr = std::string(result);
-    delete[] result;
+    iorstr = std::move(result);
     return true;
 #else  // ORB_IS_RTORB
     // RtORB does not this function.
@@ -455,46 +390,45 @@ namespace CORBA_IORUtil
   static int get_poa_info(OctetUSequence& key, StringUSequence& poas_out,
                           int& transient_out, OctetUSequence& id_out)
   {
-    const char* k = reinterpret_cast<const char*>(key.NP_data());
-    size_t len = static_cast<size_t>(key.length());
-    const char* kend = k + len;
+    if (key.length() == 0) { return 0; }
+    const std::string bytes(reinterpret_cast<const char*>(key.NP_data()), key.length());
+    std::size_t cursor = 0;
 
     poas_out.length(1);
     poas_out[0] = CORBA::string_dup("root");
+    if (bytes.front() != TRANSIENT_SUFFIX_SEP && bytes.front() != POA_NAME_SEP) { return 0; }
 
-    if (*k != TRANSIENT_SUFFIX_SEP && *k != POA_NAME_SEP) { return 0; }
-
-    while (k < kend && *k == POA_NAME_SEP)
+    while (cursor < bytes.size() && bytes[cursor] == POA_NAME_SEP)
       {
-        ++k;
-        const char* name = k;
-
-        while (k < kend && (*k != 0) && *k != POA_NAME_SEP
-              && *k != TRANSIENT_SUFFIX_SEP)
+        const auto start = ++cursor;
+        while (cursor < bytes.size() && bytes[cursor] != 0 &&
+              bytes[cursor] != POA_NAME_SEP && bytes[cursor] != TRANSIENT_SUFFIX_SEP)
           {
-            ++k;
+            ++cursor;
           }
-        if (k == kend)  { return 0; }
+        if (cursor == bytes.size()) { return 0; }
 
-        char* nm = new char[k - name + 1];
-        memcpy(nm, name, k - name);
-        nm[k - name] = '\0';
+        const auto name = bytes.substr(start, cursor - start);
         poas_out.length(poas_out.length() + 1);
-        poas_out[poas_out.length() - 1] = nm;
+        poas_out[poas_out.length() - 1] = CORBA::string_dup(name.c_str());
       }
-    if (k == kend)  { return 0; }
+    if (cursor == bytes.size()) { return 0; }
 
     transient_out = 0;
-    if (*k == TRANSIENT_SUFFIX_SEP)
+    if (bytes[cursor] == TRANSIENT_SUFFIX_SEP)
       {
         transient_out = 1;
-        k += TRANSIENT_SUFFIX_SIZE + 1;
+        if (bytes.size() - cursor <= TRANSIENT_SUFFIX_SIZE + 1) { return 0; }
+        cursor += TRANSIENT_SUFFIX_SIZE + 1;
       }
-    if (k >= kend || (*k != 0))  { return 0; }
-    k++;
+    if (bytes[cursor] != 0) { return 0; }
+    ++cursor;
 
-    id_out.length(static_cast<CORBA::ULong>(kend - k));
-    memcpy(id_out.NP_data(), k, kend - k);
+    id_out.length(static_cast<CORBA::ULong>(bytes.size() - cursor));
+    if (id_out.length() != 0)
+      {
+        bytes.copy(reinterpret_cast<char*>(id_out.NP_data()), id_out.length(), cursor);
+      }
 
     return 1;
   }

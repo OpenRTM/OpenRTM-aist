@@ -36,6 +36,10 @@ namespace RTC
   OutPortSHMConsumer::OutPortSHMConsumer()
   {
     rtclog.setName("OutPortSHMConsumer");
+#ifdef ORB_IS_OMNIORB
+    PortableServer::POA_var poa = RTC::Manager::instance().getShortCutPOA();
+    PortableServer::ObjectId_var id = poa->activate_object(&m_shmem);
+#endif
   }
 
   /*!
@@ -49,7 +53,7 @@ namespace RTC
   {
     try
     {
-      _ptr()->close_memory(true);
+      if (!CORBA::is_nil(_ptr())) { _ptr()->close_memory(true); }
     }
     catch (...)
     {
@@ -101,7 +105,8 @@ namespace RTC
     RTC_PARANOID(("setObject()"));
     if (CorbaConsumer<::OpenRTM::PortSharedMemory>::setObject(obj))
     {
-      _ptr()->setInterface(m_shmem._this());
+      ::OpenRTM::PortSharedMemory_var callback = m_shmem.getObjRef();
+      _ptr()->setInterface(callback);
       return true;
     }
 
@@ -194,17 +199,17 @@ namespace RTC
     RTC_TRACE(("OutPortSHMConsumer::subscribeInterface()"));
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.outport_ior");
+                               "dataport.shared_memory.outport_ior");
     if (index < 0)
     {
-      RTC_DEBUG(("dataport.corba_cdr.outport_ior not found."));
+      RTC_DEBUG(("dataport.shared_memory.outport_ior not found."));
       return false;
     }
 
     if (NVUtil::isString(properties,
-                         "dataport.corba_cdr.outport_ior"))
+                         "dataport.shared_memory.outport_ior"))
     {
-      RTC_DEBUG(("dataport.corba_cdr.outport_ior found."));
+      RTC_DEBUG(("dataport.shared_memory.outport_ior found."));
       const char *ior;
       properties[index].value >>= ior;
 
@@ -238,21 +243,28 @@ namespace RTC
     RTC_TRACE(("OutPortSHMConsumer::unsubscribeInterface()"));
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.outport_ior");
+                               "dataport.shared_memory.outport_ior");
     if (index < 0)
     {
-      RTC_DEBUG(("dataport.corba_cdr.outport_ior not found."));
+      RTC_DEBUG(("dataport.shared_memory.outport_ior not found."));
       return;
     }
 
     const char *ior;
     if (properties[index].value >>= ior)
     {
-      RTC_DEBUG(("dataport.corba_cdr.outport_ior found."));
+      RTC_DEBUG(("dataport.shared_memory.outport_ior found."));
       CORBA::ORB_var orb = ::RTC::Manager::instance().getORB();
       CORBA::Object_var var = orb->string_to_object(ior);
       if (_ptr()->_is_equivalent(var))
       {
+        try
+        {
+          _ptr()->close_memory(true);
+        }
+        catch (const CORBA::Exception &)
+        {
+        }
         releaseObject();
         RTC_DEBUG(("CorbaConsumer's reference was released."));
         return;

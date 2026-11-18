@@ -5,6 +5,7 @@ project (${RTCSKEL_PROJECT_NAME}
 	LANGUAGES CXX)
 
 set(${PROJECT_NAME}_IDLS
+	CSPPort.idl
 	BasicDataType.idl
 	DataPort.idl
 	DataPort_OpenRTM.idl

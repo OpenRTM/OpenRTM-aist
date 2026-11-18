@@ -16,6 +16,7 @@
  *
  */
 
+#include <array>
 #include <rtm/PortConnectListener.h>
 
 namespace RTC
@@ -32,13 +33,13 @@ namespace RTC
   const char*
   PortConnectListener::toString(PortConnectListenerType type)
   {
-    static const char* const typeString[] =
-      {
+    static const std::array<const char*, 4> typeString =
+      {{
         "ON_NOTIFY_CONNECT",
         "ON_NOTIFY_DISCONNECT",
         "ON_UNSUBSCRIBE_INTERFACES",
         ""
-      };
+      }};
     type = type < PortConnectListenerType::PORT_CONNECT_LISTENER_NUM 
                 ? type 
                 : PortConnectListenerType::PORT_CONNECT_LISTENER_NUM;
@@ -64,8 +65,8 @@ namespace RTC
   const char*
   PortConnectRetListener::toString(PortConnectRetListenerType type)
   {
-    static const char* const typeString[] =
-      {
+    static const std::array<const char*, 7> typeString =
+      {{
         "ON_PUBLISH_INTERFACES",
         "ON_CONNECT_NEXTPORT",
         "ON_SUBSCRIBE_INTERFACES",
@@ -73,7 +74,7 @@ namespace RTC
         "ON_DISCONNECT_NEXT",
         "ON_DISCONNECTED",
         ""
-      };
+      }};
     type = type < PortConnectRetListenerType::PORT_CONNECT_RET_LISTENER_NUM 
                 ? type 
                 : PortConnectRetListenerType::PORT_CONNECT_RET_LISTENER_NUM;

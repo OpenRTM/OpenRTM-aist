@@ -17,6 +17,7 @@
  */
 
 
+#include <iterator>
 #include <coil/SharedMemory.h>
 #include <cstring>
 #include <utility>
@@ -199,12 +200,14 @@ namespace coil
    */
   int SharedMemory::write(const char *data, const unsigned long long pos, const unsigned long long size)
   {
-    if (!created())
+    if (!created() || pos > m_memory_size || size > m_memory_size - pos)
     {
       return -1;
     }
+    if (size == 0) { return 0; }
+    if (!data) { return -1; }
 
-    memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
+    memcpy(std::next(m_shm, pos), data, static_cast<size_t>(size));
     
     return 0;
   }
@@ -232,12 +235,14 @@ namespace coil
    */
   int SharedMemory::read(char* data, const unsigned long long pos, const unsigned long long size)
   {
-    if (!created())
+    if (!created() || pos > m_memory_size || size > m_memory_size - pos)
     {
       return -1;
     }
+    if (size == 0) { return 0; }
+    if (!data) { return -1; }
 
-    memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
+    memcpy(data, std::next(m_shm, pos), static_cast<size_t>(size));
 
     return 0;
   }

@@ -13,6 +13,7 @@
  * $Id$
  */
 
+#include <iterator>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -76,13 +77,13 @@ int main (int argc, char** argv)
 
   for (int i = 1; i < argc; ++i)
     {
-      std::string arg{coil::normalize(argv[i])};
+      std::string arg{coil::normalize(*std::next(argv, i))};
       if (arg == "--flush")         subs_type = "flush";
       else if (arg == "--new")      subs_type = "new";
       else if (arg == "--periodic")
         {
           subs_type = "periodic";
-          if (++i < argc) period = argv[i];
+          if (++i < argc) period = *std::next(argv, i);
           else            period = "1.0";
         }
       else if (arg == "--help")
@@ -94,7 +95,7 @@ int main (int argc, char** argv)
 	{
 	  if (++i < argc)
 	    {
-	      std::string arg2(argv[i]);
+	      std::string arg2(*std::next(argv, i));
 	      coil::normalize(arg2);
 	      push_policy = arg2;
 	    }
@@ -102,7 +103,7 @@ int main (int argc, char** argv)
 	}
       else if (arg == "--skip")
         {
-          if (++i < argc) skip_count = argv[i];
+          if (++i < argc) skip_count = *std::next(argv, i);
           else            skip_count = "0";
         }
       else

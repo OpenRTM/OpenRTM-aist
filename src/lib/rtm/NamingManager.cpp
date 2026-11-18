@@ -427,18 +427,19 @@ namespace RTC
       RTM::Manager_var mgr = getManager(rtcuri.getAddress());
       if (!CORBA::is_nil(mgr))
       {
-        rtc_list = (*mgr->get_components_by_name(rtcuri.getRTCName().c_str()));
-        RTM::ManagerList *slaves = mgr->get_slave_managers();
+        RTC::RTCList_var components = mgr->get_components_by_name(rtcuri.getRTCName().c_str());
+        rtc_list = components.in();
+        RTM::ManagerList_var slaves = mgr->get_slave_managers();
         for (unsigned int i = 0; i < slaves->length(); i++)
         {
           try
           {
-            RTC::RTCList slave_rtcs = (*(*slaves)[i]->get_components_by_name(rtcuri.getRTCName().c_str()));
-            CORBA_SeqUtil::push_back_list(rtc_list, slave_rtcs);
+            RTC::RTCList_var slave_rtcs = slaves[i]->get_components_by_name(rtcuri.getRTCName().c_str());
+            CORBA_SeqUtil::push_back_list(rtc_list, slave_rtcs.in());
           }
           catch (...)
           {
-            mgr->remove_slave_manager((*slaves)[i]);
+            mgr->remove_slave_manager(slaves[i]);
           }
         }
       }
@@ -489,7 +490,7 @@ namespace RTC
           mgr = mgr_sev.getObjRef();
         }
       }
-      return mgr;
+      return mgr._retn();
     }
 
     try

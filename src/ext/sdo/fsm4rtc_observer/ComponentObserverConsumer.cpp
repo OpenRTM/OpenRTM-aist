@@ -159,7 +159,7 @@ namespace RTC
       }
 
     coil::vstring observed(coil::split(prop["observed_status"], ","));
-    bool flags[RTC::STATUS_KIND_NUM];
+    std::array<bool, RTC::STATUS_KIND_NUM> flags;
     for (bool & flag : flags)
       {
         flag = false;

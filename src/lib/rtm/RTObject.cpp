@@ -92,7 +92,7 @@ namespace RTC
     : m_pManager(nullptr),
       m_pORB(CORBA::ORB::_duplicate(orb)),
       m_pPOA(PortableServer::POA::_duplicate(poa)),
-      m_portAdmin(orb, poa),
+      m_portAdmin(CORBA::ORB::_duplicate(orb), PortableServer::POA::_duplicate(poa)),
       m_created(true), m_exiting(false),
       m_properties(default_conf), m_configsets(m_properties.getNode("conf")),
       m_sdoservice(*this),
@@ -2748,12 +2748,13 @@ namespace RTC
         return RTC::RTC_ERROR;
       }
     RTC_DEBUG(("Copying inherited EC options."));
-    for (size_t i(0); inherited_opts[i][0] != '\0'; ++i)
+    for (const auto* option : inherited_opts)
       {
-        if ((*p).findNode(inherited_opts[i]) != nullptr)
+        if (*option == '\0') { break; }
+        if ((*p).findNode(option) != nullptr)
           {
-            RTC_PARANOID(("Option %s exists.", inherited_opts[i]));
-            default_opts[inherited_opts[i]] = (*p)[inherited_opts[i]];
+            RTC_PARANOID(("Option %s exists.", option));
+            default_opts[option] = (*p)[option];
           }
       }
     return RTC::RTC_OK;
@@ -3021,12 +3022,13 @@ namespace RTC
             return RTC::RTC_ERROR;
           }
         RTC_DEBUG(("Copying inherited EC options."));
-        for (size_t i(0); inherited_opts[i][0] != '\0'; ++i)
+        for (const auto* option : inherited_opts)
           {
-            if ((*p).findNode(inherited_opts[i]) != nullptr)
+            if (*option == '\0') { break; }
+            if ((*p).findNode(option) != nullptr)
               {
-                RTC_PARANOID(("Option %s exists.", inherited_opts[i]));
-                default_opts[inherited_opts[i]] = (*p)[inherited_opts[i]];
+                RTC_PARANOID(("Option %s exists.", option));
+                default_opts[option] = (*p)[option];
               }
           }
         ec->init(default_opts);
@@ -3077,3 +3079,12 @@ namespace RTC
 
 
 } // namespace RTC
+
+
+// Bi-Directional GIOP: servants activated by _this() live in the POA of the
+// Manager (see Manager::isBiDirectionalGIOP()).
+#include <rtm/Manager.h>
+PortableServer::POA_ptr RTC::RTObject_impl::_default_POA()
+{
+  return ::RTC::Manager::instance().getPOA();
+}
