@@ -63,8 +63,6 @@ function(csp_sample_configs)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${config}" "$<TARGET_FILE_DIR:${target}>/${name}")
     endforeach()
   endforeach()
-  install(FILES ${configs} "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+  install(FILES ${configs}
     DESTINATION "${INSTALL_RTM_EXAMPLE_DIR}/CSP/${CSP_SAMPLE_GROUP}" COMPONENT examples)
 endfunction()
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/README.md" DESTINATION "${INSTALL_RTM_EXAMPLE_DIR}/CSP/CSPCommon" COMPONENT examples)
