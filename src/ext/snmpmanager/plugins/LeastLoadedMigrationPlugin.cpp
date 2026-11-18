@@ -6,9 +6,9 @@
  * @~japanese
  * 処理 (action) プラグインの例: 移動先を、その時点で負荷が最も低い生きているロボットに決めて移す
  *
- * 使い方・args は Python 版 plugins/least_loaded_migration.py と同じ。
+ * 使い方・args は Python 版 plugins/LeastLoadedMigrationPlugin.py と同じ。
  * @~english
- * The usage and args are the same as the Python version plugins/least_loaded_migration.py.
+ * The usage and args are the same as the Python version plugins/LeastLoadedMigrationPlugin.py.
  * @~
  *
  * @date $Date: 2026-11-13 16:24:26 $

@@ -102,9 +102,9 @@ namespace snmpmgr
 
   /*!
    * @~japanese
-   * @brief 配置の対象の RTC (placement.py の Item と同じ)
+   * @brief 配置の対象の RTC (RTCPlacement.py の Item と同じ)
    * @~english
-   * @brief RTC to place (same as Item in placement.py)
+   * @brief RTC to place (same as Item in RTCPlacement.py)
    * @~
    */
   struct PlacementItem
@@ -122,9 +122,9 @@ namespace snmpmgr
 
   /*!
    * @~japanese
-   * @brief 配置先のロボット (placement.py の Robot と同じ)
+   * @brief 配置先のロボット (RTCPlacement.py の Robot と同じ)
    * @~english
-   * @brief Robot to place on (same as Robot in placement.py)
+   * @brief Robot to place on (same as Robot in RTCPlacement.py)
    * @~
    */
   struct PlacementRobot
@@ -143,9 +143,9 @@ namespace snmpmgr
 
   /*!
    * @~japanese
-   * @brief RTC 間の接続 (placement.py の Edge と同じ)
+   * @brief RTC 間の接続 (RTCPlacement.py の Edge と同じ)
    * @~english
-   * @brief Connection between RTCs (same as Edge in placement.py)
+   * @brief Connection between RTCs (same as Edge in RTCPlacement.py)
    * @~
    */
   struct PlacementEdge
@@ -170,9 +170,9 @@ namespace snmpmgr
 
   /*!
    * @~japanese
-   * @brief 目的関数 (objective のロジック) に渡す途中の状態 (placement.py の state と同じ)
+   * @brief 目的関数 (objective のロジック) に渡す途中の状態 (RTCPlacement.py の state と同じ)
    * @~english
-   * @brief Intermediate state passed to the objective function (objective logic) (same as state in placement.py)
+   * @brief Intermediate state passed to the objective function (objective logic) (same as state in RTCPlacement.py)
    * @~
    */
   struct ObjectiveState

@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file FirstFitPlacementPlugin.cpp
- * @brief Example placement plugin: the first_fit logic (same as the Python version first_fit_placement.py)
+ * @brief Example placement plugin: the first_fit logic (same as the Python version FirstFitPlacementPlugin.py)
  *
  * @~japanese
- * 配置 (placement) プラグインの例: first_fit のロジック (Python 版 first_fit_placement.py と同じ)
+ * 配置 (placement) プラグインの例: first_fit のロジック (Python 版 FirstFitPlacementPlugin.py と同じ)
  *
  * @code
  *   "placement_plugin": "first_fit", "placement_args": {"order": ["robot1", "robot2", "robot3"]}
