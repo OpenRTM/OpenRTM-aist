@@ -984,7 +984,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
@@ -1001,7 +1003,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
