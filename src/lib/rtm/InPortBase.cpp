@@ -636,6 +636,7 @@ namespace RTC
           {
             return RTC::RTC_ERROR;
           }
+        connector->setEndian(littleEndian);
 
         RTC_DEBUG(("subscribeInterfaces() successfully finished."));
         return RTC::RTC_OK;

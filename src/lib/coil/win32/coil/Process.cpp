@@ -90,12 +90,18 @@ namespace coil
       {
           return -1;
       }
+      if (!SetHandleInformation(rPipe, HANDLE_FLAG_INHERIT, 0))
+      {
+          CloseHandle(rPipe);
+          CloseHandle(wPipe);
+          return -1;
+      }
 
 
       STARTUPINFO si{};
       si.cb = sizeof(si);
       si.dwFlags = STARTF_USESTDHANDLES;
-      si.hStdInput = stdin;
+      si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
       si.hStdOutput = wPipe;
       si.hStdError = wPipe;
 
@@ -130,28 +136,32 @@ namespace coil
           delete[] lpcommandbatch;
           if (!retcpbatch)
           {
+              CloseHandle(rPipe);
+              CloseHandle(wPipe);
               return -1;
           }
       }
 
+      CloseHandle(wPipe);
+      std::string output;
+      char buffer[4096];
+      DWORD bytesRead = 0;
+      BOOL readOk;
+      while ((readOk = ReadFile(rPipe, buffer, sizeof(buffer), &bytesRead, nullptr)) && bytesRead != 0)
+      {
+          output.append(buffer, bytesRead);
+      }
+      const DWORD readError = readOk ? ERROR_SUCCESS : GetLastError();
+      CloseHandle(rPipe);
       WaitForSingleObject(pi.hProcess, INFINITE);
       CloseHandle(pi.hProcess);
       CloseHandle(pi.hThread);
-
-      DWORD len;
-      DWORD size = GetFileSize(rPipe, nullptr);
-      if (size == 0)
-      {
-          return 0;
-      }
-      std::unique_ptr<CHAR[]> Buf(new CHAR[static_cast<size_t>(size) + 1]);
-      Buf[size] = '\0';
-      if (!ReadFile(rPipe, Buf.get(), size, &len, nullptr))
+      if (readError != ERROR_SUCCESS && readError != ERROR_BROKEN_PIPE && readError != ERROR_HANDLE_EOF)
       {
           return -1;
       }
 
-      for(auto&& o : coil::split(std::string(Buf.get()), "\n"))
+      for(auto&& o : coil::split(output, "\n"))
       {
           if (!o.empty() && o.back() == '\r')
           {

@@ -30,6 +30,8 @@ namespace coil
    */
   PeriodicTask::PeriodicTask()
   {
+    m_execStat.stat = {};
+    m_periodStat.stat = {};
   }
 
   /*!
@@ -102,10 +104,8 @@ namespace coil
    */
   int PeriodicTask::resume()
   {
-    m_periodTime.reset();
-    m_execTime.reset();
-
     std::lock_guard<std::mutex> guard(m_suspend.mutex);
+    m_suspend.resetMeasurements = true;
     m_suspend.suspend = false;
     m_suspend.cond.notify_one();
     return 0;
@@ -234,29 +234,43 @@ namespace coil
    */
   int PeriodicTask::svc()
   {
-    while (m_alive.value)  // needs lock?
+    bool periodStarted = false;
+    while (m_alive.value)
       {
-        if (m_periodMeasure) { m_periodTime.tack(); }
-        {  // wait if suspended
+        {
           std::unique_lock<std::mutex> suspend_guard(m_suspend.mutex);
           if (m_suspend.suspend)
             {
+              periodStarted = false;
               m_suspend.cond.wait(suspend_guard);
-              // break if finalized
-              if (!m_alive.value)
-                {
-                  return 0;
-                }
+            }
+          if (!m_alive.value)
+            {
+              return 0;
+            }
+          if (m_suspend.resetMeasurements)
+            {
+              m_periodTime.reset();
+              m_execTime.reset();
+              m_periodCount = 0;
+              m_execCount = 0;
+              periodStarted = false;
+              m_suspend.resetMeasurements = false;
             }
         }
-        if (m_periodMeasure) { m_periodTime.tick(); }
+        const bool measurePeriod = m_periodMeasure;
+        if (measurePeriod)
+          {
+            if (periodStarted) { m_periodTime.tack(); }
+            m_periodTime.tick();
+          }
+        periodStarted = measurePeriod;
 
-        // task execution
-        if (m_execMeasure) { m_execTime.tick(); }
+        const bool measureExecution = m_execMeasure;
+        if (measureExecution) { m_execTime.tick(); }
         m_func();
-        if (m_execMeasure) { m_execTime.tack(); }
+        if (measureExecution) { m_execTime.tack(); }
 
-        // wait for next period
         updateExecStat();
         sleep();
         updatePeriodStat();
@@ -277,9 +291,10 @@ namespace coil
    */
   void PeriodicTask::sleep()
   {
-    if (m_period > std::chrono::seconds::zero())
+    const auto period = m_period.load();
+    if (period > std::chrono::seconds::zero())
       {
-        std::this_thread::sleep_for(m_period - m_execTime.interval());
+        std::this_thread::sleep_for(period - (m_execMeasure ? m_execTime.interval() : std::chrono::nanoseconds::zero()));
       }
   }
 
