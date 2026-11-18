@@ -6,7 +6,7 @@
 #         Nobu Kawauchi
 #
 
-VERSION=2.1.0.02
+VERSION=2.1.0.03
 FILENAME=openrtm2_install_raspbian.sh
 BIT=`getconf LONG_BIT`
 
@@ -58,8 +58,8 @@ version()
 #---------------------------------------
 # パッケージリスト
 #---------------------------------------
-default_reposerver="openrtm.org"
-reposervers="openrtm.org"
+default_reposerver="packages.openrtm.org"
+reposervers="packages.openrtm.org"
 reposerver=""
 
 openrtm_py="openrtm-aist-python3-doc openrtm-aist-python3-example openrtm-aist-python3"
@@ -360,43 +360,55 @@ create_srclist () {
 # ソースリスト更新関数の定義
 #---------------------------------------
 update_source_list () {
-  rtmsite1=`grep $reposerver /etc/apt/sources.list`
-  if test -f "/etc/apt/sources.list.d/openrtm.list"; then
-    rtmsite2=`grep $reposerver /etc/apt/sources.list.d/openrtm.list`
-  else
-    rtmsite2=""
-  fi
-  if test "x$rtmsite1" = "x" &&
-     test "x$rtmsite2" = "x" ; then
-    echo $msg4
-    echo $msg5
-    echo "  " $openrtm_repo
-    read -p "$msg6" kick_shell
+  local list_file="/etc/apt/sources.list.d/openrtm.list"
+  local key_file="/etc/apt/keyrings/openrtm-keyring.gpg"
+  local tmp_file
 
-    if test "x$kick_shell" = "xn" ; then
-      echo $msg7
-      exit 0
-    else
-      echo $openrtm_repo | sudo tee /etc/apt/sources.list.d/openrtm.list > /dev/null
-      if [ ! -d /etc/apt/keyrings ]; then
-        sudo mkdir -p /etc/apt/keyrings
-      fi
-      sudo wget --secure-protocol=TLSv1_2 --no-check-certificate http://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
+  # Remove old OpenRTM repository entries from sources.list
+  if [ -f /etc/apt/sources.list ]; then
+    if grep -Eq '^[[:space:]]*deb .*https?://openrtm\.org/pub/Linux/raspbian/' \
+       /etc/apt/sources.list; then
+      sudo sed -i.bak \
+        '\|^[[:space:]]*deb .*https\?://openrtm\.org/pub/Linux/raspbian/|d' \
+        /etc/apt/sources.list || return 1
     fi
-  elif [ ! -e /etc/apt/keyrings/openrtm-keyring.gpg ]; then
-    if test "x$rtmsite1" != "x" ; then
-      sudo sed -i.bak '/http:\/\/openrtm.org\/pub\/Linux\/raspbian\//d' /etc/apt/sources.list
-    fi
-    if test "x$rtmsite2" != "x" ; then
-      sudo rm /etc/apt/sources.list.d/openrtm.list
-    fi
-    echo $openrtm_repo | sudo tee /etc/apt/sources.list.d/openrtm.list > /dev/null
-    if [ ! -d /etc/apt/keyrings ]; then
-      sudo mkdir -p /etc/apt/keyrings
-    fi
-    sudo wget --secure-protocol=TLSv1_2 --no-check-certificate https://$reposerver/pub/openrtm-keyring.gpg -O /etc/apt/keyrings/openrtm-keyring.gpg
   fi
-  
+
+  # Create or update OpenRTM repository entry
+  if [ ! -f "$list_file" ] ||
+     [ "$(cat "$list_file")" != "$openrtm_repo" ]; then
+
+    echo "$msg5"
+    echo "  $openrtm_repo"
+    printf "%s" "$msg6"
+    read kick_shell
+
+    if [ "$kick_shell" = "n" ]; then
+      echo "$msg7"
+      exit 0
+    fi
+
+    tmp_file=$(mktemp) || return 1
+    printf '%s\n' "$openrtm_repo" > "$tmp_file"
+
+    if ! sudo install -m 644 "$tmp_file" "$list_file"; then
+      rm -f "$tmp_file"
+      return 1
+    fi
+
+    rm -f "$tmp_file"
+    echo "OpenRTM repository entry updated."
+  fi
+
+  # Download GPG key only if it does not exist
+  if [ ! -e "$key_file" ]; then
+    sudo mkdir -p /etc/apt/keyrings || return 1
+    sudo wget --secure-protocol=TLSv1_2 \
+      --no-check-certificate \
+      "http://$reposerver/pub/openrtm-keyring.gpg" \
+      -O "$key_file" || return 1
+  fi
+
   if test "x$FORCE_YES" = "xtrue" ; then
     sudo apt install --assume-yes --allow-unauthenticated dirmngr
   else
@@ -800,9 +812,9 @@ check_lang
 reposerver=$default_reposerver
 check_codename
 create_srclist
-update_source_list
+update_source_list || exit 1
 sudo apt autoclean
-sudo apt update
+sudo apt update || exit 1
 
 if test "x$arg_all" = "xtrue" &&
    test "x$OPT_OLD_RTM" = "xfalse" ; then
