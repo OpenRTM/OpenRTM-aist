@@ -144,14 +144,17 @@ namespace RTC
   {
       if (!m_shmem.created())
       {
-      m_shmem.create(shm_address, memory_size);
-      try
-      {
-          m_smInterface->open_memory(memory_size, CORBA::string_dup(shm_address));
+        m_shmem.create(shm_address, memory_size);
+        if (!CORBA::is_nil(m_smInterface))
+        {
+          try
+          {
+            m_smInterface->open_memory(memory_size, shm_address);
           }
           catch (...)
           {
           }
+        }
       }
   }
   /*!
@@ -199,12 +202,15 @@ namespace RTC
           {
               m_shmem.unlink();
           }
-          try
+          if (!CORBA::is_nil(m_smInterface))
           {
-              m_smInterface->close_memory(false);
-          }
-          catch (...)
-          {
+              try
+              {
+                  m_smInterface->close_memory(false);
+              }
+              catch (...)
+              {
+              }
           }
       }
   }

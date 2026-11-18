@@ -471,7 +471,7 @@ namespace RTC
                 {
                   timeout = m_wtimeout;
                 }
-              if (std::cv_status::timeout == m_empty.cond.wait_for(guard, timeout))
+              if (!m_full.cond.wait_for(guard, timeout, [this] { return !full(); }))
                 {
                   return BufferStatus::TIMEOUT;
                 }
@@ -747,7 +747,6 @@ namespace RTC
             {
               timedread = true;
               readback  = false;
-              timeout = m_rtimeout;
             }
 
           if (readback && !timedread)       // "readback" mode
@@ -768,7 +767,7 @@ namespace RTC
                 {
                   timeout = m_rtimeout;
                 }
-              if (std::cv_status::timeout == m_empty.cond.wait_for(guard, timeout))
+              if (!m_empty.cond.wait_for(guard, timeout, [this] { return !empty(); }))
                 {
                   return BufferStatus::TIMEOUT;
                 }

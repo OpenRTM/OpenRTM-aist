@@ -173,6 +173,7 @@ namespace RTC
     RTC_TRACE(("Manager::shutdown()"));
     m_listeners.manager_.preShutdown();
     shutdownComponents();
+    RTM::LocalServiceAdmin::instance().finalize();
     shutdownNaming();
     shutdownManagerServant();
     shutdownORB();
@@ -1513,6 +1514,10 @@ namespace RTC
    */
   void Manager::shutdownManagerServant()
   {
+    if (m_mgrservant == nullptr)
+    {
+      return;
+    }
     PortableServer::ObjectId_var oid = m_pPOA->servant_to_id(m_mgrservant);
     m_pPOA->deactivate_object(oid);
     delete m_mgrservant;
@@ -2389,31 +2394,35 @@ namespace RTC
     std::string type_name(comp->getTypeName());
     std::string inst_name(comp->getInstanceName());
 
-    std::string type_conf(category + "." + type_name + ".config_file");
-    std::string name_conf(category + "." + inst_name + ".config_file");
+    const std::string prefix = category.empty() ? "" : category + ".";
+    const std::string type_key = prefix + type_name;
+    const std::string instance_key = prefix + inst_name;
+    const std::string type_conf = type_key + ".config_file";
+    const std::string name_conf = instance_key + ".config_file";
+    const coil::Properties& config = m_config;
     coil::vstring config_fname;
     coil::Properties type_prop, name_prop;
 
     // Load "category.instance_name.config_file"
-    if (!m_config[name_conf].empty())
+    if (!config[name_conf].empty())
     {
-      std::ifstream conff(m_config[name_conf].c_str());
+      std::ifstream conff(config[name_conf].c_str());
       if (!conff.fail())
       {
         name_prop.load(conff);
         RTC_INFO(("Component instance conf file: %s loaded.",
-                  m_config[name_conf].c_str()));
+                  config[name_conf].c_str()));
         RTC_DEBUG_STR((name_prop));
-        config_fname.emplace_back(m_config[name_conf]);
+        config_fname.emplace_back(config[name_conf]);
       }
     }
-    if (m_config.findNode(category + "." + inst_name) != nullptr)
+    if (m_config.findNode(instance_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + inst_name));
+      coil::Properties &temp(m_config.getNode(instance_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        name_prop << m_config.getNode(category + "." + inst_name);
+        name_prop << m_config.getNode(instance_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((name_prop));
         if (m_config.findNode("config_file") != nullptr)
@@ -2422,25 +2431,25 @@ namespace RTC
         }
       }
     }
-    if (!m_config[type_conf].empty())
+    if (!config[type_conf].empty())
     {
-      std::ifstream conff(m_config[type_conf].c_str());
+      std::ifstream conff(config[type_conf].c_str());
       if (!conff.fail())
       {
         type_prop.load(conff);
         RTC_INFO(("Component type conf file: %s loaded.",
-                  m_config[type_conf].c_str()));
+                  config[type_conf].c_str()));
         RTC_DEBUG_STR((type_prop));
-        config_fname.emplace_back(m_config[type_conf]);
+        config_fname.emplace_back(config[type_conf]);
       }
     }
-    if (m_config.findNode(category + "." + type_name) != nullptr)
+    if (m_config.findNode(type_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + type_name));
+      coil::Properties &temp(m_config.getNode(type_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        type_prop << m_config.getNode(category + "." + type_name);
+        type_prop << m_config.getNode(type_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((type_prop));
         if (m_config.findNode("config_file") != nullptr)

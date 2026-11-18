@@ -41,9 +41,8 @@ namespace RTM
    * @endif
    */
   LocalServiceAdmin::LocalServiceAdmin()
-    : rtclog("LocalServiceAdmin")
+    : m_silentLogger(static_cast<RTC::LogStreamBuf*>(nullptr))
   {
-    RTC_TRACE(("LocalServiceAdmin::LocalServiceAdmin()"));
   }
 
   /*!
@@ -83,6 +82,10 @@ namespace RTM
    */
   void LocalServiceAdmin::init(coil::Properties& props)
   {
+    // The administrator is a singleton, but the log buffer belongs to the
+    // current Manager and is recreated when the Manager restarts.
+    m_logger.reset(new RTC::Logger("LocalServiceAdmin"));
+    auto& rtclog = *m_logger;
     RTC_TRACE(("LocalServiceAdmin::init():"));
     RTC_DEBUG_STR((props));
     coil::vstring svcs(coil::split(props["enabled_services"], ","));
@@ -129,6 +132,7 @@ namespace RTM
         factory.deleteObject(service);
       }
     m_services.clear();
+    m_logger.reset();
   }
 
   /*!
@@ -200,6 +204,7 @@ namespace RTM
   bool
   LocalServiceAdmin::addLocalService(::RTM::LocalServiceBase* service)
   {
+    auto& rtclog = logger();
     if (service == nullptr)
       {
         RTC_ERROR(("Invalid argument: addLocalService(service == NULL)"));
@@ -221,6 +226,7 @@ namespace RTM
    */
   bool LocalServiceAdmin::removeLocalService(const std::string& name)
   {
+    auto& rtclog = logger();
     RTC_TRACE(("removeLocalService(%s)", name.c_str()));
     std::lock_guard<std::mutex> guard(m_services_mutex);
 
@@ -256,6 +262,7 @@ namespace RTM
   bool LocalServiceAdmin::isEnabled(const std::string& id,
                                     const coil::vstring& enabled)
   {
+    auto& rtclog = logger();
     bool ret = std::find(enabled.begin(), enabled.end(), id) != enabled.end();
     RTC_DEBUG(("Local service %s %s enabled.", id.c_str(),
                ret ? "is" : "is not"));
@@ -272,6 +279,7 @@ namespace RTM
    */
   bool LocalServiceAdmin::notExisting(const std::string& id)
   {
+    auto& rtclog = logger();
     std::lock_guard<std::mutex> guard(m_services_mutex);
     for (auto & service : m_services)
       {

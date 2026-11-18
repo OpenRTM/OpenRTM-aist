@@ -87,7 +87,8 @@ namespace coil
     unsigned short crc16(0xffff);
     for (size_t i(0); i < len; ++i)
       {
-        crc16 = crc16tab[(crc16 >> 8) ^ str[i]] ^ (crc16 << 8);
+        const auto byte = static_cast<unsigned char>(str[i]);
+        crc16 = crc16tab[(crc16 >> 8) ^ byte] ^ (crc16 << 8);
       }
     return crc16 ^ 0x0000;
   }
@@ -184,7 +185,8 @@ namespace coil
     unsigned long c(0xffffffffL);
     for (size_t i(0); i < len; ++i)
       {
-        c = crc32tab[(0xff ^ str[i]) & 0xff] ^ (c >> 8);
+        const auto byte = static_cast<unsigned char>(str[i]);
+        c = crc32tab[(c ^ byte) & 0xffUL] ^ (c >> 8);
       }
     return c ^ 0xffffffffL;
   }
