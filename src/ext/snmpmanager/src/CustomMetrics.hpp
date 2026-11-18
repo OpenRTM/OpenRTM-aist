@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file CustomMetrics.hpp
- * @brief Additional monitoring values (custom metrics). Same as the Python version snmpmgr_metrics.py
+ * @brief Additional monitoring values (custom metrics). Same as the Python version CustomMetrics.py
  *
  * @~japanese
- * 追加の監視の値 (カスタムメトリクス)。Python 版 snmpmgr_metrics.py と同じ
+ * 追加の監視の値 (カスタムメトリクス)。Python 版 CustomMetrics.py と同じ
  *
  * @verbatim
  * rtc.conf: snmp.metrics: temperature, motor_current

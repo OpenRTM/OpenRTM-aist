@@ -2,7 +2,7 @@
 
 `SNMPManager.py` を C++ (OpenRTM-aist 2.1 C++) で書き直したマスターマネージャです。Linux と Windows で動きます。
 rtc.conf の `snmp.*` と構成ファイル (`snmp.migration_config` の JSON)、配置プロファイル (`placement.xml`)、
-SQLite の保存形式は Python 版と同じなので、`docker-test` の構成ファイルや `snmpmgr_store.py` の CLI がそのまま使えます。
+SQLite の保存形式は Python 版と同じなので、`docker-test` の構成ファイルや `MonitoringStore.py` の CLI がそのまま使えます。
 
 ## 機能 (Python 版と同じ)
 
@@ -36,6 +36,8 @@ SQLite の保存形式は Python 版と同じなので、`docker-test` の構成
 
 ## ビルド
 
+OpenRTM-aist のソースに組み込んでビルドする場合 (`openrtm-ext`、`-DSNMPMANAGER_ENABLE=ON`) は、`openrtm-ext/README.md` を見てください。OpenRTM-aist に配置するものには、単体テスト (`tests/`) とビルド用のスクリプト (`build.sh`、`build-win.ps1`、`docker/`) は入りません。以下は、このディレクトリを単独でビルドする方法です。
+
 WSL2 の Ubuntu (docker が使えること) で実行します。ビルドは Docker イメージ `rtm-snmp-cpp` の中で行い、
 単体テストも流します。
 
@@ -48,7 +50,7 @@ bash snmpmanager-cpp/build.sh
 - `snmpmanager`: マスターマネージャ本体。`snmpmanager -f rtc.conf` で起動する
 - `snmpmgr_measure.so`: C++ の slave (`rtcd2`) に読み込む計測モジュール
 - `plugins/lib*.so`: サンプルプラグイン
-- `snmpmgr_tests`: 単体テスト (99 件)。配置・プロファイル・保存・プラグイン・計測・SNMP の符号化・slave の終了の検知を確認する
+- `snmpmgr_tests`: 単体テスト (Linux 128 件、Windows 126 件)。配置・プロファイル・保存・プラグイン・計測・SNMP の符号化・slave の終了の検知を確認する
 
 SNMP は既定で Net-SNMP を使います。`SNMPMGR_SNMP=builtin bash snmpmanager-cpp/build.sh` とすると、Windows と同じ組み込みの実装でビルドします (Net-SNMP をリンクしない)。
 
@@ -135,8 +137,8 @@ snmp.plugin.path: /opt/snmpmgr-cpp/plugins
 
 Python 版（`docker-test/README.md` の「マネージャによる実測値の計測と保存」）と、同じ設定（`snmp.measure.*`）と同じ保存の形式で動きます。
 
-- **計測**：slave の計測モジュールは、Python 版と同じ `snmpmgr_measure.py` です。docker-test の slave は Python（`rtcd_tk.py`）だからです。
-  - C++ のマスターは `.py` を読めないので、rtc.conf の `manager.modules.preload` には書きません。代わりに、slave の起動コマンドで渡します（`manager.modules.Python.manager_cmd: python3 /opt/rtm/rtcd_tk.py -o manager.modules.preload:/opt/snmpmgr/snmpmgr_measure.py`）。
+- **計測**：slave の計測モジュールは、Python 版と同じ `SlaveMeasureModule.py` です。docker-test の slave は Python（`RtcdTk.py`）だからです。
+  - C++ のマスターは `.py` を読めないので、rtc.conf の `manager.modules.preload` には書きません。代わりに、slave の起動コマンドで渡します（`manager.modules.Python.manager_cmd: python3 /opt/rtm/RtcdTk.py -o manager.modules.preload:/opt/snmpmgr/SlaveMeasureModule.py`）。
 - **保存**：`SNMPManager::collect_measurements` が、`snmp.measure.save_interval` 秒ごとに `snmp.measure.runtime_dir` の計測を集めます。保存先は次の3つで、Python 版と同じファイル・同じテーブルです。
   - `snmp.measure.dir/<ロボット>/runs.json`
   - `<言語>/<型名>/placement.xml`（`plc:origin="runtime"`）
@@ -145,7 +147,7 @@ Python 版（`docker-test/README.md` の「マネージャによる実測値の�
 - **見込み値**：`ProfileDB` が、計測した placement.xml があればその値を使います。規則は Python 版の `placement.ProfileDB` と同じです（CPU・メモリは計測値の最大、ポートは送受信があったものだけ置き換える、`requires` は静的な値）。自動配置のログに `measured estimates: ...` が出ます。
 - あわせて、`ProfileDB` がカンマ区切りの `snmp.placement.profile_dir` を読めるようにしました。docker-test の設定は `placement,placement-extra` の2つですが、これまでの C++ 版は1つしか読めませんでした。
 
-- **C++ の RTC の計測**：計測モジュールの C++ 版 `snmpmgr_measure.so` (Windows は `snmpmgr_measure.dll`) を、C++ の slave (`rtcd2`) に preload します。Python 版 `snmpmgr_measure.py` と同じ値 (CPU・USS・ポートの送受信) を、同じ形式の `<マネージャ名>.json` に書きます。マスター (Python 版・C++ 版のどちらでも) が集めて、`C__/<型名>/placement.xml` と SQLite に保存します。
+- **C++ の RTC の計測**：計測モジュールの C++ 版 `snmpmgr_measure.so` (Windows は `snmpmgr_measure.dll`) を、C++ の slave (`rtcd2`) に preload します。Python 版 `SlaveMeasureModule.py` と同じ値 (CPU・USS・ポートの送受信) を、同じ形式の `<マネージャ名>.json` に書きます。マスター (Python 版・C++ 版のどちらでも) が集めて、`C__/<型名>/placement.xml` と SQLite に保存します。
   ```
   manager.modules.C++.manager_cmd: rtcd2 -o manager.modules.preload:/opt/snmpmgr-cpp/snmpmgr_measure.so
   ```
@@ -190,7 +192,7 @@ powershell -ExecutionPolicy Bypass -File build-win.ps1
 | SNMP | 組み込みの実装 (`SNMPMGR_SNMP=builtin`)。SNMPv2c の GET・GETNEXT・トラップの送信と受信 (v1 のトラップも読む) |
 | SQLite | Windows SDK の `winsqlite3` (OS の `winsqlite3.dll`) |
 | tinyxml2 | 既定は Chocolatey の `C:\ProgramData\chocolatey\lib\tinyxml2` (`-DTINYXML2_DIR=` で変えられる)。`tinyxml2.dll` を `bin\` にコピーする |
-| nlohmann_json | `third_party/nlohmann` (Debian の nlohmann-json3-dev 3.11.3 のヘッダ。MIT ライセンス、`COPYRIGHT`) |
+| nlohmann_json | インストール済みのもの（Linux：`nlohmann-json3-dev` など）があれば使い、見つからなければ CMake の実行時に nlohmann/json 3.11.3 をダウンロードする（`FetchContent`。SHA-256 で確かめる。ダウンロード先は `<ビルドディレクトリ>/_deps/nlohmann_json-src`）。ダウンロードできない環境では、別に入れて `-DCMAKE_PREFIX_PATH` で場所を渡す |
 | GLPK (ILP の配置プラグインだけ。なくてもほかはビルドできる) | winglpk 4.65 (SourceForge の `winglpk-4.65.zip`) を `%LOCALAPPDATA%\glpk` に展開したもの (既定。`-DGLPK_DIR=` で変えられる)。`glpk_4_65.dll` を `bin\plugins\` にコピーする |
 
 Linux 版との違いと、Windows のための対処は次のとおりです。
@@ -278,7 +280,7 @@ API のバージョンは `SNMPMGR_PLUGIN_API_VERSION` (=3) です。違うバ�
 | `alive_count` | 条件 | 生きているロボットの数 |
 | `event_log` | イベント | イベントを JSON Lines でファイルに書く |
 | `first_fit_placement` | 配置 | 主ロボットから順に、入るだけ詰める |
-| `ilp_placement` | 配置 | 整数線形計画 (ILP) のソルバー GLPK で配置を決める (Python 版 `plugins/ilp_placement.py` と同じモデル・同じ `placement_args`。`solver` は `glpk` だけ)。GLPK があるときだけビルドする |
+| `ilp_placement` | 配置 | 整数線形計画 (ILP) のソルバー GLPK で配置を決める (Python 版 `plugins/ILPPlacementPlugin.py` と同じモデル・同じ `placement_args`。`solver` は `glpk` だけ)。GLPK があるときだけビルドする |
 
 ## 確認した結果 (docker-test, WSL2)
 
@@ -312,7 +314,7 @@ API のバージョンは `SNMPMGR_PLUGIN_API_VERSION` (=3) です。違うバ�
 | 組み込みの SNMP の実装 (`SNMPMGR_SNMP=builtin`) で `up`・`migrate`・`spof-standby.json`・`observer.json` | Net-SNMP 版と同じ: 3 台を発見、Wi-Fi -85 dBm でマイグレーション、実行ロボットの選出と `Startup Completed` のトラップ、`RTC Error` のトラップで 0.98 秒で復旧 |
 | `startup-auto-ilp.json` (`ilp_placement`、GLPK 5.0) | 変数 22・制約 36 のモデルを解き (`ILP (glpk, lexicographic): optimal`)、robot1 に SeqIO と MyService の 4 つ、robot3 に Slider・Motor を置いた。ロボットをまたぐ接続はなし |
 | `metrics-migration.json` / `metrics-recovery.json` (追加の監視の値 `temperature`) | Python 版と同じ: robot1 75℃・robot3 80℃ で、実行ロボットは robot2、robot3 を配置から外して robot1 の RTC を robot2 に移した。robot2 80℃ で、robot2 の RTC を robot1 と robot3 の待機モジュールに移した (2.4 秒) |
-| 単体テスト | passed 128, failed 0 (Windows は 126。追加の監視の値の設定・制約・保存を含む。配置の結果は Python 版の `placement.py` と一致。first_fit・objective のロジック・ロボット間の制約・待機モジュールと既存の RTC・目的関数のプラグイン・ILP のプラグイン (組み込みの optimal と 5 通りで評価が一致)・実測値・計測の按分・SNMP の符号化・`launch_shell` の置き換えを含む) |
+| 単体テスト | passed 128, failed 0 (Windows は 126。追加の監視の値の設定・制約・保存を含む。配置の結果は Python 版の `RTCPlacement.py` と一致。first_fit・objective のロジック・ロボット間の制約・待機モジュールと既存の RTC・目的関数のプラグイン・ILP のプラグイン (組み込みの optimal と 5 通りで評価が一致)・実測値・計測の按分・SNMP の符号化・`launch_shell` の置き換えを含む) |
 
 ## ファイル
 
@@ -331,7 +333,7 @@ snmpmanager-cpp/
   src/RTCPlacement.{hpp,cpp}              プロファイル (placement.xml) と配置ソルバ
   src/MonitoringStore.{hpp,cpp}           SQLite への保存
   src/PluginManager.{hpp,cpp}             プラグインの読み込みと呼び出し
-  src/MeasurementAggregator.{hpp,cpp}     実測値のまとめ方と placement.xml (Python 版 snmpmgr_measure.py と同じ)
+  src/MeasurementAggregator.{hpp,cpp}     実測値のまとめ方と placement.xml (Python 版 SlaveMeasureModule.py と同じ)
   src/SlaveProcessObserver.{hpp,cpp}      slave の起動と終了の検知 (Linux: coil::launch_shell の置き換え、Windows: pid の観測)
   src/SNMPManagerConfigure.cpp            実行ロボットの選出・起動時の構成・RTC の一覧・待機モジュール・予約・自動配置・計画の適用・マイグレーション
   src/SNMPManagerRecovery.cpp             自動復旧
@@ -344,5 +346,4 @@ snmpmanager-cpp/
   tests/TestMain.cpp                      単体テスト
   win/WifiRssi.cpp                        電波強度 (RSSI) を出力するツール wifi_rssi.exe
   win/utf8.manifest                       Windows の実行ファイルのマニフェスト (ANSI コードページを UTF-8 に)
-  third_party/nlohmann                    nlohmann_json のヘッダ (Windows 用)
 ```

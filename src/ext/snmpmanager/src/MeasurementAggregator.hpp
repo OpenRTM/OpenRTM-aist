@@ -6,9 +6,9 @@
  * @~japanese
  * マネージャによる実測値の保存と計測の按分
  *
- * Python 版 snmpmgr_measure.py の update_runs / aggregate / render_placement と同じ。slave に読み込んだ計測モジュールが snmp.measure.runtime_dir/\<slave\>.json に書いた計測を、マスターの SNMPManager が集めて runs.json・placement.xml (plc:origin="runtime")・SQLite に保存する。
+ * Python 版 SlaveMeasureModule.py の update_runs / aggregate / render_placement と同じ。slave に読み込んだ計測モジュールが snmp.measure.runtime_dir/\<slave\>.json に書いた計測を、マスターの SNMPManager が集めて runs.json・placement.xml (plc:origin="runtime")・SQLite に保存する。
  * @~english
- * Same as update_runs / aggregate / render_placement of the Python version snmpmgr_measure.py. The master SNMPManager collects the measurements written to snmp.measure.runtime_dir/\<slave\>.json by the measurement module loaded into the slaves, and saves them to runs.json, placement.xml (plc:origin="runtime") and SQLite.
+ * Same as update_runs / aggregate / render_placement of the Python version SlaveMeasureModule.py. The master SNMPManager collects the measurements written to snmp.measure.runtime_dir/\<slave\>.json by the measurement module loaded into the slaves, and saves them to runs.json, placement.xml (plc:origin="runtime") and SQLite.
  * @~
  *
  * @date $Date: 2026-11-13 16:24:27 $
@@ -121,7 +121,7 @@ namespace snmpmgr
      */
     std::string safe_name(const std::string& text);
 
-    // ---- slave 側の計測 (snmpmgr_measure.so。Python 版 snmpmgr_measure.py の attribute_* / summarize と同じ)
+    // ---- slave 側の計測 (snmpmgr_measure.so。Python 版 SlaveMeasureModule.py の attribute_* / summarize と同じ)
     /*!
      * @~japanese
      * @brief プロセスの CPU 使用率を RTC ごとに分ける (slave 側の計測。Python 版の attribute_cpu と同じ)

@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file LinkAwareObjectivePlugin.cpp
- * @brief Example objective plugin: an objective logic that weighs the link quality (same as the Python version link_aware_objective.py)
+ * @brief Example objective plugin: an objective logic that weighs the link quality (same as the Python version LinkAwareObjectivePlugin.py)
  *
  * @~japanese
- * 目的関数 (objective) プラグインの例: 通信状態を重く見る objective のロジック (Python 版 link_aware_objective.py と同じ)
+ * 目的関数 (objective) プラグインの例: 通信状態を重く見る objective のロジック (Python 版 LinkAwareObjectivePlugin.py と同じ)
  *
  * @code
  *   "logic": "objective",

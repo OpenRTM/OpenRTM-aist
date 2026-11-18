@@ -6,7 +6,7 @@
  * @~japanese
  * 配置 (placement) プラグインの例: 整数線形計画 (ILP) のソルバー GLPK で配置を決める
  *
- * Python 版 plugins/ilp_placement.py と同じモデル・同じ placement_args (solver は glpk だけ)。
+ * Python 版 plugins/ILPPlacementPlugin.py と同じモデル・同じ placement_args (solver は glpk だけ)。
  * @code
  *   "plugins": [{"module": "ilp_placement"}],
  *   "startup": {"mode": "auto", "placement_plugin": "ilp",
@@ -27,7 +27,7 @@
  * @endverbatim
  * placement_args: time_limit (1 回の求解の秒数。既定 10)、objective、weights、tolerance (既定 1e-6)
  * @~english
- * Same model and placement_args as the Python version plugins/ilp_placement.py (solver is glpk only).
+ * Same model and placement_args as the Python version plugins/ILPPlacementPlugin.py (solver is glpk only).
  * @code
  *   "plugins": [{"module": "ilp_placement"}],
  *   "startup": {"mode": "auto", "placement_plugin": "ilp",

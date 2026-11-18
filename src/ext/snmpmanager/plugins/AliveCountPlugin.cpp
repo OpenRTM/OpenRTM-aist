@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file AliveCountPlugin.cpp
- * @brief Example condition plugin: decides by the number of alive robots (same as the Python version alive_count.py)
+ * @brief Example condition plugin: decides by the number of alive robots (same as the Python version AliveCountPlugin.py)
  *
  * @~japanese
- * 条件 (condition) プラグインの例: 生きているロボットの数で判定する (Python 版 alive_count.py と同じ)
+ * 条件 (condition) プラグインの例: 生きているロボットの数で判定する (Python 版 AliveCountPlugin.py と同じ)
  *
  * @code
  *   {"plugin": "alive_count", "args": {"op": ">=", "value": 3, "robots": [...]}}

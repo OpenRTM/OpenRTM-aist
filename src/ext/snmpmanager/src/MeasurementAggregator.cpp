@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file MeasurementAggregator.cpp
- * @brief Saving of measurements by the managers (same aggregation and placement.xml as the Python version snmpmgr_measure.py)
+ * @brief Saving of measurements by the managers (same aggregation and placement.xml as the Python version SlaveMeasureModule.py)
  *
  * @~japanese
- * マネージャによる実測値の保存 (Python 版 snmpmgr_measure.py と同じまとめ方・同じ placement.xml)
+ * マネージャによる実測値の保存 (Python 版 SlaveMeasureModule.py と同じまとめ方・同じ placement.xml)
  * @~
  *
  * @date $Date: 2026-11-13 16:24:27 $

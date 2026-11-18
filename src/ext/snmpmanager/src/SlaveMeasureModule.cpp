@@ -6,7 +6,7 @@
  * @~japanese
  * snmpmgr_measure.so: C++ の slave マネージャ (rtcd2) に読み込む計測モジュール
  *
- * Python 版 snmpmgr_measure.py と同じものを、同じ設定 (snmp.measure.*) で計測し、同じ形式の snmp.measure.runtime_dir/\<マネージャ名\>.json に書き出す。マスターの SNMPManager (Python 版・C++ 版) が集めて保存する。
+ * Python 版 SlaveMeasureModule.py と同じものを、同じ設定 (snmp.measure.*) で計測し、同じ形式の snmp.measure.runtime_dir/\<マネージャ名\>.json に書き出す。マスターの SNMPManager (Python 版・C++ 版) が集めて保存する。
  * @code
  *   manager.modules.preload: /opt/snmpmgr-cpp/snmpmgr_measure.so
  *   snmp.measure.enabled: YES
@@ -18,7 +18,7 @@
  * - メモリ: プロセスの USS (Linux: smaps_rollup の Private、Windows: PrivateUsage)。RTC の値 = (USS - 最初の RTC を置く直前の USS) を、生成したときの増分の比で按分 (増分を下回らない)
  * - データポート: InPort は受信 (ON_RECEIVED)、OutPort は送信 (ON_SEND) したデータのバイト数と回数 (コネクタごと)
  * @~english
- * Measures the same items as the Python version snmpmgr_measure.py with the same settings (snmp.measure.*), and writes them to snmp.measure.runtime_dir/\<manager name\>.json in the same format. The master SNMPManager (Python or C++ version) collects and saves them.
+ * Measures the same items as the Python version SlaveMeasureModule.py with the same settings (snmp.measure.*), and writes them to snmp.measure.runtime_dir/\<manager name\>.json in the same format. The master SNMPManager (Python or C++ version) collects and saves them.
  * @code
  *   manager.modules.preload: /opt/snmpmgr-cpp/snmpmgr_measure.so
  *   snmp.measure.enabled: YES

@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file RTCPlacement.hpp
- * @brief Automatic placement of RTCs (same approach and priorities as the Python version placement.py)
+ * @brief Automatic placement of RTCs (same approach and priorities as the Python version RTCPlacement.py)
  *
  * @~japanese
- * RTC の自動配置 (Python 版 placement.py と同じ考え方・同じ優先順位)
+ * RTC の自動配置 (Python 版 RTCPlacement.py と同じ考え方・同じ優先順位)
  *
  * logic:
  * - optimal (既定): 全探索 (大きい問題は貪欲法) で、次の優先順位 (辞書式) の最良解を求める
@@ -192,13 +192,13 @@ namespace snmpmgr
 
   /*!
    * @~japanese
-   * @brief 静的な見込み値を実行中の計測値 (1 つ以上) で置き換える (placement.py の merge_measured)
+   * @brief 静的な見込み値を実行中の計測値 (1 つ以上) で置き換える (RTCPlacement.py の merge_measured)
    *
    * @param static_prof 静的な見込み値 (なければ nullopt)
    * @param runtime 実行中の計測値
    * @return 置き換えたプロファイル
    * @~english
-   * @brief Replaces the static estimates with runtime measurements (one or more) (merge_measured of placement.py)
+   * @brief Replaces the static estimates with runtime measurements (one or more) (merge_measured of RTCPlacement.py)
    *
    * @param static_prof static estimates (nullopt if none)
    * @param runtime runtime measurements
@@ -300,7 +300,7 @@ namespace snmpmgr
   const std::map<std::string, double>& default_weights();
   /*!
    * @~japanese
-   * @brief objective のロジックの既定の目的関数 (placement.py の objective_value。大きいほどよい)
+   * @brief objective のロジックの既定の目的関数 (RTCPlacement.py の objective_value。大きいほどよい)
    *
    * @param item 置く RTC
    * @param robot 置くロボット
@@ -308,7 +308,7 @@ namespace snmpmgr
    * @param weights 項ごとの重み (空なら既定値)
    * @return 目的関数の値
    * @~english
-   * @brief Default objective function of the objective logic (objective_value of placement.py; larger is better)
+   * @brief Default objective function of the objective logic (objective_value of RTCPlacement.py; larger is better)
    *
    * @param item RTC to place
    * @param robot robot to place on

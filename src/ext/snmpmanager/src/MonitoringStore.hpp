@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file MonitoringStore.hpp
- * @brief Saving monitoring information (metrics and events) to SQLite. The tables are the same as the Python version (snmpmgr_store.py)
+ * @brief Saving monitoring information (metrics and events) to SQLite. The tables are the same as the Python version (MonitoringStore.py)
  *
  * @~japanese
- * 監視情報 (メトリクスとイベント) の SQLite への保存。テーブルは Python 版 (snmpmgr_store.py) と同じ
+ * 監視情報 (メトリクスとイベント) の SQLite への保存。テーブルは Python 版 (MonitoringStore.py) と同じ
  * @~
  *
  * @date $Date: 2026-11-13 16:24:32 $

@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file EventLogPlugin.cpp
- * @brief Example event plugin: appends events to a JSON Lines file (same as the Python version event_log.py)
+ * @brief Example event plugin: appends events to a JSON Lines file (same as the Python version EventLogPlugin.py)
  *
  * @~japanese
- * イベント (event) プラグインの例: イベントを JSON Lines のファイルに追記する (Python 版 event_log.py と同じ)
+ * イベント (event) プラグインの例: イベントを JSON Lines のファイルに追記する (Python 版 EventLogPlugin.py と同じ)
  *
  * @code
  *   {"module": "event_log", "config": {"path": "...", "kinds": ["down", "up"]}}

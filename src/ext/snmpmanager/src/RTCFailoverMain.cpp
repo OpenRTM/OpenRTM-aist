@@ -1,10 +1,10 @@
 // -*- C++ -*-
 /*!
  * @file RTCFailoverMain.cpp
- * @brief Entry point of rtcd_failover (C++ version of rtcd_failover.py)
+ * @brief Entry point of rtcd_failover (C++ version of RTCFailoverMain.py)
  *
  * @~japanese
- * rtcd_failover (rtcd_failover.py の C++ 版) の入口
+ * rtcd_failover (RTCFailoverMain.py の C++ 版) の入口
  *
  *   rtcd_failover --failover-config rtc_failover.json [--log-level DEBUG|INFO|WARNING|ERROR] -f rtc.conf [-o key:value ...]
  *
