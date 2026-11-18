@@ -1,0 +1,5 @@
+set(CSP_SAMPLE_GROUP CSPSample)
+set(CSP_SAMPLE_TARGETS)
+csp_sample_component(DataIn2)
+csp_sample_component(DataOut2)
+csp_sample_configs()

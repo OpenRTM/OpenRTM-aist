@@ -127,3 +127,8 @@ if(NOT WINDOWS_MSM_BUILD)
   add_subdirectory(Templates)
   add_subdirectory(Serializer)
 endif()
+
+add_subdirectory(CSPCommon)
+add_subdirectory(CSPSample)
+add_subdirectory(CSPSelectSample)
+add_subdirectory(CSPStaticFsmSample)

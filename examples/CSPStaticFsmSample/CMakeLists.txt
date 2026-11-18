@@ -1,0 +1,5 @@
+set(CSP_SAMPLE_GROUP CSPStaticFsmSample)
+set(CSP_SAMPLE_TARGETS)
+csp_sample_component(Inputbutton)
+csp_sample_component(Microwave MicrowaveFsm.cpp MicrowaveFsm.h)
+csp_sample_configs()
