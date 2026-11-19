@@ -25,6 +25,8 @@
 #include <rtm/SystemLogger.h>
 
 #include <string>
+#include <atomic>
+#include <mutex>
 #include <vector>
 
 namespace RTC
@@ -187,6 +189,15 @@ namespace RTC
      * @endif
      */
     virtual ~SdoServiceAdmin();
+
+    /*!
+     * @if jp
+     * @brief リスナーの破棄前にサービスを一度だけ終了する
+     * @else
+     * @brief Finalize services once before listener holders are destroyed
+     * @endif
+     */
+    void finalize();
 
     /*!
      * @if jp
@@ -370,6 +381,8 @@ protected:
 
 
   private:
+    std::atomic<bool> m_finalized{false};
+    std::mutex m_finalizeMutex;
     RTC::RTObject_impl& m_rtobj;
     coil::vstring m_consumerTypes;
     bool m_allConsumerEnabled;

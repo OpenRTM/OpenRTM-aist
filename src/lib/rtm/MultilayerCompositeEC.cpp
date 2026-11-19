@@ -53,6 +53,18 @@ namespace RTC_exp
   MultilayerCompositeEC::~MultilayerCompositeEC()
   {
     RTC_TRACE(("~MultilayerCompositeEC()"));
+    {
+      std::lock_guard<std::mutex> guard(m_svcmutex);
+      m_svc = false;
+    }
+    {
+      std::lock_guard<std::mutex> guard(m_workerthread.mutex_);
+      m_workerthread.running_ = true;
+      m_workerthread.cond_.notify_all();
+    }
+    wait();
+    for (auto* task : m_tasklist) { task->finalize(); delete task; }
+    m_tasklist.clear();
   }
 
   void MultilayerCompositeEC::init(coil::Properties& props)
@@ -139,6 +151,7 @@ namespace RTC_exp
       std::string threads_str = rtc->getProperties()["conf.default.members"];
       for (auto const & thread : coil::split(threads_str, "|"))
       {
+          std::vector<RTC::LightweightRTObject_var> owned;
           std::vector<RTC::LightweightRTObject_ptr> rtcs;
           for (auto&& member : coil::split(thread, ","))
           {
@@ -160,7 +173,8 @@ namespace RTC_exp
                   {
                       continue;
                   }
-                  rtcs.emplace_back(RTC::RTObject::_duplicate(rtobj));
+                  owned.emplace_back(RTC::LightweightRTObject::_duplicate(rtobj.in()));
+                  rtcs.emplace_back(owned.back().in());
               }
           }
           addTask(rtcs);
@@ -192,7 +206,8 @@ namespace RTC_exp
           return;
       }
 
-      ChildTask *ct = new ChildTask(task, this);
+      std::unique_ptr<ChildTask> ownedTask(new ChildTask(task, this));
+      ChildTask* ct = ownedTask.get();
 
       task->setTask([ct]{ ct->svc(); });
       task->setPeriod(std::chrono::seconds(0));
@@ -221,6 +236,7 @@ namespace RTC_exp
       }
 
       m_tasklist.emplace_back(ct);
+      ownedTask.release();
 
       // Start task in suspended mode
       task->suspend();
@@ -256,19 +272,22 @@ namespace RTC_exp
 
   }
 
-  MultilayerCompositeEC::ChildTask::~ChildTask() = default;
+  MultilayerCompositeEC::ChildTask::~ChildTask()
+  {
+      finalize();
+  }
 
   void MultilayerCompositeEC::ChildTask::addComponent(RTC::LightweightRTObject_ptr rtc)
   {
-      m_rtcs.emplace_back(rtc);
+      m_rtcs.emplace_back(RTC::LightweightRTObject::_duplicate(rtc));
   }
 
   void MultilayerCompositeEC::ChildTask::updateCompList()
   {
-      std::vector<RTC::LightweightRTObject_ptr>::iterator rtc = m_rtcs.begin();
+      auto rtc = m_rtcs.begin();
       while (rtc != m_rtcs.end())
       {
-          RTC_impl::RTObjectStateMachine* comp = m_ec->findComponent(*rtc);
+          RTC_impl::RTObjectStateMachine* comp = m_ec->findComponent(rtc->in());
           if (comp != nullptr)
           {
               rtc = m_rtcs.erase(rtc);
@@ -291,10 +310,11 @@ namespace RTC_exp
       {
           std::unique_lock<std::mutex> guard(m_signal_worker.mutex_);
 
-          while (!m_signal_worker.running_)
+          while (!m_signal_worker.running_ && !m_stopping)
           {
               m_signal_worker.cond_.wait(guard);
           }
+          if (m_stopping) { return 0; }
           m_signal_worker.running_ = false;
       }
 
@@ -315,9 +335,10 @@ namespace RTC_exp
 
       {
           std::unique_lock<std::mutex> guard(m_signal_worker.mutex_);
-          while (!m_signal_worker.running_){
+          while (!m_signal_worker.running_ && !m_stopping){
              m_signal_worker.cond_.wait(guard);
           }
+          if (m_stopping) { return 0; }
           m_signal_worker.running_ = false;
       }
 
@@ -371,10 +392,17 @@ namespace RTC_exp
 
   void MultilayerCompositeEC::ChildTask::finalize()
   {
+      if (m_task == nullptr) { return; }
+      {
+        std::lock_guard<std::mutex> guard(m_signal_worker.mutex_);
+        m_stopping = true;
+        m_signal_worker.cond_.notify_all();
+      }
       m_task->resume();
       m_task->finalize();
 
       RTC::PeriodicTaskFactory::instance().deleteObject(m_task);
+      m_task = nullptr;
   }
 
 } // namespace RTC_exp

@@ -43,6 +43,8 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <condition_variable>
+#include <map>
 #include <list>
 #include <thread>
 #include <vector>
@@ -2455,6 +2457,52 @@ namespace RTC
       std::vector<RTObject_impl*> comps;
     };
     Finalized m_finalized;
+
+    /*!
+     * @if jp
+     * @brief 終了処理前に受付済みAPIの完了を保証するガード
+     * @else
+     * @brief Track admitted API calls before shutdown releases resources
+     * @endif
+     */
+    class OperationGuard
+    {
+    public:
+      /*!
+       * @if jp
+       * @brief 実行中または受付済みの再入呼び出しを登録する
+       * @else
+       * @brief Admit a running operation or its nested calls
+       * @endif
+       */
+      explicit OperationGuard(Manager& owner);
+      /*!
+       * @if jp
+       * @brief 完了を通知する
+       * @else
+       * @brief Notify shutdown that the operation has completed
+       * @endif
+       */
+      ~OperationGuard();
+      OperationGuard(const OperationGuard&) = delete;
+      OperationGuard& operator=(const OperationGuard&) = delete;
+      /*!
+       * @if jp
+       * @brief 受付結果を返す
+       * @else
+       * @brief Return whether the call was admitted
+       * @endif
+       */
+      explicit operator bool() const { return m_owner != nullptr; }
+    private:
+      Manager* m_owner{nullptr};
+    };
+    std::mutex m_apiMutex;
+    std::condition_variable m_apiCondition;
+    std::map<std::thread::id, size_t> m_apiThreads;
+    size_t m_activeOperations{0};
+    bool m_shutdownStarted{false};
+    std::thread::id m_shutdownThread;
 
     ::RTM::ManagerActionListeners m_listeners;
   };  // class Manager
