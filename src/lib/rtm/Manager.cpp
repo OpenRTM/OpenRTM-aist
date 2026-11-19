@@ -2270,11 +2270,13 @@ namespace RTC
   void Manager::shutdownComponents()
   {
     RTC_TRACE(("Manager::shutdownComponents()"));
+    std::vector<RTObject_impl*> exited;
     for (auto const &comp : m_namingManager->getObjects())
     {
       try
       {
-        comp->exit();
+        if (comp->exit() != RTC::PRECONDITION_NOT_MET)
+          { exited.emplace_back(comp); }
         coil::Properties p(comp->getInstanceName());
         p << comp->getProperties();
         RTC_PARANOID_STR((p));
@@ -2283,6 +2285,7 @@ namespace RTC
       {
       }
     }
+    waitFinalized(exited, std::chrono::seconds(10));
     cleanupComponents();
     for (auto const &m_ec : m_ecs)
     {
@@ -2338,8 +2341,30 @@ namespace RTC
   void Manager::notifyFinalized(RTObject_impl *comp)
   {
     RTC_TRACE(("Manager::notifyFinalized()"));
-    std::lock_guard<std::mutex> guard(m_finalized.mutex);
-    m_finalized.comps.emplace_back(comp);
+    {
+      std::lock_guard<std::mutex> guard(m_finalized.mutex);
+      m_finalized.comps.emplace_back(comp);
+    }
+    m_finalized.cond.notify_all();
+  }
+
+  void Manager::waitFinalized(const std::vector<RTObject_impl*>& comps,
+                              std::chrono::milliseconds timeout)
+  {
+    std::unique_lock<std::mutex> guard(m_finalized.mutex);
+    auto all_finalized = [this, &comps] {
+      for (auto const &comp : comps)
+        {
+          if (std::find(m_finalized.comps.begin(), m_finalized.comps.end(),
+                        comp) == m_finalized.comps.end())
+            { return false; }
+        }
+      return true;
+    };
+    if (!m_finalized.cond.wait_for(guard, timeout, all_finalized))
+      {
+        RTC_WARN(("Some components did not finish exit() in time."));
+      }
   }
 
   /*!

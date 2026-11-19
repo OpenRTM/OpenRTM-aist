@@ -2454,9 +2454,29 @@ namespace RTC
     {
       ~Finalized();
       std::mutex mutex;
+      std::condition_variable cond;
       std::vector<RTObject_impl*> comps;
     };
     Finalized m_finalized;
+
+    /*!
+     * @if jp
+     * @brief 他スレッドで終了処理中のRTCの完了を待つ
+     *
+     * Manager 終了時、exit() の呼び出しが他のスレッドで先に始まっていた
+     * RTCは、終了処理の完了前に exit() が戻る。それらが notifyFinalized()
+     * するまで最大 timeout 待ち、回収漏れを防ぐ。
+     * @else
+     * @brief Wait for components whose exit is running on another thread
+     *
+     * During Manager shutdown, exit() returns early for a component whose
+     * exit was already started by another thread. Wait (at most timeout)
+     * until such components call notifyFinalized() so that they are
+     * collected by the shutdown sequence.
+     * @endif
+     */
+    void waitFinalized(const std::vector<RTObject_impl*>& comps,
+                       std::chrono::milliseconds timeout);
 
     /*!
      * @if jp

@@ -302,7 +302,7 @@ namespace RTM
      * @endif
      */
     std::string
-    FileNameservice::getFname(std::string& ns_path) const
+    FileNameservice::getFname(const std::string& ns_path) const
     {
       RTC_TRACE(("getFname(%s)", ns_path.c_str()));
 
@@ -312,8 +312,7 @@ namespace RTM
         {
           RTC_DEBUG(("file_structure = flat"));
           std::string const& d(m_profile.properties["context_delimiter"]);
-          ns_path = coil::replaceString(std::move(ns_path), "/", d);
-          pathstring += ns_path;
+          pathstring += coil::replaceString(ns_path, "/", d);
         }
       else if (fs == "tree")
         {

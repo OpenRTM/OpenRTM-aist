@@ -374,7 +374,7 @@ namespace RTC
   {
     RTC_TRACE(("exit()"));
     if (m_created) { return RTC::PRECONDITION_NOT_MET; }
-    if (m_exiting) { return RTC::RTC_OK; }
+    if (m_exitRequested.exchange(true)) { return RTC::RTC_OK; }
 
     // finalize ECs
     finalizeMineEC();

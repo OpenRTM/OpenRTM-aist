@@ -37,6 +37,7 @@
 #include <rtm/PortConnectListener.h>
 #include <rtm/FsmActionListener.h>
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <memory>
@@ -5309,7 +5310,8 @@ namespace RTC
      * @brief RTC Finalize Status Flag
      * @endif
      */
-    bool m_exiting;
+    std::atomic<bool> m_exiting;
+    std::atomic<bool> m_exitRequested{false};
 
     /*!
      * @if jp

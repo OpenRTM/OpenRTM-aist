@@ -20,6 +20,7 @@
 #ifndef RTC_NUMBERINGPOLICY_H
 #define RTC_NUMBERINGPOLICY_H
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <rtm/RTC.h>
@@ -141,6 +142,7 @@ namespace RTM
      *
      * オブジェクトリストから指定されたオブジェクトを検索し、
      * 該当するオブジェクトが格納されている場合にはインデックスを返す。
+     * 呼び出し側で m_mutex をロックしておくこと。
      * 
      * @param obj 検索対象オブジェクト
      *
@@ -151,7 +153,7 @@ namespace RTM
      * @brief Find the object
      *
      * Find the specified object in the object list and return its index
-     * when it is stored.
+     * when it is stored. The caller must hold m_mutex.
      * 
      * @param obj The target object for the find
      *
@@ -162,6 +164,7 @@ namespace RTM
     long int find(void* obj);
     
   private:
+    std::mutex m_mutex;
     int m_num{0};
     std::vector<void*> m_objects;
   };
