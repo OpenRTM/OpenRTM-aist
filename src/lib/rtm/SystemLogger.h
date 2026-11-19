@@ -19,6 +19,7 @@
 #ifndef RTC_SYSTEMLOGGER_H
 #define RTC_SYSTEMLOGGER_H
 
+#include <iterator>
 #include <rtm/config_rtc.h>
 
 #include <coil/ClockManager.h>
@@ -393,7 +394,7 @@ namespace RTC
      */
     static std::string getLevelString(int level)
     {
-        return m_levelString[level];
+        return *std::next(m_levelString, level);
     }
 
     /*!
@@ -420,7 +421,7 @@ namespace RTC
      */
     static std::string getLevelOutputString(int level)
     {
-        return m_levelOutputString[level];
+        return *std::next(m_levelOutputString, level);
     }
 
 
@@ -448,7 +449,7 @@ namespace RTC
      */
     static std::string getLevelColor(int level)
     {
-        return m_levelColor[level];
+        return *std::next(m_levelColor, level);
     }
     
 

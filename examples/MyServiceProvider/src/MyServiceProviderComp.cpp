@@ -7,6 +7,7 @@
  */
 // </rtc-template>
 
+#include <iterator>
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
@@ -22,7 +23,7 @@ public:
   {
     for (size_t i = 0; i < (size_t)argc; ++i)
       {
-        std::string opt = argv[i];
+        std::string opt = *std::next(argv, i);
         if (opt.find("--instance_name=") == std::string::npos) { continue; }
 
         coil::replaceString(opt, "--instance_name=", "");

@@ -1,0 +1,69 @@
+#ifndef CSPPORT_IDL
+#define CSPPORT_IDL
+
+#include "DataPort.idl"
+#include "SDOPackage.idl"
+#include "BasicDataType.idl"
+
+#pragma prefix "openrtm.aist.go.jp"
+/*!
+ * @brief CSP (Communicating Sequential Processes) channel port
+ *
+ * Communicating Sequential Processes (CSP) is a formal language for
+ * describing patterns of interaction in concurrent systems. CSP uses
+ * explicit channels for message passing, whereas actor systems
+ * transmit messages to named destination actors. These approaches may
+ * be considered duals of each other, in the sense that processes
+ * receiving through a single channel effectively have an identity
+ * corresponding to that channel, while the name-based coupling
+ * between actors may be broken by constructing actors that behave as
+ * channels.
+ * (from https://en.wikipedia.org/wiki/Communicating_sequential_processes)
+ *
+ * http://arild.github.io/csp-presentation
+ * https://qiita.com/ymgyt/items/420eaf2bcf7bee4ae152
+ * 
+ 
+ * This interface definition realizes CSP channel as an RTC port.
+ *
+ * CSPチャネル
+ * - 同期型メッセージパッシング
+ *   - 確実に伝達（受信側が受信できるまで待つ）
+ * - 通信可能な相手を自動的に選択して通信可能
+ *   - 受信可能なプロセスを選択して送信する（全てが受信不可のときは、ひと
+ *     つが受信可能になるまで送信を延期）
+ * - 通信可能なチャネルを自動的に選択（外部選択）して通信可能
+ *   - 受信可能なプロセスが接続されているチャネルを選択して送信する
+ *
+ */
+module CSP
+{
+  // READY means a data reservation was actually established.
+  // Other values describe why this request did not establish a reservation.
+  enum Readiness { NOT_READY, READY, SCANNING, NOT_SELECTING };
+
+  typedef SDOPackage::NVList NVList;
+  interface InPortCsp
+  {
+    RTC::PortStatus put(in RTC::OctetSeq data);
+    Readiness is_writable(in boolean retry, in NVList option);
+    boolean match_condition(in NVList option);
+  };
+  
+  interface OutPortCsp
+  {
+    RTC::PortStatus get(out RTC::OctetSeq data);
+    Readiness is_readable(in boolean retry, in InPortCsp provider);
+  };
+
+  #pragma version InPortCsp 2.0
+  #pragma version OutPortCsp 2.0
+
+  struct TimedNVList
+  {
+	  RTC::Time tm;
+	  NVList data;
+  };
+};
+
+#endif // CSPPORT_IDL

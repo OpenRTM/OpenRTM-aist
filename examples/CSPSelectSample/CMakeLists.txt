@@ -1,0 +1,8 @@
+set(CSP_SAMPLE_GROUP CSPSelectSample)
+set(CSP_SAMPLE_TARGETS)
+csp_sample_component(DataIn)
+csp_sample_component(DataOut)
+csp_sample_component(DataIn_port3)
+csp_sample_component(DataOut_port3)
+csp_sample_component(DataInOut)
+csp_sample_configs()

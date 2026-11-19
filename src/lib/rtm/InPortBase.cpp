@@ -1,4 +1,25 @@
-﻿// -*-  C++ -*-
+﻿// -*- C++ -*-
+/*!
+ * @file InPortBase.cpp
+ * @if jp
+ * @brief `InPortBase`の状態と操作をまとめる。 実装。
+ * @else
+ * @brief Encapsulate the state and operations of InPortBase. Implementation.
+ * @endif
+ * @date $Date: 2026-11-13 15:32:20 $
+ * @author Nobuhiko Miyamoto <n-miyamoto@aist.go.jp>
+ *
+ * Copyright (C) 2019
+ *     Nobuhiko Miyamoto
+ *     Intelligent Systems Research Institute,
+ *     National Institute of
+ *         Advanced Industrial Science and Technology (AIST), Japan
+ *     All rights reserved.
+ *
+ * $Id$
+ */
+
+// -*-  C++ -*-
 /*!
  * @file InPortBase.cpp
  * @brief Base class of InPort
@@ -20,6 +41,7 @@
 #include <rtm/CORBA_SeqUtil.h>
 #include <rtm/NVUtil.h>
 #include <rtm/InPortBase.h>
+#include <rtm/CSPTransport.h>
 #include <rtm/CdrBufferBase.h>
 #include <rtm/InPortProvider.h>
 #include <rtm/OutPortConsumer.h>
@@ -517,7 +539,20 @@ namespace RTC
      */
     std::string dflow_type{coil::normalize(prop["dataflow_type"])};
 
-    if (dflow_type == "push")
+    if (prop["interface_type"] == "csp_channel" && dflow_type != "duplex") return RTC::BAD_PARAMETER;
+    if (dflow_type == "duplex")
+      {
+        if (prop["interface_type"] != "csp_channel") return RTC::BAD_PARAMETER;
+        if (csp_detail::validate(cprof) != RTC_OK) return RTC::BAD_PARAMETER;
+        auto* provider = dynamic_cast<InPortCSPProvider*>(createProvider(cprof, prop));
+        if (!provider) return RTC::BAD_PARAMETER;
+        ConnectorInfo info(cprof.name, cprof.connector_id, CORBA_SeqUtil::refToVstring(cprof.ports), prop);
+        auto* connector = new InPortDuplexConnector(info, provider, m_listeners);
+        connector->setEndian(csp_detail::littleEndian(cprof));
+        m_connectors.push_back(connector);
+        return RTC::RTC_OK;
+      }
+    else if (dflow_type == "push")
       {
         RTC_DEBUG(("dataflow_type = push .... create PushConnector"));
 
@@ -602,7 +637,21 @@ namespace RTC
      */
     std::string dflow_type{coil::normalize(prop["dataflow_type"])};
 
-    if (dflow_type == "push")
+    if (prop["interface_type"] == "csp_channel" && dflow_type != "duplex") return RTC::BAD_PARAMETER;
+    if (dflow_type == "duplex")
+      {
+        auto* connector = dynamic_cast<InPortDuplexConnector*>(getConnectorById(cprof.connector_id));
+        if (!connector) return RTC::BAD_PARAMETER;
+        auto* consumer = dynamic_cast<OutPortCSPConsumer*>(createConsumer(cprof, prop));
+        if (!consumer) return RTC::BAD_PARAMETER;
+        consumer->init(prop);
+        connector->setConsumer(std::shared_ptr<OutPortCSPConsumer>(consumer,
+          [](OutPortCSPConsumer* value) { OutPortConsumer* base = value; OutPortConsumerFactory::instance().deleteObject(base); }));
+        connector->setEndian(littleEndian);
+        if (m_listeners) { auto info = connector->profile(); m_listeners->notify(ConnectorListenerType::ON_CONNECT, info); }
+        return RTC::RTC_OK;
+      }
+    else if (dflow_type == "push")
       {
         RTC_DEBUG(("dataflow_type is push."));
 
@@ -636,6 +685,7 @@ namespace RTC
           {
             return RTC::RTC_ERROR;
           }
+        connector->setEndian(littleEndian);
 
         RTC_DEBUG(("subscribeInterfaces() successfully finished."));
         return RTC::RTC_OK;
@@ -742,6 +792,7 @@ namespace RTC
       NVUtil::copyFromProperties(m_profile.properties, prop);
     }
 
+    if (coil::includes(provider_types, "csp_channel")) appendProperty("dataport.dataflow_type", "duplex");
     m_providerTypes = provider_types;
   }
 
