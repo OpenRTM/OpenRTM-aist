@@ -61,6 +61,23 @@ namespace RTC_exp
   public:
     /*!
      * @if jp
+     * @brief 既定の POA (Manager の POA) を返す
+     *
+     * _this() で暗黙に活性化するときに使う。corba.bidirectional_giop が YES
+     * なら、Manager の POA は BiDirectional ポリシーを持つ (Bi-Directional
+     * GIOP で呼び返されるオブジェクトは、その POA にある必要がある)。
+     * @else
+     * @brief Returns the default POA (the POA of the Manager)
+     *
+     * Used for implicit activation by _this(). If corba.bidirectional_giop is
+     * YES, the POA of the Manager has the BiDirectional policy (objects
+     * called back through Bi-Directional GIOP must be in such a POA).
+     * @endif
+     */
+    PortableServer::POA_ptr _default_POA() override;
+
+    /*!
+     * @if jp
      * @brief デフォルトコンストラクタ
      *
      * デフォルトコンストラクタ

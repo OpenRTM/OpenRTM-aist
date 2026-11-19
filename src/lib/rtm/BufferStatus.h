@@ -20,6 +20,7 @@
 #ifndef RTC_BUFFERSTATUS_H
 #define RTC_BUFFERSTATUS_H
 
+#include <array>
 #include <cstdint>
 
 namespace RTC
@@ -89,7 +90,7 @@ namespace RTC
      */
     inline char const* toString(BufferStatus status)
     {
-      static char const* const buffer_status[] = {
+      static const std::array<const char*, 7> buffer_status = {{
         "BUFFER_OK",
         "BUFFER_ERROR",
         "BUFFER_FULL",
@@ -97,8 +98,9 @@ namespace RTC
         "NOT_SUPPORTED",
         "TIMEOUT",
         "PRECONDITION_NOT_MET"
-      };
-      return buffer_status[static_cast<std::size_t>(status)];
+      }};
+      const auto index = static_cast<std::size_t>(status);
+      return index < buffer_status.size() ? buffer_status[index] : "";
     }
 
 } // namespace RTC

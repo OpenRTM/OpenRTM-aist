@@ -16,6 +16,7 @@
  *
  */
 
+#include <iterator>
 #include <coil/File.h>
 
 namespace coil
@@ -81,7 +82,7 @@ namespace coil
 
     for (int i = 0; i < files; ++i)
     {
-      std::string dname = namelist[i]->d_name;
+      std::string dname = (*std::next(namelist, i))->d_name;
       if(dname == "." || dname == "..") { continue; }
       std::string fullpath = dir + "/" + dname;
 
@@ -130,7 +131,7 @@ namespace coil
 
     for (int i = 0; i < files; ++i)
       {
-        std::string dname = namelist[i]->d_name;
+        std::string dname = (*std::next(namelist, i))->d_name;
         if (dname == "." || dname == "..") { continue; }
 
         std::string fullpath = dir + "/" + dname;

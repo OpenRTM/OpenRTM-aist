@@ -121,7 +121,6 @@ MachineBase::MachineBase()
 MachineBase::~MachineBase() {
   assert(!pending_data_);
 
-  delete[] states_;
   delete pending_event_;
 }
 
@@ -154,10 +153,7 @@ void MachineBase::shutdown() {
 }
 
 void MachineBase::allocate(unsigned int count) {
-  states_ = new StateInfo *[count];
-  for (unsigned int i = 0; i < count; ++i) {
-    states_[i] = nullptr;
-  }
+  states_.assign(count, nullptr);
 }
 
 void MachineBase::free(unsigned int count) {
@@ -170,7 +166,7 @@ void MachineBase::free(unsigned int count) {
   }
 }
 
-void MachineBase::copy(StateInfo ** other, unsigned int count) {
+void MachineBase::copy(const std::vector<StateInfo*>& other, unsigned int count) {
   Key i;
 
   // Create StateInfo objects

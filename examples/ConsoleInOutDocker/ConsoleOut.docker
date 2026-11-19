@@ -28,4 +28,12 @@ RUN apt-get update
 RUN apt-get install openrtm2 -y
 RUN apt-get install openrtm2-example -y
 
+# Start command for rtcd2_docker (the same name, startRTC, for every component).
+# rtcd2_docker (manager.modules.Docker.manager_cmd) runs startRTC in the container
+# with the options from the master manager (-f <config file> -o manager.is_master:NO
+# -o corba.master_manager:... ...), and startRTC passes them to the component.
+# (CMD below is used only when the image is run without a command.)
+RUN printf '#!/bin/bash\nexec "$(ls -d /usr/share/openrtm-*/components/c++/examples/ConsoleOutComp | tail -1)" "$@"\n' \
+      > /usr/local/bin/startRTC && chmod +x /usr/local/bin/startRTC
+
 CMD ["/usr/share/openrtm-2.0/components/c++/examples/ConsoleOutComp"]

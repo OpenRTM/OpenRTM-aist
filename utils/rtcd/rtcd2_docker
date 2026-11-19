@@ -1,13 +1,82 @@
 #!/bin/bash
 #
-# @file rtcprof2_docker
-# @brief Docker container profile information extract command for OpenRTM
+# @file rtcd2_docker
+# @brief Docker container RT component server launcher for OpenRTM
 # @author (c) Noriaki Ando <n-ando@aist.go.jp>
 #
 # arg: /usr/bin/rtcd2_docker -o manager.modules.load_path:./ -o manager.modules.docker.load_paths:/usr/share/openrtm-2.0/containers -o manager.is_master:NO -o manager.corba_servant:YES -o corba.master_manager:localhost:2810 -o manager.name:manager -o manager.instance_name:manager_%p -o manager.shutdown_auto:NO -o module_name:RTC:AIST:example:ConsoleIn:docker:1.0.0
 #
+# The container runs the command startRTC in the image with these arguments
+# (start<implementation_id> for images without startRTC). See the end of this
+# file.
+#
+# Network mode (in the arguments, e.g. in manager.modules.Docker.manager_cmd:
+#   "rtcd2_docker -o manager.modules.Docker.network:bridge")
+#   manager.modules.Docker.network:<mode>
+#       host (default): docker run --network host (the same as before)
+#       bridge, or the name of a network (docker network create): the container
+#       has its own address. The slave manager in the container reaches the
+#       master through host.docker.internal (the host), and the master and
+#       other robots reach the container in one of the following ways.
+#   manager.modules.Docker.bidirectional:YES|NO (default NO)
+#       NO : publish a TCP port of the host (-p <port>:<port>) and make the
+#            CORBA references of the container point to <publish_address>:<port>
+#            (ORBendPointPublish).
+#       YES: Bi-Directional GIOP (corba.bidirectional_giop: YES). The master
+#            calls back through the connection that the container opened, so no
+#            port is published. The master and the container need OpenRTM-aist
+#            with Bi-Directional GIOP, and the omniORB options for it
+#            (-ORBofferBiDirectionalGIOP etc.) in corba.args of the
+#            configuration file of the master (the container reads it, too).
+#   manager.modules.Docker.port:<port>
+#       the published port (default: a free port of the host)
+#   manager.modules.Docker.publish_address:<address>
+#       the address in the CORBA references (default: the first address of
+#       "hostname -I"). Other robots must be able to reach it.
+#   manager.modules.Docker.master_address:<address>
+#       the address of the master seen from the container (default: with
+#       the host network, 127.0.0.1 when the host in corba.master_manager is
+#       omitted or 0.0.0.0; with the other networks, host.docker.internal
+#       when it is omitted, localhost or a loopback address)
+#   manager.modules.Docker.options:<docker run options>
+#       options added to "docker run" for every container (e.g. "--cpus 1")
+#
+# These options can also be written in the configuration file given with -f
+# (e.g. "manager.modules.Docker.network: bridge"). The master gives its own
+# configuration file, or the file in the config_file parameter of
+# create_component ("<module name>?config_file=<file>"), so the mode can be
+# chosen for each component. The -o arguments take precedence over the file.
+#
+# Options for each component, in the parameters of create_component
+# (e.g. "RTC:AIST:example:ConsoleIn:docker:1.0.0?module.options=-o exec_cxt.periodic.rate:100&docker.options=--cpus 1"):
+#   module.options (module_option:<options>): options of the component; added
+#       to the arguments of the command in the container (startRTC)
+#   docker.options (docker_option:<options>): options of "docker run" (after
+#       manager.modules.Docker.options)
+# The values are split at white space (quotes are not interpreted).
 
-for arg in $@; do
+network=host
+bidirectional=NO
+port=""
+publish_address=""
+master_address=""
+options=""
+docker_option=""
+args=("$@")
+
+# ---- options in the configuration file (-f); the -o arguments below win
+for i in "${!args[@]}"; do
+    if test "x${args[$i]}" = "x-f" && test -f "${args[$((i + 1))]}"; then
+        while IFS= read -r line || test -n "$line"; do
+            line=${line%$'\r'}
+            if [[ $line =~ ^[[:space:]]*manager\.modules\.[Dd]ocker\.(network|bidirectional|port|publish_address|master_address|options)([[:space:]]*[:=][[:space:]]*|[[:space:]]+)(.*[^[:space:]])[[:space:]]*$ ]]; then
+                printf -v "${BASH_REMATCH[1]}" '%s' "${BASH_REMATCH[3]}"
+            fi
+        done < "${args[$((i + 1))]}"
+    fi
+done
+
+for arg in "$@"; do
     tmp=`echo $arg | grep module_name`
     if test "x" != "x$tmp"; then
         module_name=`echo $tmp | sed -e 's/module_name\://'`
@@ -24,6 +93,15 @@ for arg in $@; do
     if test "x" != "x$tmp"; then
         load_path=`echo $tmp | sed -e 's/manager\.modules\.docker\.load_paths\://'`
     fi
+    case "$arg" in
+        manager.modules.[Dd]ocker.network:*)         network=${arg#*network:} ;;
+        manager.modules.[Dd]ocker.bidirectional:*)   bidirectional=${arg#*bidirectional:} ;;
+        manager.modules.[Dd]ocker.port:*)            port=${arg#*port:} ;;
+        manager.modules.[Dd]ocker.publish_address:*) publish_address=${arg#*publish_address:} ;;
+        manager.modules.[Dd]ocker.master_address:*)  master_address=${arg#*master_address:} ;;
+        manager.modules.[Dd]ocker.options:*)         options=${arg#manager.modules.?ocker.options:} ;;
+        docker_option:*)                             docker_option=${arg#docker_option:} ;;
+    esac
 done
 
 if [ -z ${module_name} ]; then
@@ -72,11 +150,122 @@ for f in $dockerfiles; do
 #        echo "$module_name is created by $f"
         docker_file=$f
         break
-    fi 
+    fi
 done
 
 if test "xNO" != "x$module_build"; then
     docker build -t "${implementation_id,,}" -f $docker_file .
 fi
-docker run --network host ${module_option} -it --rm "${implementation_id,,}" start${implementation_id} $@
+
+# ---- configuration file (-f): the same path in the container (read-only)
+run_opts=()
+for i in "${!args[@]}"; do
+    if test "x${args[$i]}" = "x-f" && test -f "${args[$((i + 1))]}"; then
+        conf=`readlink -f "${args[$((i + 1))]}"`
+        run_opts+=(-v "${conf}:${conf}:ro")
+    fi
+done
+
+# ---- the master as seen from the container (corba.master_manager)
+# The master passes its own endpoint (e.g. giop:tcp::2810, which listens on all
+# the addresses), but a corbaloc with an omitted host is not valid.
+#   network host : an omitted host or 0.0.0.0 -> 127.0.0.1 (the container
+#                  shares the network of the host)
+#   other network: a loopback address or an omitted host -> host.docker.internal
+#   master_address (any network): replaces the host
+if test "x$network" = "xhost"; then
+    mm_host=127.0.0.1
+    mm_pat='0\.0\.0\.0'
+else
+    mm_host=host.docker.internal
+    mm_pat='localhost|127\.[0-9.]+|0\.0\.0\.0|\[::1\]'
+fi
+for i in "${!args[@]}"; do
+    case "${args[$i]}" in
+        corba.master_manager:*)
+            mm=${args[$i]#corba.master_manager:}
+            if [ -n "$master_address" ]; then
+                mm=`echo "$mm" | sed -E "s/(^|:)[^:]*(:[0-9]+)$/\1${master_address}\2/"`
+            else
+                mm=`echo "$mm" | sed -E \
+                    -e "s/(^|:)(${mm_pat})(:[0-9]+)$/\1${mm_host}\3/" \
+                    -e "s/::([0-9]+)$/:${mm_host}:\1/" \
+                    -e "s/^:([0-9]+)$/${mm_host}:\1/"`
+            fi
+            args[$i]="corba.master_manager:$mm"
+            ;;
+        manager.instance_name:*%p*)
+            # %p in the container is the process ID in the container (1 for
+            # every container), so every slave would be named manager_1 and
+            # the master could not tell the new slave (it waits for a new
+            # manager_<number>). Use the process ID of this script on the host.
+            args[$i]=${args[$i]//%p/$$}
+            ;;
+    esac
+done
+
+# ---- network
+run_opts+=(--network "$network")
+env_opts=()
+if test "x$network" != "xhost"; then
+    run_opts+=(--add-host host.docker.internal:host-gateway)
+    case "$bidirectional" in
+        [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|1)
+            # Bi-Directional GIOP: no published port
+            args+=(-o "corba.bidirectional_giop:YES")
+            ;;
+        *)
+            # Publish a port of the host and put <publish_address>:<port> in
+            # the CORBA references of the container.
+            if [ -z "$port" ]; then
+                port=`python3 -c 'import socket; s = socket.socket(); s.bind(("", 0)); print(s.getsockname()[1])'`
+            fi
+            if [ -z "$publish_address" ]; then
+                publish_address=`hostname -I 2>/dev/null | awk '{ print $1 }'`
+            fi
+            run_opts+=(-p "${port}:${port}")
+            args+=(-o "corba.endpoints:giop:tcp::${port}")
+            # omniORB reads its parameters also from environment variables
+            env_opts+=(-e "ORBendPointPublish=giop:tcp:${publish_address}:${port}")
+            ;;
+    esac
+fi
+
+# -it only with a terminal (the master starts this without one)
+if [ -t 0 ]; then tty_opts=(-it); else tty_opts=(-i); fi
+
+# ---- the command in the container
+# startRTC: the same name for every component. The image (.docker) provides it
+# and it passes the arguments (-f, -o ...) to the component, e.g.
+#   #!/bin/bash
+#   exec /usr/share/openrtm-2.1/components/c++/examples/ConsoleInComp "$@"
+# Images made for the older rtcd2_docker have start<implementation_id> instead,
+# which is used when startRTC is not found.
+start_cmd='if command -v startRTC >/dev/null 2>&1; then exec startRTC "$@"; else exec "start'"${implementation_id}"'" "$@"; fi'
+
+# ---- the arguments of the component: the arguments of this script without
+# module_option / docker_option, and then the options in module_option
+# (module.options of create_component)
+rtc_args=()
+skip=0
+for i in "${!args[@]}"; do
+    if test $skip = 1; then skip=0; continue; fi
+    case "${args[$i]}" in
+        -o)
+            case "${args[$((i + 1))]}" in
+                module_option:*|docker_option:*) skip=1; continue ;;
+            esac
+            ;;
+        module_option:*|docker_option:*) continue ;;
+    esac
+    rtc_args+=("${args[$i]}")
+done
+read -r -a module_opts <<< "$module_option"
+rtc_args+=("${module_opts[@]}")
+
+# ---- the options of docker run: manager.modules.Docker.options and
+# docker_option (docker.options of create_component)
+read -r -a docker_opts <<< "$options $docker_option"
+
+docker run "${run_opts[@]}" "${env_opts[@]}" "${docker_opts[@]}" "${tty_opts[@]}" --rm "${implementation_id,,}" /bin/sh -c "$start_cmd" startRTC "${rtc_args[@]}"
 

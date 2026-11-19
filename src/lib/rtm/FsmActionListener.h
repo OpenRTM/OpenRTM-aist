@@ -256,15 +256,15 @@ namespace RTC
      */
     static const char* toString(PreFsmActionListenerType type)
     {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 6> typeString =
+        {{
           "PRE_ON_INIT",
           "PRE_ON_ENTRY",
           "PRE_ON_DO",
           "PRE_ON_EXIT",
           "PRE_ON_STATE_CHANGE",
           "PRE_FSM_ACTION_LISTENER_NUM"
-        };
+        }};
       if (type < PreFsmActionListenerType::PRE_FSM_ACTION_LISTENER_NUM)
         {
           return typeString[static_cast<uint8_t>(type)];
@@ -499,15 +499,15 @@ namespace RTC
      */
     static const char* toString(PostFsmActionListenerType type)
     {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 6> typeString =
+        {{
           "POST_ON_INIT",
           "POST_ON_ENTRY",
           "POST_ON_DO",
           "POST_ON_EXIT",
           "POST_ON_STATE_CHANGE",
           "POST_FSM_ACTION_LISTENER_NUM"
-        };
+        }};
       if (type < PostFsmActionListenerType::POST_FSM_ACTION_LISTENER_NUM)
         {
           return typeString[static_cast<uint8_t>(type)];
@@ -745,8 +745,8 @@ namespace RTC
      */
     static const char* toString(FsmProfileListenerType type)
     {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 9> typeString =
+        {{
           "SET_FSM_PROFILE",
           "GET_FSM_PROFILE",
           "ADD_FSM_STATE",
@@ -756,7 +756,7 @@ namespace RTC
           "BIND_FSM_EVENT",
           "UNBIND_FSM_EVENT",
           "FSM_PROFILE_LISTENER_NUM"
-        };
+        }};
       if (type < FsmProfileListenerType::FSM_PROFILE_LISTENER_NUM)
         {
           return typeString[static_cast<uint8_t>(type)];
@@ -966,12 +966,12 @@ namespace RTC
      */
     static const char* toString(FsmStructureListenerType type)
     {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 3> typeString =
+        {{
           "SET_FSM_STRUCTURE",
           "GET_FSM_STRUCTURE",
           "FSM_STRUCTURE_LISTENER_NUM"
-        };
+        }};
       if (type < FsmStructureListenerType::FSM_STRUCTURE_LISTENER_NUM)
        {
          return typeString[static_cast<uint8_t>(type)];

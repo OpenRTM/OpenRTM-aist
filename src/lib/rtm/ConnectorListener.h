@@ -435,8 +435,8 @@ namespace RTC
     {
       if (type < ConnectorDataListenerType::CONNECTOR_DATA_LISTENER_NUM)
         {
-          static const char* const typeString[] =
-          {
+          static const std::array<const char*, 11> typeString =
+          {{
             "ON_BUFFER_WRITE",
             "ON_BUFFER_FULL",
             "ON_BUFFER_WRITE_TIMEOUT",
@@ -448,7 +448,7 @@ namespace RTC
             "ON_RECEIVER_TIMEOUT",
             "ON_RECEIVER_ERROR",
             "CONNECTOR_DATA_LISTENER_NUM"
-          };
+          }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -911,8 +911,8 @@ namespace RTC
     {
       if (type < ConnectorListenerType::CONNECTOR_LISTENER_NUM)
         {
-          static const char* const typeStr[] =
-          {
+          static const std::array<const char*, 8> typeStr =
+          {{
             "ON_BUFFER_EMPTY",
             "ON_BUFFER_READ_TIMEOUT",
             "ON_SENDER_EMPTY",
@@ -921,7 +921,7 @@ namespace RTC
             "ON_CONNECT",
             "ON_DISCONNECT",
             "CONNECTOR_LISTENER_NUM"
-          };
+          }};
           return typeStr[static_cast<uint8_t>(type)];
         }
       return "";

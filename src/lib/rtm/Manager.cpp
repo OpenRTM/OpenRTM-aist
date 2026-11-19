@@ -173,6 +173,7 @@ namespace RTC
     RTC_TRACE(("Manager::shutdown()"));
     m_listeners.manager_.preShutdown();
     shutdownComponents();
+    RTM::LocalServiceAdmin::instance().finalize();
     shutdownNaming();
     shutdownManagerServant();
     shutdownORB();
@@ -803,9 +804,9 @@ namespace RTC
       setEndpointProperty(rtobj.in());
     }
 
-    for (int i(0); inherit_prop[i][0] != '\0'; ++i)
+    for (const auto* key : inherit_prop)
     {
-      const char *key(inherit_prop[i]);
+      if (*key == '\0') { break; }
       if (m_config.findNode(key) != nullptr)
       {
         prop[key] = m_config[key];
@@ -1162,6 +1163,12 @@ namespace RTC
    * @brief Get the pointer to the RootPOA (ownership duplicated)
    * @endif
    */
+  bool Manager::isBiDirectionalGIOP()
+  {
+    return coil::toBool(m_config["corba.bidirectional_giop"],
+                        "YES", "NO", false);
+  }
+
   PortableServer::POA_ptr Manager::getPOA()
   {
     RTC_TRACE(("Manager::getPOA()"));
@@ -1507,9 +1514,14 @@ namespace RTC
    */
   void Manager::shutdownManagerServant()
   {
+    if (m_mgrservant == nullptr)
+    {
+      return;
+    }
     PortableServer::ObjectId_var oid = m_pPOA->servant_to_id(m_mgrservant);
     m_pPOA->deactivate_object(oid);
-    delete m_mgrservant;
+    m_mgrservant->deactivate();
+    m_mgrservant->_remove_ref();
     m_mgrservant = nullptr;
   }
 
@@ -1584,9 +1596,27 @@ namespace RTC
       }
       // Get the POAManager
       m_pPOAManager = m_pPOA->the_POAManager();
+      m_pRootPOA = PortableServer::POA::_duplicate(m_pPOA);
 #ifdef ORB_IS_OMNIORB
+      if (isBiDirectionalGIOP())
+        {
+          // Bi-Directional GIOP: the objects of this process live in a POA
+          // with the BiDirectional policy (BOTH). IMPLICIT_ACTIVATION is for
+          // _this() (see the _default_POA() of the servants).
+          CORBA::PolicyList bp;
+          bp.length(2);
+          bp[0] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+          bp[1] = m_pRootPOA->create_implicit_activation_policy(
+                      PortableServer::IMPLICIT_ACTIVATION);
+          m_pPOA = m_pRootPOA->create_POA("bidir", m_pPOAManager, bp);
+          RTC_INFO(("Bi-Directional GIOP is enabled."));
+        }
       CORBA::PolicyList pl;
-      pl.length(1);
+      pl.length(isBiDirectionalGIOP() ? 2 : 1);
+      if (isBiDirectionalGIOP())
+        {
+          pl[1] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+        }
 #if defined(RTM_OMNIORB_42) || defined(RTM_OMNIORB_43)
       pl[0] = omniPolicy::create_local_shortcut_policy(omniPolicy::LOCAL_CALLS_SHORTCUT);
 #else
@@ -1640,6 +1670,18 @@ namespace RTC
   {
     std::string opt(m_config["corba.args"]);
     RTC_DEBUG(("corba.args: %s", opt.c_str()));
+
+#ifdef ORB_IS_OMNIORB
+    if (isBiDirectionalGIOP() &&
+        opt.find("BiDirectionalGIOP") == std::string::npos)
+      {
+        // The ORB options for Bi-Directional GIOP are not added here; they
+        // are given in corba.args (or the omniORB configuration).
+        RTC_WARN(("corba.bidirectional_giop is YES, but corba.args has no "
+                  "-ORBofferBiDirectionalGIOP / -ORBacceptBiDirectionalGIOP "
+                  "(see the omniORB options for Bi-Directional GIOP)."));
+      }
+#endif
 
     RTC_DEBUG_STR((m_config));
 
@@ -2283,8 +2325,9 @@ namespace RTC
     }
     for (unsigned int i(1); i < RTM::CompParam::prof_list_size; ++i)
     {
-      comp_id[RTM::CompParam::prof_list[i]] = id[i];
-      RTC_TRACE(("RTC basic propfile %s: %s", RTM::CompParam::prof_list[i], id[i].c_str()));
+      const auto* key = *std::next(RTM::CompParam::prof_list, i);
+      comp_id[key] = id[i];
+      RTC_TRACE(("RTC basic propfile %s: %s", key, id[i].c_str()));
     }
 
     if (id_and_conf.size() == 2)
@@ -2353,31 +2396,35 @@ namespace RTC
     std::string type_name(comp->getTypeName());
     std::string inst_name(comp->getInstanceName());
 
-    std::string type_conf(category + "." + type_name + ".config_file");
-    std::string name_conf(category + "." + inst_name + ".config_file");
+    const std::string prefix = category.empty() ? "" : category + ".";
+    const std::string type_key = prefix + type_name;
+    const std::string instance_key = prefix + inst_name;
+    const std::string type_conf = type_key + ".config_file";
+    const std::string name_conf = instance_key + ".config_file";
+    const coil::Properties& config = m_config;
     coil::vstring config_fname;
     coil::Properties type_prop, name_prop;
 
     // Load "category.instance_name.config_file"
-    if (!m_config[name_conf].empty())
+    if (!config[name_conf].empty())
     {
-      std::ifstream conff(m_config[name_conf].c_str());
+      std::ifstream conff(config[name_conf].c_str());
       if (!conff.fail())
       {
         name_prop.load(conff);
         RTC_INFO(("Component instance conf file: %s loaded.",
-                  m_config[name_conf].c_str()));
+                  config[name_conf].c_str()));
         RTC_DEBUG_STR((name_prop));
-        config_fname.emplace_back(m_config[name_conf]);
+        config_fname.emplace_back(config[name_conf]);
       }
     }
-    if (m_config.findNode(category + "." + inst_name) != nullptr)
+    if (m_config.findNode(instance_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + inst_name));
+      coil::Properties &temp(m_config.getNode(instance_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        name_prop << m_config.getNode(category + "." + inst_name);
+        name_prop << m_config.getNode(instance_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((name_prop));
         if (m_config.findNode("config_file") != nullptr)
@@ -2386,25 +2433,25 @@ namespace RTC
         }
       }
     }
-    if (!m_config[type_conf].empty())
+    if (!config[type_conf].empty())
     {
-      std::ifstream conff(m_config[type_conf].c_str());
+      std::ifstream conff(config[type_conf].c_str());
       if (!conff.fail())
       {
         type_prop.load(conff);
         RTC_INFO(("Component type conf file: %s loaded.",
-                  m_config[type_conf].c_str()));
+                  config[type_conf].c_str()));
         RTC_DEBUG_STR((type_prop));
-        config_fname.emplace_back(m_config[type_conf]);
+        config_fname.emplace_back(config[type_conf]);
       }
     }
-    if (m_config.findNode(category + "." + type_name) != nullptr)
+    if (m_config.findNode(type_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + type_name));
+      coil::Properties &temp(m_config.getNode(type_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        type_prop << m_config.getNode(category + "." + type_name);
+        type_prop << m_config.getNode(type_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((type_prop));
         if (m_config.findNode("config_file") != nullptr)

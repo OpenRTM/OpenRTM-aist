@@ -27,8 +27,61 @@
 #include <rtm/CORBA_IORUtil.h>
 #include <rtm/CORBA_RTCUtil.h>
 
+#include <cstring>
 #include <vector>
 #include <string>
+
+#ifdef ORB_IS_OMNIORB
+namespace
+{
+  /*!
+   * @if jp
+   * @brief INS (corbaloc) で見つけたマネージャへの要求を、本体の参照へ転送するサーバント
+   *
+   * Bi-Directional GIOP を使うとき (corba.bidirectional_giop: YES)、マネージャ
+   * の本体は BiDirectional ポリシーを持つ POA にある (omniORB は、そのような
+   * POA が受けた要求の中で受け取った参照だけを、相手が開いた接続で呼び返す)。
+   * omniINSPOA にはこのサーバントを置き、すべての要求に LOCATION_FORWARD を返す。
+   * @else
+   * @brief Servant that forwards requests to the manager found by INS
+   *        (corbaloc) to the reference of the manager itself
+   *
+   * With Bi-Directional GIOP (corba.bidirectional_giop: YES), the manager
+   * itself lives in the POA with the BiDirectional policy (omniORB calls back
+   * through the connection that the other side opened only for references
+   * received in requests served by such a POA). This servant is placed in the
+   * omniINSPOA and returns LOCATION_FORWARD for every request.
+   * @endif
+   */
+  class ManagerForwarder
+    : public virtual PortableServer::RefCountServantBase
+  {
+  public:
+    explicit ManagerForwarder(RTM::Manager_ptr target)
+      : m_target(RTM::Manager::_duplicate(target)) {}
+    ~ManagerForwarder() override = default;
+    CORBA::Boolean _dispatch(omniCallHandle&) override
+    {
+      throw omniORB::LOCATION_FORWARD(
+          CORBA::Object::_duplicate(m_target.in()), 0);
+    }
+    void* _ptrToInterface(const char* id) override
+    {
+      if (std::strcmp(id, CORBA::Object::_PD_repoId) == 0)
+        {
+          return reinterpret_cast<void*>(1);
+        }
+      return nullptr;
+    }
+    const char* _mostDerivedRepoId() override
+    {
+      return "IDL:RTM/Manager:1.0";
+    }
+  private:
+    RTM::Manager_var m_target;
+  };
+} // namespace
+#endif
 
 namespace RTM
 {
@@ -85,6 +138,13 @@ namespace RTM
 
   ManagerServant::~ManagerServant()
   {
+    deactivate();
+  }
+
+  void ManagerServant::deactivate()
+  {
+    if (m_deactivated) { return; }
+    m_deactivated = true;
     std::lock_guard<std::mutex> guardm(m_masterMutex);
     for (CORBA::ULong i(0); i < m_masters.length(); ++i)
       {
@@ -125,9 +185,23 @@ namespace RTM
 
         PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
         PortableServer::ObjectId_var id;
-        id = poa->servant_to_id(this);
+        id = poa->servant_to_id(m_insServant != nullptr ? m_insServant : this);
 
         poa->deactivate_object(id.in());
+        if (m_insServant != nullptr)
+          {
+            m_insServant->_remove_ref();
+            m_insServant = nullptr;
+            try
+              {
+                PortableServer::POA_var bidir = m_mgr.getPOA();
+                PortableServer::ObjectId_var bid = bidir->servant_to_id(this);
+                bidir->deactivate_object(bid.in());
+              }
+            catch (...)
+              {
+              }
+          }
 #else
         CORBA::Object_var obj = m_mgr.theORB()->resolve_initial_references("IORTable");
         IORTable::Table_var adapter = IORTable::Table::_narrow(obj.in());
@@ -917,7 +991,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
@@ -934,7 +1010,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
@@ -1001,11 +1079,26 @@ namespace RTM
 
         // Object activation
         RTC_DEBUG(("Activating manager with id(%s)", config["manager.name"].c_str()));
-        poa->activate_object_with_id(id.in(), this);
-        CORBA::Object_var mgrobj = poa->id_to_reference(id);
+        if (m_mgr.isBiDirectionalGIOP())
+          {
+            // Bi-Directional GIOP: this servant lives in the POA with the
+            // BiDirectional policy, and the INS object (corbaloc) forwards
+            // every request to it.
+            PortableServer::POA_var bidir = m_mgr.getPOA();
+            PortableServer::ObjectId_var bid = bidir->activate_object(this);
+            CORBA::Object_var bobj = bidir->id_to_reference(bid);
+            m_objref = ::RTM::Manager::_narrow(bobj);
+            m_insServant = new ManagerForwarder(m_objref.in());
+            poa->activate_object_with_id(id.in(), m_insServant);
+          }
+        else
+          {
+            poa->activate_object_with_id(id.in(), this);
+            CORBA::Object_var mgrobj = poa->id_to_reference(id);
 
-        // Set m_objref
-        m_objref = ::RTM::Manager::_narrow(mgrobj);
+            // Set m_objref
+            m_objref = ::RTM::Manager::_narrow(mgrobj);
+          }
 
         CORBA::String_var ior;
         ior = m_mgr.theORB()->
@@ -1062,6 +1155,20 @@ namespace RTM
         coil::Properties config(m_mgr.getConfig());
         // Why RtORB does not allow corbaloc:iiop: ?
         std::string mgrloc(CORBA_RTCUtil::CorbaURI(host_port, config["manager.name"]).toString());
+#ifdef ORB_IS_OMNIORB
+        if (m_mgr.isBiDirectionalGIOP())
+          {
+            // Bi-Directional GIOP needs GIOP 1.2 (corbaloc is 1.0 by
+            // default), so that the other manager can call back through
+            // this connection.
+            const std::string iiop("corbaloc:iiop:");
+            if (mgrloc.compare(0, iiop.size(), iiop) == 0 &&
+                mgrloc.find('@') == std::string::npos)
+              {
+                mgrloc.insert(iiop.size(), "1.2@");
+              }
+          }
+#endif
 
         RTC_DEBUG(("corbaloc: %s", mgrloc.c_str()));
 
@@ -1254,6 +1361,12 @@ namespace RTM
             coil::vstring tmp = coil::split (create_arg, "?");
             rtcd_cmd += " -o \"module_name:" +  tmp[0] + "\"";
             rtcd_cmd += " -o \"module_option:" +  param["module.options"] + "\"";
+            // options of the launcher itself (e.g. "docker run" options for
+            // rtcd2_docker): <module name>?docker.options=<options>
+            if (param.find("docker.options") != param.end())
+              {
+                rtcd_cmd += " -o \"docker_option:" + param["docker.options"] + "\"";
+              }
             if(!build_comp)
             {
               rtcd_cmd += " -o \"module_build:NO\"";

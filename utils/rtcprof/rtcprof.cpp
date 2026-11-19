@@ -16,6 +16,7 @@
  *
  */
 
+#include <iterator>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -40,7 +41,7 @@ int main(int argc, char* argv[])
   // notice: coil::dirname brakes original string
   // 
   // file name with full path
-  std::string fullname{coil::replaceString(argv[1], "\\", "/")};
+  std::string fullname{coil::replaceString(*std::next(argv), "\\", "/")};
   // directory name
   std::string dirname(coil::dirname(const_cast<char*>(fullname.c_str())));
   // basename
