@@ -403,8 +403,9 @@ namespace coil
       {
         return deleteObject(obj);
       }
+      AbstractClass *tmp(obj);
       m_creators[id].destructor_(obj);
-      m_objects.erase(obj);
+      m_objects.erase(tmp);
       return FactoryReturn::OK;
     }
 
