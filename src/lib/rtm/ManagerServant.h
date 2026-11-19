@@ -96,6 +96,23 @@ namespace RTM
 
     /*!
      * @if jp
+     * @brief マネージャの登録とPOAの活性化を解除する
+     *
+     * 所有する参照を解放する前に呼び出す。実行中の要求がある場合は、
+     * POAが保持する参照により要求完了までサーバントの寿命を維持する。
+     * 終了処理を行うスレッドから呼び出し、同時に呼び出してはならない。
+     * @else
+     * @brief Unregister the manager and deactivate its POA objects
+     *
+     * Call before releasing the owning reference. POA references keep the
+     * servant alive until outstanding requests complete. Call from the
+     * shutdown thread; concurrent calls are not supported.
+     * @endif
+     */
+    void deactivate();
+
+    /*!
+     * @if jp
      * @brief モジュールをロードする
      *
      * 当該マネージャに指定されたモジュールをロードし、指定された初期化
@@ -761,6 +778,7 @@ namespace RTM
     // Bi-Directional GIOP: the servant in the omniINSPOA that forwards
     // requests to m_objref (nullptr if not used)
     PortableServer::ServantBase* m_insServant{nullptr};
+    bool m_deactivated{false};
 
     ::RTM::Manager_var m_objref{RTM::Manager::_nil()};
 
