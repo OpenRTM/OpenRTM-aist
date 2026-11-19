@@ -41,28 +41,36 @@ namespace RTC
       m_consumer(consumer), m_publisher(nullptr),
       m_listeners(listeners), m_buffer(buffer)
   {
-    m_publisher = createPublisher(info);
-    if (m_buffer == nullptr)
+    try
       {
-        m_buffer = createBuffer(info);
-      }
-    if (m_publisher == nullptr || m_buffer == nullptr || m_consumer == nullptr)
-      { throw std::bad_alloc(); }
+        m_publisher = createPublisher(info);
+        if (m_buffer == nullptr)
+          {
+            m_buffer = createBuffer(info);
+          }
+        if (m_publisher == nullptr || m_buffer == nullptr || m_consumer == nullptr)
+          { throw std::bad_alloc(); }
 
-    if (m_publisher->init(info.properties) != DataPortStatus::PORT_OK)
+        if (m_publisher->init(info.properties) != DataPortStatus::PORT_OK)
+          {
+            throw std::bad_alloc();
+          }
+        m_buffer->init(info.properties.getNode("buffer"));
+        m_consumer->init(info.properties);
+
+        m_publisher->setConsumer(m_consumer);
+        m_publisher->setBuffer(m_buffer);
+        m_publisher->setListener(m_profile, m_listeners);
+
+        m_marshaling_type = coil::eraseBothEndsBlank(info.properties.getProperty("marshaling_type", "cdr"));
+
+        onConnect();
+      }
+    catch (...)
       {
-        throw std::bad_alloc();
+        disconnect();
+        throw;
       }
-    m_buffer->init(info.properties.getNode("buffer"));
-    m_consumer->init(info.properties);
-
-    m_publisher->setConsumer(m_consumer);
-    m_publisher->setBuffer(m_buffer);
-    m_publisher->setListener(m_profile, m_listeners);
-
-    m_marshaling_type = coil::eraseBothEndsBlank(info.properties.getProperty("marshaling_type", "cdr"));
-
-    onConnect();
   }
 
   /*!

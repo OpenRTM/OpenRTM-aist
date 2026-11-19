@@ -39,23 +39,31 @@ namespace RTC
     : InPortConnector(info, listeners, buffer), m_consumer(consumer),
       m_listeners(listeners)
   {
-    if (buffer == nullptr)
+    try
       {
-        m_buffer = createBuffer(m_profile);
+        if (buffer == nullptr)
+          {
+            m_buffer = createBuffer(m_profile);
+          }
+        if (m_buffer == nullptr || m_consumer == nullptr)
+          {
+            throw std::bad_alloc();
+          }
+        m_buffer->init(info.properties.getNode("buffer"));
+        m_consumer->init(info.properties);
+        m_consumer->setBuffer(m_buffer);
+        m_consumer->setListener(info, m_listeners);
+
+        m_marshaling_type = coil::eraseBothEndsBlank(
+          info.properties.getProperty("marshaling_type", "cdr"));
+
+        onConnect();
       }
-    if (m_buffer == nullptr || m_consumer == nullptr)
+    catch (...)
       {
-        throw std::bad_alloc();
+        disconnect();
+        throw;
       }
-    m_buffer->init(info.properties.getNode("buffer"));
-    m_consumer->init(info.properties);
-    m_consumer->setBuffer(m_buffer);
-    m_consumer->setListener(info, m_listeners);
-
-    m_marshaling_type = coil::eraseBothEndsBlank(
-      info.properties.getProperty("marshaling_type", "cdr"));
-
-    onConnect();
   }
 
   /*!

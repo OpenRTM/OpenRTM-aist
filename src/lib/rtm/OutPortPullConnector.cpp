@@ -41,29 +41,37 @@ namespace RTC
       m_buffer(buffer),
       m_sync_readwrite(false)
   {
-    // create buffer
-    if (m_buffer == nullptr)
+    try
       {
-        m_buffer = createBuffer(info);
+        // create buffer
+        if (m_buffer == nullptr)
+          {
+            m_buffer = createBuffer(info);
+          }
+
+        if (m_provider == nullptr || m_buffer == nullptr) { throw std::bad_alloc(); }
+
+        m_buffer->init(info.properties.getNode("buffer"));
+        m_provider->init(info.properties);
+        m_provider->setBuffer(m_buffer);
+        m_provider->setConnector(this);
+        m_provider->setListener(info, m_listeners);
+
+        if (coil::toBool(info.properties["sync_readwrite"], "YES", "NO", false))
+        {
+            m_sync_readwrite = true;
+        }
+
+        m_marshaling_type = coil::eraseBothEndsBlank(
+          info.properties.getProperty("marshaling_type", "cdr"));
+
+        onConnect();
       }
-
-    if (m_provider == nullptr || m_buffer == nullptr) { throw std::bad_alloc(); }
-
-    m_buffer->init(info.properties.getNode("buffer"));
-    m_provider->init(info.properties);
-    m_provider->setBuffer(m_buffer);
-    m_provider->setConnector(this);
-    m_provider->setListener(info, m_listeners);
-
-    if (coil::toBool(info.properties["sync_readwrite"], "YES", "NO", false))
-    {
-        m_sync_readwrite = true;
-    }
-
-    m_marshaling_type = coil::eraseBothEndsBlank(
-      info.properties.getProperty("marshaling_type", "cdr"));
-
-    onConnect();
+    catch (...)
+      {
+        disconnect();
+        throw;
+      }
   }
 
   /*!

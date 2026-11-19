@@ -27,6 +27,14 @@
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 
 #include <cstdint>
+#include <algorithm>
+#include <climits>
+#include <cstring>
+#include <limits>
+#include <map>
+#include <regex>
+#include <string>
+#include <utility>
 
 
 #include "ROS2Serializer.h"
@@ -655,6 +663,115 @@ namespace RTC
   }
 
   
+  namespace
+  {
+    /*!
+     * @if jp
+     *
+     * @brief 画像エンコーディングから画素要素のビット深度とチャネル数を取得する
+     *
+     * @param encoding sensor_msgs/Image のエンコーディング
+     * @param depth 画素要素のビット深度
+     * @param channels チャネル数
+     * @return true：対応するエンコーディング、false：未対応
+     *
+     * @else
+     *
+     * @brief Get the bit depth of a pixel element and the number of channels
+     *        of an image encoding
+     *
+     * @param encoding Encoding of sensor_msgs/Image
+     * @param depth Bit depth of a pixel element
+     * @param channels Number of channels
+     * @return true: supported encoding, false: unsupported encoding
+     *
+     * @endif
+     */
+    bool imageEncodingLayout(const std::string& encoding,
+                             unsigned int& depth, unsigned int& channels)
+    {
+      static const std::map<std::string, std::pair<unsigned int, unsigned int>> layouts{
+        {"rgb8", {8, 3}}, {"bgr8", {8, 3}}, {"rgba8", {8, 4}}, {"bgra8", {8, 4}},
+        {"rgb16", {16, 3}}, {"bgr16", {16, 3}}, {"rgba16", {16, 4}}, {"bgra16", {16, 4}},
+        {"mono8", {8, 1}}, {"mono16", {16, 1}},
+        {"yuv422", {8, 2}}, {"yuv422_yuy2", {8, 2}}};
+      auto it = layouts.find(encoding);
+      if (it != layouts.end())
+        {
+          depth = it->second.first;
+          channels = it->second.second;
+          return true;
+        }
+      static const std::regex bayer("bayer_(rggb|bggr|gbrg|grbg)(8|16)");
+      static const std::regex opencv("(8U|8S|16U|16S|32S|32F|64F)C([1-9][0-9]{0,2})");
+      std::smatch match;
+      if (std::regex_match(encoding, match, bayer))
+        {
+          depth = match[2].str() == "16" ? 16U : 8U;
+          channels = 1;
+          return true;
+        }
+      if (std::regex_match(encoding, match, opencv))
+        {
+          depth = static_cast<unsigned int>(std::stoul(match[1].str()));
+          channels = static_cast<unsigned int>(std::stoul(match[2].str()));
+          return true;
+        }
+      return false;
+    }
+
+    /*!
+     * @if jp
+     *
+     * @brief 実行環境がビッグエンディアンかを判定する
+     *
+     * @return true：ビッグエンディアン、false：リトルエンディアン
+     *
+     * @else
+     *
+     * @brief Check whether the host is big endian
+     *
+     * @return true: big endian, false: little endian
+     *
+     * @endif
+     */
+    bool isHostBigEndian()
+    {
+      const std::uint16_t probe(1);
+      std::uint8_t first(0);
+      std::memcpy(&first, &probe, 1);
+      return first == 0;
+    }
+
+    /*!
+     * @if jp
+     *
+     * @brief 画素要素ごとにバイト順を反転する
+     *
+     * @param pixels 画素データ
+     * @param length 画素データのバイト数
+     * @param sample 画素要素のバイト数
+     *
+     * @else
+     *
+     * @brief Reverse the byte order of each pixel element
+     *
+     * @param pixels Pixel data
+     * @param length Number of bytes of the pixel data
+     * @param sample Number of bytes of a pixel element
+     *
+     * @endif
+     */
+    void swapSampleBytes(CORBA::Octet* pixels, std::size_t length,
+                         std::size_t sample)
+    {
+      for (std::size_t i = 0; i + sample <= length; i += sample)
+        {
+          std::reverse(pixels + i, pixels + i + sample);
+        }
+    }
+  }
+
   /*!
    * @if jp
    *
@@ -725,35 +842,40 @@ namespace RTC
      */
     bool serialize(const RTC::CameraImage& data) override
     {
+      std::string encoding(static_cast<const char*>(data.format));
+      if (encoding.empty())
+        {
+          encoding = "rgb8";
+        }
+      unsigned int depth(0);
+      unsigned int channels(0);
+      if (!imageEncodingLayout(encoding, depth, channels))
+        {
+          return false;
+        }
+      const unsigned int bpp(depth * channels);
+      if (data.bpp != 0 && data.bpp != bpp)
+        {
+          return false;
+        }
+      const std::size_t step(static_cast<std::size_t>(data.width) * (bpp / 8));
+      const std::size_t length(data.pixels.length());
+      if (length != step * data.height
+          || step > std::numeric_limits<std::uint32_t>::max())
+        {
+          return false;
+        }
+
       m_msg.header.stamp.sec = data.tm.sec;
       m_msg.header.stamp.nanosec = data.tm.nsec;
       m_msg.height = data.height;
       m_msg.width = data.width;
-      if(std::string(data.format).empty())
-      {
-        m_msg.encoding = "rgb8";
-      }
-      else
-      {
-        m_msg.encoding = data.format;
-      }
-      m_msg.step = 1920;
-      m_msg.data.resize(data.pixels.length());
-      CORBA::ULong image_size = data.pixels.length() / 3;
-      for(CORBA::ULong i=0;i < image_size;i++)
-      {
-        m_msg.data[i*3] = data.pixels[i*3+2];
-        m_msg.data[i*3+1] = data.pixels[i*3+1];
-        m_msg.data[i*3+2] = data.pixels[i*3];
-      }
-      /*
-      if(m_msg.data.size() > 0)
-      {
-        memcpy(&m_msg.data[0], &data.pixels[0], data.pixels.length());
-      }
-      */
+      m_msg.encoding = encoding;
+      m_msg.is_bigendian = isHostBigEndian() ? 1 : 0;
+      m_msg.step = static_cast<std::uint32_t>(step);
+      m_msg.data.assign(data.pixels.get_buffer(),
+                        data.pixels.get_buffer() + length);
 
-      
       return ROS2SerializerBase<RTC::CameraImage>::sensormsg_serialize(m_msg);
     }
     /*!
@@ -775,42 +897,51 @@ namespace RTC
      */
     bool deserialize(RTC::CameraImage& data) override
     {
-      
-      bool ret = ROS2SerializerBase<RTC::CameraImage>::sensormsg_deserialize(m_msg);
-      
-      
-      data.tm.sec = m_msg.header.stamp.sec;
-      data.tm.nsec = m_msg.header.stamp.nanosec;
+      if (!ROS2SerializerBase<RTC::CameraImage>::sensormsg_deserialize(m_msg))
+        {
+          return false;
+        }
 
       if (m_msg.height > USHRT_MAX || m_msg.width > USHRT_MAX)
       {
           return false;
       }
 
+      unsigned int depth(0);
+      unsigned int channels(0);
+      if (!imageEncodingLayout(m_msg.encoding, depth, channels))
+        {
+          return false;
+        }
+      const unsigned int bpp(depth * channels);
+      const std::size_t rowSize(static_cast<std::size_t>(m_msg.width) * (bpp / 8));
+      const std::size_t step(m_msg.step);
+      const std::size_t height(m_msg.height);
+      if (step < rowSize || m_msg.data.size() != step * height
+          || rowSize * height > std::numeric_limits<CORBA::ULong>::max())
+        {
+          return false;
+        }
+
+      data.tm.sec = m_msg.header.stamp.sec;
+      data.tm.nsec = m_msg.header.stamp.nanosec;
       data.height = static_cast<CORBA::UShort>(m_msg.height);
       data.width = static_cast<CORBA::UShort>(m_msg.width);
-
-      
+      data.bpp = static_cast<CORBA::UShort>(bpp);
       data.format = CORBA::string_dup(m_msg.encoding.c_str());
 
-
-      data.pixels.length((CORBA::ULong)m_msg.data.size());
-      
-      CORBA::ULong image_size = data.pixels.length() / 3;
-      for(CORBA::ULong i=0;i < image_size;i++)
-      {
-        data.pixels[i*3+2] = m_msg.data[i*3];
-        data.pixels[i*3+1] = m_msg.data[i*3+1];
-        data.pixels[i*3] = m_msg.data[i*3+2];
-      }
-      /*
-      if(data.pixels.length() > 0)
-      {
-        memcpy(&data.pixels[0], &m_msg.data[0], data.pixels.length());
-      }
-      */
-
-      return ret;
+      const std::size_t length(rowSize * height);
+      data.pixels.length(static_cast<CORBA::ULong>(length));
+      CORBA::Octet* pixels(data.pixels.get_buffer());
+      for (std::size_t row = 0; row < height && rowSize > 0; ++row)
+        {
+          std::memcpy(pixels + row * rowSize, m_msg.data.data() + row * step, rowSize);
+        }
+      if (depth > 8 && (m_msg.is_bigendian != 0) != isHostBigEndian())
+        {
+          swapSampleBytes(pixels, length, depth / 8);
+        }
+      return true;
     }
   };
 
