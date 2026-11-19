@@ -37,8 +37,11 @@
 #include <rtm/PortConnectListener.h>
 #include <rtm/FsmActionListener.h>
 
+#include <atomic>
 #include <string>
 #include <vector>
+#include <memory>
+#include <mutex>
 
 #define ECOTHER_OFFSET 1000
 
@@ -92,6 +95,23 @@ namespace RTC
       public virtual PortableServer::RefCountServantBase
   {
   public:
+    /*!
+     * @if jp
+     * @brief 既定の POA (Manager の POA) を返す
+     *
+     * _this() で暗黙に活性化するときに使う。corba.bidirectional_giop が YES
+     * なら、Manager の POA は BiDirectional ポリシーを持つ (Bi-Directional
+     * GIOP で呼び返されるオブジェクトは、その POA にある必要がある)。
+     * @else
+     * @brief Returns the default POA (the POA of the Manager)
+     *
+     * Used for implicit activation by _this(). If corba.bidirectional_giop is
+     * YES, the POA of the Manager has the BiDirectional policy (objects
+     * called back through Bi-Directional GIOP must be in such a POA).
+     * @endif
+     */
+    PortableServer::POA_ptr _default_POA() override;
+
     /*!
      * @if jp
      * @brief コンストラクタ
@@ -5290,7 +5310,8 @@ namespace RTC
      * @brief RTC Finalize Status Flag
      * @endif
      */
-    bool m_exiting;
+    std::atomic<bool> m_exiting;
+    std::atomic<bool> m_exitRequested{false};
 
     /*!
      * @if jp
@@ -5432,7 +5453,17 @@ namespace RTC
       SdoServiceAdmin *m_sdoservice;
       std::string m_id;
     };
-    SdoServiceConsumerTerminator *m_sdoconterm;
+    std::vector<std::unique_ptr<SdoServiceConsumerTerminator>> m_sdoTerminators;
+    std::mutex m_sdoTermMutex;
+    bool m_sdoTerminating{false};
+    /*!
+     * @if jp
+     * @brief SDO通知を停止しサービス削除スレッドの完了を待つ
+     * @else
+     * @brief Stop SDO notifications and join service-removal threads
+     * @endif
+     */
+    void finalizeSdoService();
 
     //------------------------------------------------------------
     // Functor

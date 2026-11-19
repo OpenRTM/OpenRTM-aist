@@ -17,6 +17,7 @@
  *
  */
 
+#include <iterator>
 #include <rtm/RTC.h>
 #include <rtm/ManagerConfig.h>
 #include <coil/OS.h>
@@ -162,7 +163,7 @@ namespace RTC
 #ifndef __QNX__
                 for (int i(0); i < argc; ++i)
                   {
-                    std::string tmp(argv[i]);
+                    std::string tmp(*std::next(argv, i));
                     if (tmp == "-i") { ignoreNoConf = true; }
                   }
                 if (!ignoreNoConf) { exit(-1); }
@@ -239,17 +240,16 @@ namespace RTC
         std::cerr << " not found." << std::endl;
       }
     // Search rtc configuration file from default search path
-    int i = 0;
-    while (config_file_path[i] != nullptr)
+    for (const auto* path : config_file_path)
       {
-        std::string cpath = coil::replaceEnv(config_file_path[i]);
+        if (path == nullptr) { break; }
+        std::string cpath = coil::replaceEnv(path);
 
         if (fileExist(cpath))
           {
             m_configFile = cpath;
             return true;
           }
-        ++i;
       }
     return false;
   }

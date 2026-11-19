@@ -1,4 +1,4 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 /*!
  * @file ComponentObserverConsumer.h
  * @brief Component observer SDO service consumer implementation
@@ -20,6 +20,7 @@
 #ifndef RTC_COMPONENTOBSERVERCONSUMER_H
 #define RTC_COMPONENTOBSERVERCONSUMER_H
 
+#include <array>
 #include <coil/Factory.h>
 #include <coil/stringutil.h>
 #include <rtm/SdoServiceConsumerBase.h>
@@ -108,12 +109,14 @@ namespace RTC
     inline void updateStatus(OpenRTM::StatusKind statuskind, const char* msg)
     {
       std::lock_guard<std::mutex> guard(mutex);
+      if (m_stopping) { return; }
       try
         {
           m_observer->update_status(statuskind, msg);
         }
       catch (...)
         {
+          m_stopping = true;
           m_rtobj->removeSdoServiceConsumerStartThread(m_profile.id);
         }
     }
@@ -127,16 +130,16 @@ namespace RTC
      */
     static inline const char* toString(OpenRTM::StatusKind kind)
     {
-      static const char* const kinds[] = 
-        {
+      static const std::array<const char*, 6> kinds =
+        {{
           "COMPONENT_PROFILE",
           "RTC_STATUS",
           "EC_STATUS",
           "PORT_PROFILE",
           "CONFIGURATION",
           "HEARTBEAT"
-        };
-      return static_cast<size_t>(kind) < sizeof(kinds)/sizeof(kinds[0]) ? kinds[kind] : "";
+        }};
+      return static_cast<size_t>(kind) < kinds.size() ? kinds[kind] : "";
     }
 
     /*!
@@ -562,7 +565,7 @@ namespace RTC
     SDOPackage::ServiceProfile m_profile;
     CorbaConsumer<OpenRTM::ComponentObserver> m_observer;
 
-    bool m_observed[OpenRTM::STATUS_KIND_NUM];
+    std::array<bool, OpenRTM::STATUS_KIND_NUM> m_observed;
 
     // ComponentProfile
     CompStatMsg m_compstat{*this};
@@ -581,6 +584,9 @@ namespace RTC
     Manager::TaskId m_hbtaskid;
 
     std::mutex mutex;
+    std::mutex m_finalizeMutex;
+    bool m_stopping{false};
+    bool m_finalized{false};
 
     std::vector<DataPortAction*> m_recievedactions;
     std::vector<DataPortAction*> m_sendactions;

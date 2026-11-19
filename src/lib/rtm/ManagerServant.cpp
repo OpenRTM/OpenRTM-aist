@@ -27,8 +27,61 @@
 #include <rtm/CORBA_IORUtil.h>
 #include <rtm/CORBA_RTCUtil.h>
 
+#include <cstring>
 #include <vector>
 #include <string>
+
+#ifdef ORB_IS_OMNIORB
+namespace
+{
+  /*!
+   * @if jp
+   * @brief INS (corbaloc) で見つけたマネージャへの要求を、本体の参照へ転送するサーバント
+   *
+   * Bi-Directional GIOP を使うとき (corba.bidirectional_giop: YES)、マネージャ
+   * の本体は BiDirectional ポリシーを持つ POA にある (omniORB は、そのような
+   * POA が受けた要求の中で受け取った参照だけを、相手が開いた接続で呼び返す)。
+   * omniINSPOA にはこのサーバントを置き、すべての要求に LOCATION_FORWARD を返す。
+   * @else
+   * @brief Servant that forwards requests to the manager found by INS
+   *        (corbaloc) to the reference of the manager itself
+   *
+   * With Bi-Directional GIOP (corba.bidirectional_giop: YES), the manager
+   * itself lives in the POA with the BiDirectional policy (omniORB calls back
+   * through the connection that the other side opened only for references
+   * received in requests served by such a POA). This servant is placed in the
+   * omniINSPOA and returns LOCATION_FORWARD for every request.
+   * @endif
+   */
+  class ManagerForwarder
+    : public virtual PortableServer::RefCountServantBase
+  {
+  public:
+    explicit ManagerForwarder(RTM::Manager_ptr target)
+      : m_target(RTM::Manager::_duplicate(target)) {}
+    ~ManagerForwarder() override = default;
+    CORBA::Boolean _dispatch(omniCallHandle&) override
+    {
+      throw omniORB::LOCATION_FORWARD(
+          CORBA::Object::_duplicate(m_target.in()), 0);
+    }
+    void* _ptrToInterface(const char* id) override
+    {
+      if (std::strcmp(id, CORBA::Object::_PD_repoId) == 0)
+        {
+          return reinterpret_cast<void*>(1);
+        }
+      return nullptr;
+    }
+    const char* _mostDerivedRepoId() override
+    {
+      return "IDL:RTM/Manager:1.0";
+    }
+  private:
+    RTM::Manager_var m_target;
+  };
+} // namespace
+#endif
 
 namespace RTM
 {
@@ -83,39 +136,44 @@ namespace RTM
       }
   }
 
+  void ManagerServant::detachManagers()
+  {
+    ManagerList masters;
+    ManagerList slaves;
+    {
+      std::lock_guard<std::mutex> guard(m_masterMutex);
+      m_detaching.store(true);
+      masters = m_masters;
+      m_masters.length(0);
+    }
+    {
+      std::lock_guard<std::mutex> guard(m_slaveMutex);
+      slaves = m_slaves;
+      m_slaves.length(0);
+    }
+    // Never hold a list lock across a call to another manager.
+    for (CORBA::ULong i = 0; i < masters.length(); ++i)
+      {
+        try { if (!CORBA::is_nil(masters[i])) masters[i]->remove_slave_manager(m_objref.in()); }
+        catch (...) {}
+      }
+    for (CORBA::ULong i = 0; i < slaves.length(); ++i)
+      {
+        try { if (!CORBA::is_nil(slaves[i])) slaves[i]->remove_master_manager(m_objref.in()); }
+        catch (...) {}
+      }
+  }
+
   ManagerServant::~ManagerServant()
   {
-    std::lock_guard<std::mutex> guardm(m_masterMutex);
-    for (CORBA::ULong i(0); i < m_masters.length(); ++i)
-      {
-        try
-          {
-            if (CORBA::is_nil(m_masters[i])) { continue; }
-            m_masters[i]
-              ->remove_slave_manager(m_objref.in());
-          }
-        catch (...)
-          {
-            m_masters[i] = RTM::Manager::_nil();
-          }
-      }
-    m_masters.length(0);
+    deactivate();
+  }
 
-    std::lock_guard<std::mutex> guards(m_slaveMutex);
-    for (CORBA::ULong i(0); i < m_slaves.length(); ++i)
-      {
-        try
-          {
-            if (CORBA::is_nil(m_slaves[i])) { continue; }
-            m_slaves[i]
-              ->remove_master_manager(m_objref.in());
-          }
-        catch (...)
-          {
-            m_slaves[i] = RTM::Manager::_nil();
-          }
-      }
-    m_slaves.length(0);
+  void ManagerServant::deactivate()
+  {
+    if (m_deactivated) { return; }
+    m_deactivated = true;
+    detachManagers();
 
 #ifndef ORB_IS_RTORB
     if (!CORBA::is_nil(m_objref))
@@ -125,9 +183,23 @@ namespace RTM
 
         PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
         PortableServer::ObjectId_var id;
-        id = poa->servant_to_id(this);
+        id = poa->servant_to_id(m_insServant != nullptr ? m_insServant : this);
 
         poa->deactivate_object(id.in());
+        if (m_insServant != nullptr)
+          {
+            m_insServant->_remove_ref();
+            m_insServant = nullptr;
+            try
+              {
+                PortableServer::POA_var bidir = m_mgr.getPOA();
+                PortableServer::ObjectId_var bid = bidir->servant_to_id(this);
+                bidir->deactivate_object(bid.in());
+              }
+            catch (...)
+              {
+              }
+          }
 #else
         CORBA::Object_var obj = m_mgr.theORB()->resolve_initial_references("IORTable");
         IORTable::Table_var adapter = IORTable::Table::_narrow(obj.in());
@@ -709,6 +781,7 @@ namespace RTM
   RTC::ReturnCode_t ManagerServant::add_master_manager(RTM::Manager_ptr mgr)
   {
     std::lock_guard<std::mutex> guard(m_masterMutex);
+    if (m_detaching.load()) { return RTC::PRECONDITION_NOT_MET; }
     CORBA::Long index;
     RTC_TRACE(("add_master_manager(), %d masters", m_masters.length()));
     index = CORBA_SeqUtil::find(m_masters, is_equiv(mgr));
@@ -776,6 +849,7 @@ namespace RTM
   RTC::ReturnCode_t ManagerServant::add_slave_manager(RTM::Manager_ptr mgr)
   {
     std::lock_guard<std::mutex> guard(m_slaveMutex);
+    if (m_detaching.load()) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("add_slave_manager(), %d slaves", m_slaves.length()));
 
     CORBA::Long index;
@@ -839,42 +913,7 @@ namespace RTM
    */
   RTC::ReturnCode_t ManagerServant::shutdown()
   {
-    if (!m_isMaster)
-      {
-        std::lock_guard<std::mutex> guardm(m_masterMutex);
-        for (CORBA::ULong i(0); i < m_masters.length(); ++i)
-          {
-            try
-              {
-                if (CORBA::is_nil(m_masters[i])) { continue; }
-                m_masters[i]
-                  ->remove_slave_manager(m_objref.in());
-              }
-            catch (...)
-              {
-                m_masters[i] = RTM::Manager::_nil();
-              }
-          }
-        m_masters.length(0);
-      }
-    else
-      {
-        std::lock_guard<std::mutex> guards(m_slaveMutex);
-        for (CORBA::ULong i(0); i < m_slaves.length(); ++i)
-          {
-            try
-              {
-                if (CORBA::is_nil(m_slaves[i])) { continue; }
-                m_slaves[i]
-                 ->remove_master_manager(m_objref.in());
-              }
-            catch (...)
-              {
-                m_slaves[i] = RTM::Manager::_nil();
-              }
-          }
-        m_slaves.length(0);
-      }
+    detachManagers();
     ::RTC::Manager::terminate();
     return ::RTC::RTC_OK;
   }
@@ -917,7 +956,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
@@ -934,7 +975,9 @@ namespace RTM
           {
             RTC::RTObject_var rtcref = rtc->getObjRef();
 #ifndef ORB_IS_RTORB
-            CORBA_SeqUtil::push_back(crtcs.inout(), rtcref.in());
+            const CORBA::ULong index = crtcs->length();
+            crtcs->length(index + 1);
+            crtcs[index] = rtcref._retn();
 #else // ORB_IS_RTORB
             CORBA_SeqUtil::push_back(crtcs, rtcref.in());
 #endif // ORB_IS_RTORB
@@ -1001,11 +1044,26 @@ namespace RTM
 
         // Object activation
         RTC_DEBUG(("Activating manager with id(%s)", config["manager.name"].c_str()));
-        poa->activate_object_with_id(id.in(), this);
-        CORBA::Object_var mgrobj = poa->id_to_reference(id);
+        if (m_mgr.isBiDirectionalGIOP())
+          {
+            // Bi-Directional GIOP: this servant lives in the POA with the
+            // BiDirectional policy, and the INS object (corbaloc) forwards
+            // every request to it.
+            PortableServer::POA_var bidir = m_mgr.getPOA();
+            PortableServer::ObjectId_var bid = bidir->activate_object(this);
+            CORBA::Object_var bobj = bidir->id_to_reference(bid);
+            m_objref = ::RTM::Manager::_narrow(bobj);
+            m_insServant = new ManagerForwarder(m_objref.in());
+            poa->activate_object_with_id(id.in(), m_insServant);
+          }
+        else
+          {
+            poa->activate_object_with_id(id.in(), this);
+            CORBA::Object_var mgrobj = poa->id_to_reference(id);
 
-        // Set m_objref
-        m_objref = ::RTM::Manager::_narrow(mgrobj);
+            // Set m_objref
+            m_objref = ::RTM::Manager::_narrow(mgrobj);
+          }
 
         CORBA::String_var ior;
         ior = m_mgr.theORB()->
@@ -1062,6 +1120,20 @@ namespace RTM
         coil::Properties config(m_mgr.getConfig());
         // Why RtORB does not allow corbaloc:iiop: ?
         std::string mgrloc(CORBA_RTCUtil::CorbaURI(host_port, config["manager.name"]).toString());
+#ifdef ORB_IS_OMNIORB
+        if (m_mgr.isBiDirectionalGIOP())
+          {
+            // Bi-Directional GIOP needs GIOP 1.2 (corbaloc is 1.0 by
+            // default), so that the other manager can call back through
+            // this connection.
+            const std::string iiop("corbaloc:iiop:");
+            if (mgrloc.compare(0, iiop.size(), iiop) == 0 &&
+                mgrloc.find('@') == std::string::npos)
+              {
+                mgrloc.insert(iiop.size(), "1.2@");
+              }
+          }
+#endif
 
         RTC_DEBUG(("corbaloc: %s", mgrloc.c_str()));
 
@@ -1254,6 +1326,12 @@ namespace RTM
             coil::vstring tmp = coil::split (create_arg, "?");
             rtcd_cmd += " -o \"module_name:" +  tmp[0] + "\"";
             rtcd_cmd += " -o \"module_option:" +  param["module.options"] + "\"";
+            // options of the launcher itself (e.g. "docker run" options for
+            // rtcd2_docker): <module name>?docker.options=<options>
+            if (param.find("docker.options") != param.end())
+              {
+                rtcd_cmd += " -o \"docker_option:" + param["docker.options"] + "\"";
+              }
             if(!build_comp)
             {
               rtcd_cmd += " -o \"module_build:NO\"";
@@ -1578,50 +1656,59 @@ namespace RTM
   */
   void ManagerServant::updateMasterManager()
     {
-      if (!m_isMaster && !CORBA::is_nil(m_objref))
-        {
-            {
-              std::lock_guard<std::mutex> guardm(m_masterMutex);
-              if (m_masters.length() > 0)
-                {
-                  for (CORBA::ULong i = 0; i < m_masters.length(); ++i)
-                    {
-                      try
-                        {
-                          if (m_masters[i]->_non_existent())
-                            {
-                              CORBA_SeqUtil::erase(m_masters, i); --i;
-                            }
-                        }
-                      catch (...)
-                        {
-                          RTC_ERROR(("Unknown exception cought."));
-                          CORBA_SeqUtil::erase(m_masters, i); --i;
-                        }
-                    }
-                }
-            }
-            
-          if (m_masters.length() == 0)
-            {
-              coil::Properties config = m_mgr.getConfig();
-              try
-                {
-                  RTM::Manager_var owner = findManager(config.getProperty("corba.master_manager"));
-                  if (CORBA::is_nil(owner))
-                    {
-                      RTC_INFO(("Master manager not found"));
-                      return;
-                    }
-                  add_master_manager(owner);
-                  owner->add_slave_manager(m_objref);
-                }
-              catch (...)
-                {
-                  RTC_ERROR(("Unknown exception cought."));
-                }
-            }
+      if (m_isMaster || CORBA::is_nil(m_objref) || m_detaching.load())
+        { return; }
 
+      ManagerList masters;
+      {
+        std::lock_guard<std::mutex> guard(m_masterMutex);
+        masters = m_masters;
+      }
+      for (CORBA::ULong i = 0; i < masters.length(); ++i)
+        {
+          bool exists = false;
+          try
+            {
+              exists = !masters[i]->_non_existent();
+            }
+          catch (...)
+            {
+              RTC_ERROR(("Unknown exception cought."));
+            }
+          if (!exists)
+            {
+              std::lock_guard<std::mutex> guard(m_masterMutex);
+              CORBA::Long index =
+                CORBA_SeqUtil::find(m_masters, is_equiv(masters[i]));
+              if (index >= 0) { CORBA_SeqUtil::erase(m_masters, index); }
+            }
+        }
+
+      {
+        std::lock_guard<std::mutex> guard(m_masterMutex);
+        if (m_masters.length() > 0) { return; }
+      }
+      if (m_detaching.load()) { return; }
+
+      coil::Properties config = m_mgr.getConfig();
+      try
+        {
+          RTM::Manager_var owner = findManager(config.getProperty("corba.master_manager"));
+          if (CORBA::is_nil(owner))
+            {
+              RTC_INFO(("Master manager not found"));
+              return;
+            }
+          if (add_master_manager(owner) != RTC::RTC_OK) { return; }
+          owner->add_slave_manager(m_objref);
+          if (m_detaching.load())
+            {
+              owner->remove_slave_manager(m_objref);
+            }
+        }
+      catch (...)
+        {
+          RTC_ERROR(("Unknown exception cought."));
         }
     }
 

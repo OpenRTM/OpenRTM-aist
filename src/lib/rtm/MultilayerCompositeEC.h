@@ -159,7 +159,8 @@ namespace RTC_exp
           coil::TimeMeasure::Statistics getExecStat();
           void finalize();
       private:
-          std::vector<RTC::LightweightRTObject_ptr> m_rtcs;
+          std::vector<RTC::LightweightRTObject_var> m_rtcs;
+          bool m_stopping{false};
           coil::PeriodicTaskBase* m_task;
           MultilayerCompositeEC* m_ec;
           std::vector<RTC_impl::RTObjectStateMachine*> m_comps;

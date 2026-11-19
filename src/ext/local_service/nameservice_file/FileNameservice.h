@@ -182,13 +182,23 @@ namespace RTM
       /*!
        * @if jp
        * @brief ファイル名取得
-       * TODO: Documentation
+       *
+       * 名前サービスのパスから登録ファイルのパスを生成する。
+       * 引数は変更しない。
+       *
+       * @param ns_path 名前サービスのパス
+       * @return 登録ファイルのパス
        * @else
        * @brief Getting file name
-       * TODO: Documentation
+       *
+       * Build the registration file path from a name service path.
+       * The argument is not modified.
+       *
+       * @param ns_path Name service path
+       * @return Registration file path
        * @endif
        */
-      std::string getFname(std::string& ns_path) const;
+      std::string getFname(const std::string& ns_path) const;
       
       /*!
        * @if jp

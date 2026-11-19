@@ -77,19 +77,35 @@ namespace RTC
    */
   SdoServiceAdmin::~SdoServiceAdmin()
   {
-    for (auto & provider : m_providers)
+    finalize();
+  }
+
+  void SdoServiceAdmin::finalize()
+  {
+    std::lock_guard<std::mutex> finalizing(m_finalizeMutex);
+    if (m_finalized.exchange(true)) { return; }
+    std::vector<SdoServiceProviderBase*> providers;
+    std::vector<SdoServiceConsumerBase*> consumers;
+    {
+      std::lock_guard<std::mutex> guard(m_provider_mutex);
+      providers.swap(m_providers);
+    }
+    {
+      std::lock_guard<std::mutex> guard(m_consumer_mutex);
+      consumers.swap(m_consumers);
+    }
+    for (auto* provider : providers)
       {
         provider->finalize();
-        delete provider;
+        if (SdoServiceProviderFactory::instance().deleteObject(provider) != coil::FactoryReturn::OK)
+          { delete provider; }
       }
-    m_providers.clear();
-
-    for (auto & consumer : m_consumers)
+    for (auto* consumer : consumers)
       {
         consumer->finalize();
-        delete consumer;
+        if (SdoServiceConsumerFactory::instance().deleteObject(consumer) != coil::FactoryReturn::OK)
+          { delete consumer; }
       }
-    m_consumers.clear();
   }
 
   void SdoServiceAdmin::init(const coil::Properties& prop)
@@ -260,6 +276,7 @@ namespace RTC
     RTC_TRACE(("SdoServiceAdmin::addSdoServiceProvider(if=%s)",
                static_cast<const char*>(prof.interface_type)));
     std::lock_guard<std::mutex> guard(m_provider_mutex);
+    if (m_finalized.load()) { return false; }
 
     std::string id(static_cast<const char*>(prof.id));
     for (auto & prov : m_providers)
@@ -320,6 +337,7 @@ namespace RTC
   addSdoServiceConsumer(const SDOPackage::ServiceProfile& sProfile)
   {
     std::lock_guard<std::mutex> guard(m_consumer_mutex);
+    if (m_finalized.load()) { return false; }
     RTC_TRACE(("addSdoServiceConsumer(IFR = %s)",
                static_cast<const char*>(sProfile.interface_type)));
 

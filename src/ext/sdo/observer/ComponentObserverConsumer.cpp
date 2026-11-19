@@ -1,4 +1,4 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 /*!
  * @file ComponentObserverConsumer.h
  * @brief Component observer SDO service consumer implementation
@@ -49,20 +49,7 @@ namespace RTC
    */
   ComponentObserverConsumer::~ComponentObserverConsumer()
   {
-      {
-        std::lock_guard<std::mutex> guard(mutex);
-        unsetComponentProfileListeners();
-        unsetComponentStatusListeners();
-        unsetPortProfileListeners();
-        unsetExecutionContextListeners();
-        unsetConfigurationListeners();
-        unsetHeartbeat();
-      }
-
-      {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::lock_guard<std::mutex> guard(mutex);
-      }
+    finalize();
   }
 
   /*!
@@ -142,11 +129,22 @@ namespace RTC
    */
   void ComponentObserverConsumer::finalize()
   {
+    std::lock_guard<std::mutex> lifecycle(m_finalizeMutex);
+    if (m_finalized) { return; }
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+      m_stopping = true;
+    }
+    // stop() waits for an executing timer callback; do not hold mutex here.
+    unsetHeartbeat();
     unsetComponentProfileListeners();
     unsetComponentStatusListeners();
     unsetPortProfileListeners();
     unsetExecutionContextListeners();
     unsetConfigurationListeners();
+    m_observer.releaseObject();
+    m_rtobj = nullptr;
+    m_finalized = true;
   }
 
   //============================================================
@@ -167,7 +165,7 @@ namespace RTC
       }
 
     coil::vstring observedlist(coil::split(prop["observed_status"], ","));
-    bool flags[OpenRTM::STATUS_KIND_NUM];
+    std::array<bool, OpenRTM::STATUS_KIND_NUM> flags;
     for (bool & flag : flags)
       {
         flag = false;
@@ -275,7 +273,7 @@ namespace RTC
           }
         m_heartbeat = true;
         m_hbtaskid = Manager::instance().addTask([this]{
-          if (m_heartbeat) { updateStatus(OpenRTM::HEARTBEAT, ""); }
+          updateStatus(OpenRTM::HEARTBEAT, "");
         }, interval);
 }
   }

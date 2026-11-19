@@ -92,6 +92,27 @@ namespace RTC
   {
     return m_name == comp->getInstanceName();
   }
+  Manager::OperationGuard::OperationGuard(Manager& owner)
+  {
+    std::lock_guard<std::mutex> guard(owner.m_apiMutex);
+    const auto thread = std::this_thread::get_id();
+    if (owner.m_shutdownStarted && owner.m_shutdownThread != thread &&
+        owner.m_apiThreads.find(thread) == owner.m_apiThreads.end())
+      { return; }
+    ++owner.m_apiThreads[thread];
+    ++owner.m_activeOperations;
+    m_owner = &owner;
+  }
+
+  Manager::OperationGuard::~OperationGuard()
+  {
+    if (m_owner == nullptr) { return; }
+    std::lock_guard<std::mutex> guard(m_owner->m_apiMutex);
+    auto it = m_owner->m_apiThreads.find(std::this_thread::get_id());
+    if (--it->second == 0) { m_owner->m_apiThreads.erase(it); }
+    if (--m_owner->m_activeOperations == 0) { m_owner->m_apiCondition.notify_all(); }
+  }
+
   Manager::FactoryPredicate::~FactoryPredicate() = default;
   Manager::Finalized::~Finalized() = default;
 
@@ -170,9 +191,17 @@ namespace RTC
    */
   void Manager::shutdown()
   {
+    {
+      std::unique_lock<std::mutex> guard(m_apiMutex);
+      if (m_shutdownStarted) { return; }
+      m_shutdownStarted = true;
+      m_shutdownThread = std::this_thread::get_id();
+      m_apiCondition.wait(guard, [this] { return m_activeOperations == 0; });
+    }
     RTC_TRACE(("Manager::shutdown()"));
     m_listeners.manager_.preShutdown();
     shutdownComponents();
+    RTM::LocalServiceAdmin::instance().finalize();
     shutdownNaming();
     shutdownManagerServant();
     shutdownORB();
@@ -410,6 +439,8 @@ namespace RTC
   ReturnCode_t Manager::load(const std::string &fname,
                              const std::string &initfunc)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("Manager::load(fname = %s, initfunc = %s)",
                fname.c_str(), initfunc.c_str()));
 
@@ -429,6 +460,8 @@ namespace RTC
   ReturnCode_t Manager::load(coil::Properties &prop,
                              const std::string &initfunc)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
                prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
 
@@ -496,6 +529,8 @@ namespace RTC
    */
   void Manager::unload(const char *fname)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("Manager::unload()"));
     std::string fnamestr(fname);
     m_listeners.module_.preUnload(fnamestr);
@@ -513,6 +548,8 @@ namespace RTC
    */
   void Manager::unloadAll()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("Manager::unloadAll()"));
     m_module->unloadAll();
     return;
@@ -527,6 +564,8 @@ namespace RTC
    */
   std::vector<coil::Properties> Manager::getLoadedModules()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getLoadedModules()"));
     return m_module->getLoadedModules();
   }
@@ -540,6 +579,8 @@ namespace RTC
    */
   std::vector<coil::Properties> Manager::getLoadableModules()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getLoadableModules()"));
     return m_module->getLoadableModules();
   }
@@ -558,6 +599,8 @@ namespace RTC
                                 RtcNewFunc new_func,
                                 RtcDeleteFunc delete_func)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::registerFactory(%s)", profile["type_name"].c_str()));
 
     std::string policy_name =
@@ -592,6 +635,8 @@ namespace RTC
 
   std::vector<coil::Properties> Manager::getFactoryProfiles()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     std::vector<FactoryBase *> factories(m_factory.getObjects());
     std::vector<coil::Properties> props;
     props.reserve(factories.size());
@@ -657,6 +702,8 @@ namespace RTC
    */
   RTObject_impl *Manager::createComponent(const char *comp_args)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::createComponent(%s)", comp_args));
     std::string argstr(comp_args);
     m_listeners.rtclifecycle_.preCreate(argstr);
@@ -803,9 +850,9 @@ namespace RTC
       setEndpointProperty(rtobj.in());
     }
 
-    for (int i(0); inherit_prop[i][0] != '\0'; ++i)
+    for (const auto* key : inherit_prop)
     {
-      const char *key(inherit_prop[i]);
+      if (*key == '\0') { break; }
       if (m_config.findNode(key) != nullptr)
       {
         prop[key] = m_config[key];
@@ -859,6 +906,8 @@ namespace RTC
    */
   bool Manager::registerComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::registerComponent(%s)", comp->getInstanceName()));
     // ### NamingManager のみで代用可能
     m_compManager.registerObject(comp);
@@ -919,6 +968,8 @@ namespace RTC
    */
   bool Manager::unregisterComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::unregisterComponent(%s)", comp->getInstanceName()));
     // ### NamingManager のみで代用可能
     m_compManager.unregisterObject(comp->getInstanceName());
@@ -938,6 +989,8 @@ namespace RTC
 
   ExecutionContextBase *Manager::createContext(const char *ec_args)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::createContext()"));
     RTC_TRACE(("ExecutionContext type: %s",
                m_config.getProperty("exec_cxt.periodic.type").c_str()));
@@ -970,6 +1023,8 @@ namespace RTC
    */
   void Manager::deleteComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("deleteComponent(RTObject*)"));
     // cleanup from manager's table, and naming serivce
     unregisterComponent(comp);
@@ -1005,6 +1060,8 @@ namespace RTC
 
   void Manager::deleteComponent(const char *instance_name)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("deleteComponent(%s)", instance_name));
     RTObject_impl *comp;
     comp = m_compManager.find(instance_name);
@@ -1025,6 +1082,8 @@ namespace RTC
    */
   RTObject_impl *Manager::getComponent(const char *instance_name)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::getComponent(%s)", instance_name));
     return m_compManager.find(instance_name);
   }
@@ -1038,6 +1097,8 @@ namespace RTC
    */
   std::vector<RTObject_impl *> Manager::getComponents()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getComponents()"));
     return m_compManager.getObjects();
   }
@@ -1162,6 +1223,12 @@ namespace RTC
    * @brief Get the pointer to the RootPOA (ownership duplicated)
    * @endif
    */
+  bool Manager::isBiDirectionalGIOP()
+  {
+    return coil::toBool(m_config["corba.bidirectional_giop"],
+                        "YES", "NO", false);
+  }
+
   PortableServer::POA_ptr Manager::getPOA()
   {
     RTC_TRACE(("Manager::getPOA()"));
@@ -1507,9 +1574,14 @@ namespace RTC
    */
   void Manager::shutdownManagerServant()
   {
+    if (m_mgrservant == nullptr)
+    {
+      return;
+    }
     PortableServer::ObjectId_var oid = m_pPOA->servant_to_id(m_mgrservant);
     m_pPOA->deactivate_object(oid);
-    delete m_mgrservant;
+    m_mgrservant->deactivate();
+    m_mgrservant->_remove_ref();
     m_mgrservant = nullptr;
   }
 
@@ -1584,9 +1656,27 @@ namespace RTC
       }
       // Get the POAManager
       m_pPOAManager = m_pPOA->the_POAManager();
+      m_pRootPOA = PortableServer::POA::_duplicate(m_pPOA);
 #ifdef ORB_IS_OMNIORB
+      if (isBiDirectionalGIOP())
+        {
+          // Bi-Directional GIOP: the objects of this process live in a POA
+          // with the BiDirectional policy (BOTH). IMPLICIT_ACTIVATION is for
+          // _this() (see the _default_POA() of the servants).
+          CORBA::PolicyList bp;
+          bp.length(2);
+          bp[0] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+          bp[1] = m_pRootPOA->create_implicit_activation_policy(
+                      PortableServer::IMPLICIT_ACTIVATION);
+          m_pPOA = m_pRootPOA->create_POA("bidir", m_pPOAManager, bp);
+          RTC_INFO(("Bi-Directional GIOP is enabled."));
+        }
       CORBA::PolicyList pl;
-      pl.length(1);
+      pl.length(isBiDirectionalGIOP() ? 2 : 1);
+      if (isBiDirectionalGIOP())
+        {
+          pl[1] = new BiDirPolicy::BidirectionalPolicy(BiDirPolicy::BOTH);
+        }
 #if defined(RTM_OMNIORB_42) || defined(RTM_OMNIORB_43)
       pl[0] = omniPolicy::create_local_shortcut_policy(omniPolicy::LOCAL_CALLS_SHORTCUT);
 #else
@@ -1640,6 +1730,18 @@ namespace RTC
   {
     std::string opt(m_config["corba.args"]);
     RTC_DEBUG(("corba.args: %s", opt.c_str()));
+
+#ifdef ORB_IS_OMNIORB
+    if (isBiDirectionalGIOP() &&
+        opt.find("BiDirectionalGIOP") == std::string::npos)
+      {
+        // The ORB options for Bi-Directional GIOP are not added here; they
+        // are given in corba.args (or the omniORB configuration).
+        RTC_WARN(("corba.bidirectional_giop is YES, but corba.args has no "
+                  "-ORBofferBiDirectionalGIOP / -ORBacceptBiDirectionalGIOP "
+                  "(see the omniORB options for Bi-Directional GIOP)."));
+      }
+#endif
 
     RTC_DEBUG_STR((m_config));
 
@@ -2168,11 +2270,13 @@ namespace RTC
   void Manager::shutdownComponents()
   {
     RTC_TRACE(("Manager::shutdownComponents()"));
+    std::vector<RTObject_impl*> exited;
     for (auto const &comp : m_namingManager->getObjects())
     {
       try
       {
-        comp->exit();
+        if (comp->exit() != RTC::PRECONDITION_NOT_MET)
+          { exited.emplace_back(comp); }
         coil::Properties p(comp->getInstanceName());
         p << comp->getProperties();
         RTC_PARANOID_STR((p));
@@ -2181,6 +2285,7 @@ namespace RTC
       {
       }
     }
+    waitFinalized(exited, std::chrono::seconds(10));
     cleanupComponents();
     for (auto const &m_ec : m_ecs)
     {
@@ -2220,6 +2325,8 @@ namespace RTC
 
   void Manager::cleanupComponents()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_VERBOSE(("Manager::cleanupComponents()"));
     std::lock_guard<std::mutex> guard(m_finalized.mutex);
     RTC_VERBOSE(("%d components are marked as finalized.",
@@ -2234,8 +2341,30 @@ namespace RTC
   void Manager::notifyFinalized(RTObject_impl *comp)
   {
     RTC_TRACE(("Manager::notifyFinalized()"));
-    std::lock_guard<std::mutex> guard(m_finalized.mutex);
-    m_finalized.comps.emplace_back(comp);
+    {
+      std::lock_guard<std::mutex> guard(m_finalized.mutex);
+      m_finalized.comps.emplace_back(comp);
+    }
+    m_finalized.cond.notify_all();
+  }
+
+  void Manager::waitFinalized(const std::vector<RTObject_impl*>& comps,
+                              std::chrono::milliseconds timeout)
+  {
+    std::unique_lock<std::mutex> guard(m_finalized.mutex);
+    auto all_finalized = [this, &comps] {
+      for (auto const &comp : comps)
+        {
+          if (std::find(m_finalized.comps.begin(), m_finalized.comps.end(),
+                        comp) == m_finalized.comps.end())
+            { return false; }
+        }
+      return true;
+    };
+    if (!m_finalized.cond.wait_for(guard, timeout, all_finalized))
+      {
+        RTC_WARN(("Some components did not finish exit() in time."));
+      }
   }
 
   /*!
@@ -2283,8 +2412,9 @@ namespace RTC
     }
     for (unsigned int i(1); i < RTM::CompParam::prof_list_size; ++i)
     {
-      comp_id[RTM::CompParam::prof_list[i]] = id[i];
-      RTC_TRACE(("RTC basic propfile %s: %s", RTM::CompParam::prof_list[i], id[i].c_str()));
+      const auto* key = *std::next(RTM::CompParam::prof_list, i);
+      comp_id[key] = id[i];
+      RTC_TRACE(("RTC basic propfile %s: %s", key, id[i].c_str()));
     }
 
     if (id_and_conf.size() == 2)
@@ -2353,31 +2483,35 @@ namespace RTC
     std::string type_name(comp->getTypeName());
     std::string inst_name(comp->getInstanceName());
 
-    std::string type_conf(category + "." + type_name + ".config_file");
-    std::string name_conf(category + "." + inst_name + ".config_file");
+    const std::string prefix = category.empty() ? "" : category + ".";
+    const std::string type_key = prefix + type_name;
+    const std::string instance_key = prefix + inst_name;
+    const std::string type_conf = type_key + ".config_file";
+    const std::string name_conf = instance_key + ".config_file";
+    const coil::Properties& config = m_config;
     coil::vstring config_fname;
     coil::Properties type_prop, name_prop;
 
     // Load "category.instance_name.config_file"
-    if (!m_config[name_conf].empty())
+    if (!config[name_conf].empty())
     {
-      std::ifstream conff(m_config[name_conf].c_str());
+      std::ifstream conff(config[name_conf].c_str());
       if (!conff.fail())
       {
         name_prop.load(conff);
         RTC_INFO(("Component instance conf file: %s loaded.",
-                  m_config[name_conf].c_str()));
+                  config[name_conf].c_str()));
         RTC_DEBUG_STR((name_prop));
-        config_fname.emplace_back(m_config[name_conf]);
+        config_fname.emplace_back(config[name_conf]);
       }
     }
-    if (m_config.findNode(category + "." + inst_name) != nullptr)
+    if (m_config.findNode(instance_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + inst_name));
+      coil::Properties &temp(m_config.getNode(instance_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        name_prop << m_config.getNode(category + "." + inst_name);
+        name_prop << m_config.getNode(instance_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((name_prop));
         if (m_config.findNode("config_file") != nullptr)
@@ -2386,25 +2520,25 @@ namespace RTC
         }
       }
     }
-    if (!m_config[type_conf].empty())
+    if (!config[type_conf].empty())
     {
-      std::ifstream conff(m_config[type_conf].c_str());
+      std::ifstream conff(config[type_conf].c_str());
       if (!conff.fail())
       {
         type_prop.load(conff);
         RTC_INFO(("Component type conf file: %s loaded.",
-                  m_config[type_conf].c_str()));
+                  config[type_conf].c_str()));
         RTC_DEBUG_STR((type_prop));
-        config_fname.emplace_back(m_config[type_conf]);
+        config_fname.emplace_back(config[type_conf]);
       }
     }
-    if (m_config.findNode(category + "." + type_name) != nullptr)
+    if (m_config.findNode(type_key) != nullptr)
     {
-      coil::Properties &temp(m_config.getNode(category + "." + type_name));
+      coil::Properties &temp(m_config.getNode(type_key));
       coil::vstring keys(temp.propertyNames());
       if (!(keys.size() == 1 && keys.back() == "config_file"))
       {
-        type_prop << m_config.getNode(category + "." + type_name);
+        type_prop << m_config.getNode(type_key);
         RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
         RTC_DEBUG_STR((type_prop));
         if (m_config.findNode("config_file") != nullptr)

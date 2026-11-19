@@ -48,15 +48,15 @@ namespace RTC
 #ifndef ORB_IS_RTORB
     CORBA_SeqUtil::
       push_back(m_properties,
-                NVUtil::newNV("dataport.corba_cdr.outport_ior", ior));
+                NVUtil::newNV("dataport.shared_memory.outport_ior", ior));
 #else // ORB_IS_RTORB
     CORBA_SeqUtil::
       push_back(m_properties,
-                NVUtil::newNV("dataport.corba_cdr.outport_ior", ior.in()));
+                NVUtil::newNV("dataport.shared_memory.outport_ior", ior.in()));
 #endif // ORB_IS_RTORB
     CORBA_SeqUtil::
       push_back(m_properties,
-                NVUtil::newNV("dataport.corba_cdr.outport_ref", m_objref));
+                NVUtil::newNV("dataport.shared_memory.outport_ref", m_objref));
 
     std::unique_ptr<coil::UUID> uuid(coil::UUID_Generator::generateUUID(2, 0x01));
     m_shm_address = uuid->to_string();

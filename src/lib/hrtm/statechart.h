@@ -431,7 +431,7 @@ class EXPORT_DLL MachineBase {
   // Free all StateInfo objects.
   void free(unsigned int count);
   // Create a copy of another machines StateInfo objects (includes dataes).
-  void copy(StateInfo ** other, unsigned int count);
+  void copy(const std::vector<StateInfo*>& other, unsigned int count);
   // Create a copy of another machines StateInfo object.
   StateInfo * create_clone(Key key, StateInfo * original);
 
@@ -454,7 +454,7 @@ class EXPORT_DLL MachineBase {
   EventQueue deferred_events_;
   EventNames deferred_names_;
   // Array of StateInfo objects.
-  StateInfo ** states_;
+  std::vector<StateInfo*> states_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

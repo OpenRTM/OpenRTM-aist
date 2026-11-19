@@ -14,6 +14,18 @@
 // See Macho.hpp for more information.
 #include <iostream>
 #include <rtm/Macho.h>
+
+// Limit the suppression for the vendored Macho code to this file.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#if __has_warning("-Wreserved-identifier")
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
+#if __has_warning("-Wunsafe-buffer-usage")
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
+#endif
+
 using namespace Macho;
 
 
@@ -373,20 +385,12 @@ Key _AdaptingInitializer::adapt(Key key) {
 }
 
 
-#if defined(__clang__)
-#if defined(_WIN32) || defined(_WIN64)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreserved-identifier"
-#endif
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 // Singleton initializers.
 _DefaultInitializer _theDefaultInitializer;
 _HistoryInitializer _theHistoryInitializer;
 
 #if defined(__clang__)
-#if defined(_WIN32) || defined(_WIN64)
 #pragma clang diagnostic pop
-#endif
 #endif
 
