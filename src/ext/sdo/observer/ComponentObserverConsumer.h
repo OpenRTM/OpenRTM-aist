@@ -1,4 +1,4 @@
-﻿// -*- C++ -*-
+// -*- C++ -*-
 /*!
  * @file ComponentObserverConsumer.h
  * @brief Component observer SDO service consumer implementation
@@ -109,12 +109,14 @@ namespace RTC
     inline void updateStatus(OpenRTM::StatusKind statuskind, const char* msg)
     {
       std::lock_guard<std::mutex> guard(mutex);
+      if (m_stopping) { return; }
       try
         {
           m_observer->update_status(statuskind, msg);
         }
       catch (...)
         {
+          m_stopping = true;
           m_rtobj->removeSdoServiceConsumerStartThread(m_profile.id);
         }
     }
@@ -582,6 +584,9 @@ namespace RTC
     Manager::TaskId m_hbtaskid;
 
     std::mutex mutex;
+    std::mutex m_finalizeMutex;
+    bool m_stopping{false};
+    bool m_finalized{false};
 
     std::vector<DataPortAction*> m_recievedactions;
     std::vector<DataPortAction*> m_sendactions;
