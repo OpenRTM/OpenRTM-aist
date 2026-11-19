@@ -270,7 +270,9 @@ namespace coil
     
     if (created())
     {
-        ::close(m_fd);
+        const int fd = m_fd;
+        m_fd = -1;
+        return ::close(fd);
     }
     else
     {
