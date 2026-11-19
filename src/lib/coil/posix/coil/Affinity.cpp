@@ -26,6 +26,29 @@
 
 namespace coil
 {
+#if defined(COIL_OS_LINUX)
+  namespace
+  {
+    // The libc macros index the opaque cpu_set_t representation internally.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
+    bool cpuIsSet(std::size_t index, const cpu_set_t& set)
+    {
+      return index < CPU_SETSIZE && CPU_ISSET(index, &set);
+    }
+
+    void setCpu(std::size_t index, cpu_set_t& set)
+    {
+      if (index < CPU_SETSIZE) { CPU_SET(index, &set); }
+    }
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+  }
+#endif
+
   bool getProcCpuAffinity(CpuMask& cpu_mask)
   {
 #if defined(COIL_OS_LINUX)
@@ -38,7 +61,7 @@ namespace coil
 
     for (size_t i(0); i < CPU_SETSIZE; ++i)
       {
-        if (CPU_ISSET(i, &cpu_set))
+        if (cpuIsSet(i, cpu_set))
           {
             cpu_mask.emplace_back(static_cast<unsigned int>(i)+1);
           }
@@ -56,7 +79,7 @@ namespace coil
 
     for (size_t i(0); i < cpu_mask.size(); ++i)
       {
-        CPU_SET(i, &cpu_set);
+        setCpu(i, cpu_set);
       }
 
     int result = sched_setaffinity(pid, sizeof(cpu_set_t), &cpu_set);
@@ -96,7 +119,7 @@ namespace coil
 
     for (size_t i(0); i < CPU_SETSIZE; ++i)
       {
-        if (CPU_ISSET(i, &cpu_set))
+        if (cpuIsSet(i, cpu_set))
           {
             cpu_mask.emplace_back(static_cast<unsigned int>(i)+1);
           }
@@ -114,7 +137,7 @@ namespace coil
 
     for (size_t i(0); i < cpu_mask.size(); ++i)
       {
-        CPU_SET(i, &cpu_set);
+        setCpu(i, cpu_set);
       }
 
     int result = pthread_setaffinity_np(tid, sizeof(cpu_set_t), &cpu_set);

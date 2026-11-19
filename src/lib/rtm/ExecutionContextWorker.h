@@ -19,6 +19,7 @@
 #ifndef RTC_EXECUTIONCONTEXTWORKER_H
 #define RTC_EXECUTIONCONTEXTWORKER_H
 
+#include <array>
 #include <condition_variable>
 
 #include <rtm/idl/RTCSkel.h>
@@ -420,12 +421,12 @@ namespace RTC_impl
     RTC::LifeCycleState getComponentState(RTC::LightweightRTObject_ptr comp);
     static const char* getStateString(RTC::LifeCycleState state)
     {
-      static const char* const st[] = {
+      static const std::array<const char*, 4> st = {{
         "CREATED_STATE",
         "INACTIVE_STATE",
         "ACTIVE_STATE",
         "ERROR_STATE"
-      };
+      }};
       return state >= RTC::CREATED_STATE && state <= RTC::ERROR_STATE ?
         st[state] : "";
     }

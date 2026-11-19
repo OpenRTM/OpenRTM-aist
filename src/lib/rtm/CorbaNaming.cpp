@@ -17,7 +17,9 @@
  *
  */
 
+#include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <rtm/CorbaNaming.h>
 #include <rtm/CORBA_RTCUtil.h>
 #include <iostream>
@@ -902,30 +904,27 @@ namespace RTC
                                  char* string_name,
                                  CORBA::ULong slen)
   {
-    char* s = string_name;
+    if (!string_name || slen == 0) { return; }
+    std::string result;
+    const auto append = [&result](const char* value)
+      {
+        for (char ch : std::string(value))
+          {
+            if (ch == '/' || ch == '.' || ch == '\\') { result.push_back('\\'); }
+            result.push_back(ch);
+          }
+      };
     for (CORBA::ULong i = 0; i < name.length(); ++i)
       {
-        // Copy id to string_name
-        for (const char* id = name[i].id; *id != '\0'; ++id)
-          {
-            if (*id == '/' || *id == '.' || *id == '\\') *s++ = '\\';
-            *s++ = *id;
-          }
-        // '.' if there is a kind, or no id
-        if (((const char*)(name[i].id  ))[0] == '\0' ||
-            ((const char*)(name[i].kind))[0] != '\0')
-          *s++ = '.';
-        // Copy kind to string_name
-        for (const char* kind = name[i].kind; *kind != '\0'; ++kind)
-          {
-            if (*kind == '/' || *kind == '.' || *kind == '\\')
-              *s++ = '\\';
-            *s++ = *kind;
-          }
-        // The end of string_name will be overwritten by '\0'
-        *s++ = '/';
+        if (i != 0) { result.push_back('/'); }
+        const char* id = name[i].id;
+        const char* kind = name[i].kind;
+        append(id);
+        if (*id == '\0' || *kind != '\0') { result.push_back('.'); }
+        append(kind);
       }
-    string_name[slen-1] = '\0';
+    result.resize(std::min(result.size(), static_cast<std::size_t>(slen) - 1));
+    std::memcpy(string_name, result.c_str(), result.size() + 1);
   }
 
   /*!
@@ -942,10 +941,10 @@ namespace RTC
     for (CORBA::ULong i = 0; i < name.length(); ++i)
       {
         // Count string length of id(s)
-        for (const char* id = name[i].id; *id != '\0'; ++id)
+        for (char id : std::string(static_cast<const char*>(name[i].id)))
           {
             // Escape character '/', '.', '\' will convert to "\/", "\.", "\\".
-            if (*id == '/' || *id == '.' || *id == '\\') slen++;
+            if (id == '/' || id == '.' || id == '\\') slen++;
             slen++;
           }
         // If kind exists, space for '.' is counted
@@ -955,9 +954,9 @@ namespace RTC
             slen++;
           }
         // Count string length of kind(s)
-        for (const char* kind = name[i].kind; *kind != '\0'; kind++)
+        for (char kind : std::string(static_cast<const char*>(name[i].kind)))
           {
-            if (*kind == '/' || *kind == '.' || *kind == '\\') slen++;
+            if (kind == '/' || kind == '.' || kind == '\\') slen++;
             slen++;
           }
         // Space for '/' or '\0'

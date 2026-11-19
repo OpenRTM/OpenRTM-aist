@@ -26,6 +26,7 @@
 #include <rtm/SystemLogger.h>
 #include <rtm/LocalServiceBase.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -265,12 +266,16 @@ namespace RTM
 
     /*!
      * @if jp
-     * @brief logger
+     * @brief ローカルサービス管理で使用するロガーを取得する
+     * @return 初期化後は現在の Manager のログバッファを使うロガー、それ以外は出力しないロガー
      * @else
-     * @brief logger
+     * @brief Get the logger used by the local service administrator
+     * @return A logger using the current Manager's log buffer while initialized, or a silent logger otherwise
      * @endif
      */
-    ::RTC::Logger rtclog;
+    ::RTC::Logger& logger() { return m_logger ? *m_logger : m_silentLogger; }
+    ::RTC::Logger m_silentLogger;
+    std::unique_ptr<::RTC::Logger> m_logger;
   };
 } // namespace RTM
 

@@ -118,6 +118,20 @@ add_subdirectory(ext)
 # Header list
 #==============================
 set(rtm_headers
+	CSPMachine.h
+	CSPArbitration.h
+	InPortCSPProvider.h
+	OutPortCSPProvider.h
+	InPortCSPConsumer.h
+	OutPortCSPConsumer.h
+	InPortDuplexConnector.h
+	OutPortDuplexConnector.h
+	CSPTransport.h
+	CSPManager.h
+	CSPPort.h
+	CSPInPort.h
+	CSPOutPort.h
+	CSPEventPort.h
 	ConfigAdmin.h
 	ModuleManager.h
 	CorbaNaming.h
@@ -237,6 +251,8 @@ set(rtm_headers
 # Source list
 #==============================
 set(rtm_srcs
+	CSPTransport.cpp
+	CSPArbitration.cpp
 	ConfigAdmin.cpp
 	ModuleManager.cpp
 	CorbaNaming.cpp

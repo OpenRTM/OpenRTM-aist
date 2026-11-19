@@ -1,0 +1,32 @@
+// コンポーネントオブザーバー (FSM4RTC 版。IDL:omg.org/RTC/ComponentObserver:1.0)。
+// OpenRTM-aist C++ 2.1 の ComponentObserverConsumer.so はこちらを使う
+// (パッケージに入っている C++ の ComponentObserver.idl は旧来の OpenRTM モジュール版なので、
+//  OpenRTM-aist-Python の生成済みスタブ RTM_IDL/ComponentObserver_idl.py と同じ定義をここに書いた)。
+#include "SDOPackage.idl"
+
+#pragma prefix "omg.org"
+
+module RTC
+{
+  enum StatusKind
+  {
+    COMPONENT_PROFILE,
+    RTC_STATUS,
+    EC_STATUS,
+    PORT_PROFILE,
+    CONFIGURATION,
+    RTC_HEARTBEAT,
+    EC_HEARTBEAT,
+    FSM_PROFILE,
+    FSM_STATUS,
+    FSM_STRUCTURE,
+    USER_DEFINED,
+    STATUS_KIND_NUM
+  };
+
+  interface ComponentObserver
+    : SDOPackage::SDOService
+  {
+    oneway void update_status(in StatusKind status_kind, in string hint);
+  };
+};

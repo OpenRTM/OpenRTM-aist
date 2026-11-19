@@ -7,6 +7,7 @@
  * $Id$
  */
 
+#include <string>
 #include "ConfigSample.h"
 #include "VectorConvert.h"
 
@@ -40,7 +41,7 @@ static const char* const configsample_spec[] =
 char ticktack()
 {
   static int i(0);
-  const char* c = "/-\\|";
+  static const std::string c = "/-\\|";
   i = (i + 1) % 4;
   return c[i];
 }
@@ -134,7 +135,7 @@ RTC::ReturnCode_t ConfigSample::onExecute(RTC::UniqueId  /*ec_id*/)
 {
   static size_t maxlen(0);
   size_t curlen(0);
-  const char* c = "                    ";
+  static const std::string c = "                    ";
   {
       std::cout << "---------------------------------------" << std::endl;
       std::cout << " Active Configuration Set: ";

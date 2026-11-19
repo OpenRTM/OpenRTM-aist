@@ -60,7 +60,7 @@ namespace CORBA_IORUtil
     if (iorstr == nullptr) { return false; }
     size_t size = strlen(iorstr);
 
-    if (size < 4)
+    if (size <= 4 || (size - 4) % 2 != 0)
       {
         return false;
       }
@@ -122,13 +122,22 @@ namespace CORBA_IORUtil
         buf.marshalOctet(v);
       }
 
-    buf.rewindInputPtr();
-    CORBA::Boolean b = buf.unmarshalBoolean();
-    buf.setByteSwapFlag(b);
+    try
+      {
+        buf.rewindInputPtr();
+        CORBA::Boolean b = buf.unmarshalBoolean();
+        buf.setByteSwapFlag(b);
 
-    ior.type_id = IOP::IOR::unmarshaltype_id(buf);
-    ior.profiles <<= buf;
-    return true;
+        IOP::IOR decoded;
+        decoded.type_id = IOP::IOR::unmarshaltype_id(buf);
+        decoded.profiles <<= buf;
+        ior = decoded;
+        return true;
+      }
+    catch (const CORBA::MARSHAL&)
+      {
+        return false;
+      }
 #else  // ORB_IS_RTORB
     // RtORB does not supports this function
     return false;
