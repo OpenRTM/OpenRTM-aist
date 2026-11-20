@@ -1959,7 +1959,6 @@ namespace snmpmgr
     std::set<std::string> loadable_checked_;
     std::atomic<bool> prefetching_{false};           // 先に取っている間 (自動復旧の判断を止める)
     std::atomic<bool> loadable_prefetched_{false};   // 復旧・マイグレーションのために先に取ったか
-    // 先読みの後に CPU のサンプルを捨てた時刻 (monotonic。0 は捨てていない、またはそろった)。robots_mutex_ で守る
     double cgroup_reset_at_ = 0;
     static constexpr double cgroup_wait_seconds_ = 30.0;
     /*!

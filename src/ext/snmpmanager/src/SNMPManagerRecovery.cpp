@@ -483,8 +483,6 @@ namespace snmpmgr
       }
     if (!switching.empty())
       {
-        // 先読みの直後は CPU のサンプルを捨てているので、そろうまで待ってから配置の空きを判断する
-        // (待たないと "waiting for cgroup metrics" で切り替えが失敗し、cooldown の間やり直さない)
         wait_cgroup_samples();
         try
           {

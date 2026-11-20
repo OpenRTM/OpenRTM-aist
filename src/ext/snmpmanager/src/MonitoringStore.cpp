@@ -26,9 +26,6 @@
 #include "SNMPManagerUtil.hpp"
 
 #ifdef SNMPMGR_WINSQLITE
-// winsqlite3.h は NTDDI_VERSION が Windows 10 以上でないと宣言を出さない。OpenRTM-aist の中でビルドすると
-// _WIN32_WINNT=0x0603 (Windows 8.1) が付くので、この include の間だけ Windows 10 にする
-// (winsqlite3.h only declares the API for NTDDI_VERSION >= Windows 10; OpenRTM-aist defines _WIN32_WINNT=0x0603)
 #pragma push_macro("NTDDI_VERSION")
 #undef NTDDI_VERSION
 #define NTDDI_VERSION 0x0A000000
