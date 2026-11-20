@@ -241,7 +241,7 @@ namespace RTC
 #endif
       {
         RTC_ERROR(("prop[inport_ref] is not objref"));
-        return true;
+        return false;
       }
 
     if (CORBA::is_nil(obj))

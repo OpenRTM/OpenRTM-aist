@@ -23,6 +23,7 @@
 #include <coil/Properties.h>
 #include <rtm/NumberingPolicyBase.h>
 #include <rtm/NumberingPolicy.h>
+#include <atomic>
 
 
 namespace RTC
@@ -278,7 +279,7 @@ namespace RTC
      * @brief Number of current RT-Component's instances.
      * @endif
      */
-    int m_Number;
+    std::atomic<int> m_Number;
   };
 
   /*!
@@ -346,7 +347,11 @@ namespace RTC
 
     ~FactoryCXX() override
     {
-      delete m_policy;
+      if (RTM::NumberingPolicyFactory::instance().deleteObject(m_policy)
+          != coil::FactoryReturn::OK)
+        {
+          delete m_policy;
+        }
     }
 
     /*!

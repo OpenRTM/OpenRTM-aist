@@ -1,6 +1,27 @@
 ﻿// -*- C++ -*-
 /*!
  * @file FactoryInit.cpp
+ * @if jp
+ * @brief OpenRTMの通信・バッファなどのFactoryを初期化する。 実装。
+ * @else
+ * @brief Initialize OpenRTM communication, buffer and related factories. Implementation.
+ * @endif
+ * @date $Date: 2026-11-13 15:32:20 $
+ * @author Nobuhiko Miyamoto <n-miyamoto@aist.go.jp>
+ *
+ * Copyright (C) 2019
+ *     Nobuhiko Miyamoto
+ *     Intelligent Systems Research Institute,
+ *     National Institute of
+ *         Advanced Industrial Science and Technology (AIST), Japan
+ *     All rights reserved.
+ *
+ * $Id$
+ */
+
+// -*- C++ -*-
+/*
+ * @file FactoryInit.cpp
  * @brief factory initialization function
  * @date $Date: 2008-03-06 06:58:40 $
  * @author Noriaki Ando <n-ando@aist.go.jp>
@@ -34,6 +55,7 @@
 #include <rtm/InPortCorbaCdrProvider.h>
 #include <rtm/InPortCorbaCdrConsumer.h>
 #include <rtm/OutPortCorbaCdrConsumer.h>
+#include <rtm/CSPTransport.h>
 #include <rtm/OutPortCorbaCdrProvider.h>
 #include <rtm/InPortDirectProvider.h>
 #include <rtm/InPortDirectConsumer.h>
@@ -82,6 +104,10 @@ namespace RTM
     PublisherPeriodicInit();
 
     // Providers/Consumer
+    InPortCSPProviderInit();
+    OutPortCSPProviderInit();
+    InPortCSPConsumerInit();
+    OutPortCSPConsumerInit();
     InPortCorbaCdrProviderInit();
     InPortCorbaCdrConsumerInit();
     OutPortCorbaCdrConsumerInit();

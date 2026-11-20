@@ -20,6 +20,7 @@
 #ifndef RTC_DATAPORTSTATUS_H
 #define RTC_DATAPORTSTATUS_H
 
+#include <array>
 #include <vector>
 
 namespace RTC
@@ -153,7 +154,7 @@ namespace RTC
      */
     inline const char* toString(DataPortStatus status)
     {
-      static char const* const data_port_status[] = {
+      static const std::array<const char*, 14> data_port_status = {{
         "PORT_OK",
         "PORT_ERROR",
         "BUFFER_ERROR",
@@ -168,8 +169,9 @@ namespace RTC
         "PRECONDITION_NOT_MET",
         "CONNECTION_LOST",
         "UNKNOWN_ERROR"
-      };
-      return data_port_status[static_cast<std::size_t>(status)];
+      }};
+      const auto index = static_cast<std::size_t>(status);
+      return index < data_port_status.size() ? data_port_status[index] : "";
     }
 
   using DataPortStatusList = std::vector<DataPortStatus>;

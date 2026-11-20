@@ -1,6 +1,27 @@
 ﻿// -*- C++ -*-
 /*!
  * @file OutPortBase.cpp
+ * @if jp
+ * @brief `OutPortBase`の状態と操作をまとめる。 実装。
+ * @else
+ * @brief Encapsulate the state and operations of OutPortBase. Implementation.
+ * @endif
+ * @date $Date: 2026-11-13 15:32:20 $
+ * @author Nobuhiko Miyamoto <n-miyamoto@aist.go.jp>
+ *
+ * Copyright (C) 2019
+ *     Nobuhiko Miyamoto
+ *     Intelligent Systems Research Institute,
+ *     National Institute of
+ *         Advanced Industrial Science and Technology (AIST), Japan
+ *     All rights reserved.
+ *
+ * $Id$
+ */
+
+// -*- C++ -*-
+/*
+ * @file OutPortBase.cpp
  * @brief Output porty base class
  * @date $Date: 2007-12-31 03:08:05 $
  * @author Noriaki Ando <n-ando@aist.go.jp>
@@ -23,11 +44,13 @@
 #include <rtm/OutPortPushConnector.h>
 #include <rtm/OutPortPullConnector.h>
 #include <rtm/OutPortBase.h>
+#include <rtm/CSPTransport.h>
 #include <rtm/PublisherBase.h>
 #include <iostream>
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <new>
 
 #include <rtm/InPortBase.h>
 
@@ -337,6 +360,7 @@ namespace RTC
   void OutPortBase::activateInterfaces()
   {
     RTC_TRACE(("activateInterfaces()"));
+    std::lock_guard<std::mutex> guard(m_connectorsMutex);
 
     for (auto & connector : m_connectors)
       {
@@ -354,6 +378,7 @@ namespace RTC
   void OutPortBase::deactivateInterfaces()
   {
     RTC_TRACE(("deactivateInterfaces()"));
+    std::lock_guard<std::mutex> guard(m_connectorsMutex);
 
     for (auto & connector : m_connectors)
       {
@@ -556,7 +581,39 @@ namespace RTC
      */
     std::string dflow_type{coil::normalize(prop["dataflow_type"])};
 
-    if (dflow_type == "push")
+    if (prop["interface_type"] == "csp_channel" && dflow_type != "duplex") return RTC::BAD_PARAMETER;
+    if (dflow_type == "duplex")
+      {
+        if (prop["interface_type"] != "csp_channel") return RTC::BAD_PARAMETER;
+        if (csp_detail::validate(cprof) != RTC_OK) return RTC::BAD_PARAMETER;
+        OutPortProvider* created = createProvider(cprof, prop);
+        auto* provider = dynamic_cast<OutPortCSPProvider*>(created);
+        if (!provider)
+          {
+            if (created != nullptr) { OutPortProviderFactory::instance().deleteObject(created); }
+            return RTC::BAD_PARAMETER;
+          }
+        ConnectorInfo info(cprof.name, cprof.connector_id, CORBA_SeqUtil::refToVstring(cprof.ports), prop);
+        OutPortDuplexConnector* connector(nullptr);
+        try
+          {
+            connector = new (std::nothrow) OutPortDuplexConnector(info, provider, m_listeners);
+          }
+        catch (...)
+          {
+            connector = nullptr;
+          }
+        if (connector == nullptr)
+          {
+            RTC_ERROR(("OutPortDuplexConnector creation failed"));
+            OutPortProviderFactory::instance().deleteObject(created);
+            return RTC::RTC_ERROR;
+          }
+        connector->setEndian(csp_detail::littleEndian(cprof));
+        m_connectors.push_back(connector);
+        return RTC::RTC_OK;
+      }
+    else if (dflow_type == "push")
       {
         RTC_PARANOID(("dataflow_type = push .... do nothing"));
         return RTC::RTC_OK;
@@ -640,7 +697,26 @@ namespace RTC
     std::string dflow_type(prop["dataflow_type"]);
     dflow_type = coil::normalize(std::move(dflow_type));
 
-    if (dflow_type == "push")
+    if (prop["interface_type"] == "csp_channel" && dflow_type != "duplex") return RTC::BAD_PARAMETER;
+    if (dflow_type == "duplex")
+      {
+        auto* connector = dynamic_cast<OutPortDuplexConnector*>(getConnectorById(cprof.connector_id));
+        if (!connector) return RTC::BAD_PARAMETER;
+        InPortConsumer* created = createConsumer(cprof, prop);
+        auto* consumer = dynamic_cast<InPortCSPConsumer*>(created);
+        if (!consumer)
+          {
+            if (created != nullptr) { InPortConsumerFactory::instance().deleteObject(created); }
+            return RTC::BAD_PARAMETER;
+          }
+        consumer->init(prop);
+        connector->setConsumer(std::shared_ptr<InPortCSPConsumer>(consumer,
+          [](InPortCSPConsumer* value) { InPortConsumer* base = value; InPortConsumerFactory::instance().deleteObject(base); }));
+        connector->setEndian(littleEndian);
+        if (m_listeners) { auto info = connector->profile(); m_listeners->notify(ConnectorListenerType::ON_CONNECT, info); }
+        return RTC::RTC_OK;
+      }
+    else if (dflow_type == "push")
       {
         RTC_PARANOID(("dataflow_type is push."));
 
@@ -657,6 +733,7 @@ namespace RTC
           {
             return RTC::RTC_ERROR;
           }
+        connector->setEndian(littleEndian);
 
         RTC_DEBUG(("subscribeInterfaces() successfully finished."));
         return RTC::RTC_OK;
@@ -776,6 +853,7 @@ namespace RTC
         NVUtil::copyFromProperties(m_profile.properties, prop);
       }
 
+    if (coil::includes(provider_types, "csp_channel")) appendProperty("dataport.dataflow_type", "duplex");
     m_providerTypes = provider_types;
   }
 
@@ -910,29 +988,33 @@ namespace RTC
           {
             provider->init(prop.getNode("provider"));
           }
-        catch (std::bad_alloc&)
+        catch (...)
           {
             RTC_ERROR(("provider creation failed"));
             OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
 
+        bool published(false);
+        try
+          {
 #ifndef ORB_IS_RTORB
-        if (!provider->publishInterface(cprof.properties))
-          {
-            RTC_ERROR(("publishing interface information error"));
-            OutPortProviderFactory::instance().deleteObject(provider);
-            return nullptr;
-          }
+            published = provider->publishInterface(cprof.properties);
 #else  // ORB_IS_RTORB
-        ::SDOPackage::NVList_ptr prop_ref(cprof.properties);
-        if (!provider->publishInterface(*prop_ref))
+            ::SDOPackage::NVList_ptr prop_ref(cprof.properties);
+            published = provider->publishInterface(*prop_ref);
+#endif  // ORB_IS_RTORB
+          }
+        catch (...)
+          {
+            published = false;
+          }
+        if (!published)
           {
             RTC_ERROR(("publishing interface information error"));
             OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
-#endif  // ORB_IS_RTORB
         return provider;
       }
 
@@ -973,14 +1055,23 @@ namespace RTC
           {
             consumer->init(prop.getNode("consumer"));
           }
-        catch (std::bad_alloc&)
+        catch (...)
           {
             RTC_ERROR(("consumer creation failed"));
             InPortConsumerFactory::instance().deleteObject(consumer);
             return nullptr;
           }
 
-        if (!consumer->subscribeInterface(cprof.properties))
+        bool subscribed(false);
+        try
+          {
+            subscribed = consumer->subscribeInterface(cprof.properties);
+          }
+        catch (...)
+          {
+            subscribed = false;
+          }
+        if (!subscribed)
           {
             RTC_ERROR(("interface subscription failed."));
             InPortConsumerFactory::instance().deleteObject(consumer);
@@ -1019,14 +1110,15 @@ namespace RTC
                           prop);
 #endif  // ORB_IS_RTORB
 
+    OutPortConnector* connector(nullptr);
     try
       {
-        OutPortConnector* connector(nullptr);
-        connector = new OutPortPushConnector(profile, consumer, m_listeners);
+        connector = new (std::nothrow) OutPortPushConnector(profile, consumer, m_listeners);
 
         if (connector == nullptr)
           {
-            RTC_ERROR(("old compiler? new returned 0;"));
+            RTC_ERROR(("OutPortPushConnector allocation failed"));
+            InPortConsumerFactory::instance().deleteObject(consumer);
             return nullptr;
           }
         RTC_TRACE(("OutPortPushConnector created"));
@@ -1054,9 +1146,10 @@ namespace RTC
                       m_connectors.size()));
         return connector;
       }
-    catch (std::bad_alloc&)
+    catch (...)
       {
         RTC_ERROR(("OutPortPushConnector creation failed"));
+        delete connector;
         return nullptr;
       }
   }
@@ -1087,14 +1180,15 @@ namespace RTC
                           prop);
 #endif  // ORB_IS_RTORB
 
+    OutPortConnector* connector(nullptr);
     try
       {
-        OutPortConnector* connector(nullptr);
-        connector = new OutPortPullConnector(profile, provider, m_listeners);
+        connector = new (std::nothrow) OutPortPullConnector(profile, provider, m_listeners);
 
         if (connector == nullptr)
           {
-            RTC_ERROR(("old compiler? new returned 0;"));
+            RTC_ERROR(("OutPortPullConnector allocation failed"));
+            OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
         RTC_TRACE(("OutPortPullConnector created"));
@@ -1110,9 +1204,10 @@ namespace RTC
                       m_connectors.size()));
         return connector;
       }
-    catch (std::bad_alloc&)
+    catch (...)
       {
         RTC_ERROR(("OutPortPullConnector creation failed"));
+        delete connector;
         return nullptr;
       }
   }

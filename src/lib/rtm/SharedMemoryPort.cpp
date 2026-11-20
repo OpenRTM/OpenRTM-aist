@@ -15,6 +15,7 @@
  *
  */
 
+#include <iterator>
 #include <rtm/SharedMemoryPort.h>
 #include <rtm/Manager.h>
 
@@ -144,14 +145,17 @@ namespace RTC
   {
       if (!m_shmem.created())
       {
-      m_shmem.create(shm_address, memory_size);
-      try
-      {
-          m_smInterface->open_memory(memory_size, CORBA::string_dup(shm_address));
+        m_shmem.create(shm_address, memory_size);
+        if (!CORBA::is_nil(m_smInterface))
+        {
+          try
+          {
+            m_smInterface->open_memory(memory_size, shm_address);
           }
           catch (...)
           {
           }
+        }
       }
   }
   /*!
@@ -199,12 +203,15 @@ namespace RTC
           {
               m_shmem.unlink();
           }
-          try
+          if (!CORBA::is_nil(m_smInterface))
           {
-              m_smInterface->close_memory(false);
-          }
-          catch (...)
-          {
+              try
+              {
+                  m_smInterface->close_memory(false);
+              }
+              catch (...)
+              {
+              }
           }
       }
   }
@@ -282,16 +289,19 @@ namespace RTC
   */
   void SharedMemoryPort::read(ByteData& data)
   {
-      if (m_shmem.created())
-      {
-          CORBA_CdrMemoryStream data_size_cdr;
-          CORBA::ULongLong data_size = 0;
-          data.isLittleEndian(m_endian);
-          data_size_cdr.setEndian(m_endian);
-          data_size_cdr.writeCdrData(reinterpret_cast<unsigned char*>(&(m_shmem.get_data()[0])), sizeof(CORBA::ULongLong));
-          data_size_cdr.deserializeCDR(data_size);
-          data.writeData(reinterpret_cast<unsigned char*>(&m_shmem.get_data()[sizeof(CORBA::ULongLong)]), static_cast<unsigned long>(data_size));
-      }
+      const auto headerSize = sizeof(CORBA::ULongLong);
+      if (!m_shmem.created() || m_shmem.get_size() < headerSize) { return; }
+      auto* buffer = reinterpret_cast<unsigned char*>(m_shmem.get_data());
+      CORBA_CdrMemoryStream data_size_cdr;
+      CORBA::ULongLong data_size = 0;
+      data_size_cdr.setEndian(m_endian);
+      data_size_cdr.writeCdrData(buffer, headerSize);
+      if (!data_size_cdr.deserializeCDR(data_size) ||
+          data_size > m_shmem.get_size() - headerSize) { return; }
+      const auto size = static_cast<unsigned long>(data_size);
+      if (size != data_size) { return; }
+      data.isLittleEndian(m_endian);
+      data.writeData(std::next(buffer, headerSize), size);
 
   }
   /*!

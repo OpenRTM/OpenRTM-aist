@@ -188,7 +188,7 @@ namespace RTC
 
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.inport_ior");
+                               "dataport.shared_memory.inport_ior");
     if (index < 0)
       {
         RTC_ERROR(("inport_ior not found"));
@@ -224,7 +224,7 @@ namespace RTC
     RTC_TRACE(("subscribeFromRef()"));
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.inport_ref");
+                               "dataport.shared_memory.inport_ref");
     if (index < 0)
       {
         RTC_ERROR(("inport_ref not found"));
@@ -239,7 +239,7 @@ namespace RTC
 #endif
       {
         RTC_ERROR(("prop[inport_ref] is not objref"));
-        return true;
+        return false;
       }
 
     if (CORBA::is_nil(obj))
@@ -261,7 +261,7 @@ namespace RTC
     RTC_TRACE(("unsubscribeFromIor()"));
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.inport_ior");
+                               "dataport.shared_memory.inport_ior");
     if (index < 0)
       {
         RTC_ERROR(("inport_ior not found"));
@@ -292,7 +292,7 @@ namespace RTC
     RTC_TRACE(("unsubscribeFromRef()"));
     CORBA::Long index;
     index = NVUtil::find_index(properties,
-                               "dataport.corba_cdr.inport_ref");
+                               "dataport.shared_memory.inport_ref");
     if (index < 0) { return false; }
 
     CORBA::Object_var obj;

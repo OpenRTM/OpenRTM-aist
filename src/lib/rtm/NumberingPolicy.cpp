@@ -34,6 +34,7 @@ namespace RTM
    */
   std::string ProcessUniquePolicy::onCreate(void* obj)
   {
+    std::lock_guard<std::mutex> guard(m_mutex);
     std::vector<void*>::size_type pos;
     
     ++m_num;
@@ -61,6 +62,7 @@ namespace RTM
    */
   void ProcessUniquePolicy::onDelete(void* obj)
   {
+    std::lock_guard<std::mutex> guard(m_mutex);
     std::vector<void*>::size_type pos;
     pos = find(obj);
     if (pos < m_objects.size())

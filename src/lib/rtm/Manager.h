@@ -43,6 +43,8 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <condition_variable>
+#include <map>
 #include <list>
 #include <thread>
 #include <vector>
@@ -1148,6 +1150,32 @@ namespace RTC
      * @endif
      */
     PortableServer::POA_ptr getPOA();
+
+    /*!
+     * @if jp
+     * @brief Bi-Directional GIOP を使うか
+     *
+     * corba.bidirectional_giop が YES なら、Manager の POA (getPOA()) は
+     * BiDirectional ポリシー (BOTH) を持つ POA になる。ORB の Bi-Directional
+     * GIOP のオプション (-ORBofferBiDirectionalGIOP など) は、corba.args に書く。
+     * 相手が開いた接続で呼び返すので、外から
+     * 接続できないプロセス (NAT やコンテナの中など) のマネージャを使える。
+     *
+     * @return 使うなら true
+     * @else
+     * @brief Whether Bi-Directional GIOP is used
+     *
+     * If corba.bidirectional_giop is YES, the POA of the Manager (getPOA())
+     * has the BiDirectional policy (BOTH). The ORB options for Bi-Directional
+     * GIOP (-ORBofferBiDirectionalGIOP etc.) are given in corba.args.
+     * Callbacks use the connection that the
+     * other side opened, so a manager in a process that cannot be connected
+     * to from outside (behind NAT, in a container, etc.) can be used.
+     *
+     * @return true if used
+     * @endif
+     */
+    bool isBiDirectionalGIOP();
 #ifdef ORB_IS_OMNIORB
     PortableServer::POA_ptr getShortCutPOA();
 #endif
@@ -2088,6 +2116,9 @@ namespace RTC
      * @endif
      */
     PortableServer::POA_var m_pPOA;
+    // RootPOA (m_pPOA is a child POA with the BiDirectional policy when
+    // Bi-Directional GIOP is used)
+    PortableServer::POA_var m_pRootPOA;
 #ifdef ORB_IS_OMNIORB
     PortableServer::POA_var m_pShortCutPOA;
 #endif
@@ -2423,9 +2454,75 @@ namespace RTC
     {
       ~Finalized();
       std::mutex mutex;
+      std::condition_variable cond;
       std::vector<RTObject_impl*> comps;
     };
     Finalized m_finalized;
+
+    /*!
+     * @if jp
+     * @brief 他スレッドで終了処理中のRTCの完了を待つ
+     *
+     * Manager 終了時、exit() の呼び出しが他のスレッドで先に始まっていた
+     * RTCは、終了処理の完了前に exit() が戻る。それらが notifyFinalized()
+     * するまで最大 timeout 待ち、回収漏れを防ぐ。
+     * @else
+     * @brief Wait for components whose exit is running on another thread
+     *
+     * During Manager shutdown, exit() returns early for a component whose
+     * exit was already started by another thread. Wait (at most timeout)
+     * until such components call notifyFinalized() so that they are
+     * collected by the shutdown sequence.
+     * @endif
+     */
+    void waitFinalized(const std::vector<RTObject_impl*>& comps,
+                       std::chrono::milliseconds timeout);
+
+    /*!
+     * @if jp
+     * @brief 終了処理前に受付済みAPIの完了を保証するガード
+     * @else
+     * @brief Track admitted API calls before shutdown releases resources
+     * @endif
+     */
+    class OperationGuard
+    {
+    public:
+      /*!
+       * @if jp
+       * @brief 実行中または受付済みの再入呼び出しを登録する
+       * @else
+       * @brief Admit a running operation or its nested calls
+       * @endif
+       */
+      explicit OperationGuard(Manager& owner);
+      /*!
+       * @if jp
+       * @brief 完了を通知する
+       * @else
+       * @brief Notify shutdown that the operation has completed
+       * @endif
+       */
+      ~OperationGuard();
+      OperationGuard(const OperationGuard&) = delete;
+      OperationGuard& operator=(const OperationGuard&) = delete;
+      /*!
+       * @if jp
+       * @brief 受付結果を返す
+       * @else
+       * @brief Return whether the call was admitted
+       * @endif
+       */
+      explicit operator bool() const { return m_owner != nullptr; }
+    private:
+      Manager* m_owner{nullptr};
+    };
+    std::mutex m_apiMutex;
+    std::condition_variable m_apiCondition;
+    std::map<std::thread::id, size_t> m_apiThreads;
+    size_t m_activeOperations{0};
+    bool m_shutdownStarted{false};
+    std::thread::id m_shutdownThread;
 
     ::RTM::ManagerActionListeners m_listeners;
   };  // class Manager

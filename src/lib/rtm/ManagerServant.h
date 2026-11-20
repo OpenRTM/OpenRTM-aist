@@ -21,6 +21,7 @@
 #define RTM_MANAGERSERVANT_H
 
 #include <mutex>
+#include <atomic>
 #include <rtm/idl/ManagerSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/SystemLogger.h>
@@ -93,6 +94,23 @@ namespace RTM
      * @endif
      */
     ~ManagerServant() override;
+
+    /*!
+     * @if jp
+     * @brief マネージャの登録とPOAの活性化を解除する
+     *
+     * 所有する参照を解放する前に呼び出す。実行中の要求がある場合は、
+     * POAが保持する参照により要求完了までサーバントの寿命を維持する。
+     * 終了処理を行うスレッドから呼び出し、同時に呼び出してはならない。
+     * @else
+     * @brief Unregister the manager and deactivate its POA objects
+     *
+     * Call before releasing the owning reference. POA references keep the
+     * servant alive until outstanding requests complete. Call from the
+     * shutdown thread; concurrent calls are not supported.
+     * @endif
+     */
+    void deactivate();
 
     /*!
      * @if jp
@@ -735,6 +753,16 @@ namespace RTM
   private:
     /*!
      * @if jp
+     * @brief 相手への呼び出し中に一覧のロックを保持せず登録を解除する
+     * @else
+     * @brief Unregister peers without holding list locks during remote calls
+     * @endif
+     */
+    void detachManagers();
+    std::atomic<bool> m_detaching{false};
+
+    /*!
+     * @if jp
      * @brief ロガーオブジェクト
      * @else
      * @brief Logger object
@@ -758,6 +786,11 @@ namespace RTM
      * @brief An object reference of ManagerServant
      * @endif
      */
+    // Bi-Directional GIOP: the servant in the omniINSPOA that forwards
+    // requests to m_objref (nullptr if not used)
+    PortableServer::ServantBase* m_insServant{nullptr};
+    bool m_deactivated{false};
+
     ::RTM::Manager_var m_objref{RTM::Manager::_nil()};
 
     /*!

@@ -19,6 +19,7 @@
 #ifndef RTC_SYSTEMLOGGER_H
 #define RTC_SYSTEMLOGGER_H
 
+#include <iterator>
 #include <rtm/config_rtc.h>
 
 #include <coil/ClockManager.h>
@@ -187,35 +188,42 @@ namespace RTC
      *
      * @brief ヘッダに付加する日時フォーマットを指定する。
      *
+     * 日時はローカル時刻ではなく常にUTC (gmtime()) で出力する。
      * フォーマット指定文字列は以下のとおり。
      * <pre>
-     * @%a abbreviated weekday name
-     * @%A full weekday name
-     * @%b abbreviated month name
-     * @%B full month name
-     * @%c the standard date and time string
-     * @%d day of the month, as a number (1-31)
-     * @%H hour, 24 hour format (0-23)
-     * @%I hour, 12 hour format (1-12)
-     * @%j day of the year, as a number (1-366)
-     * @%m month as a number (1-12).
-     *    Note: some versions of Microsoft Visual C++ may use values that range
-     *    from 0-11.
-     * @%M minute as a number (0-59)
-     * @%p locale's equivalent of AM or PM
-     * @%Q millisecond as a number (0-999) from ver 1.1
-     * @%q microsecond as a number (0-999) from ver 1.1
-     * @%S second as a number (0-59)
-     * @%U week of the year, sunday as the first day
-     * @%w weekday as a decimal (0-6, sunday=0)
-     * @%W week of the year, monday as the first day
-     * @%x standard date string
-     * @%X standard time string
-     * @%y year in decimal, without the century (0-99)
-     * @%Y year in decimal, with the century
-     * @%Z time zone name
-     * %% a percent sign
+     * @%a 曜日の省略名
+     * @%A 曜日の完全名
+     * @%b 月の省略名
+     * @%B 月の完全名
+     * @%c ロケールの標準的な日時表現
+     * @%d 月内の日 (01-31)
+     * @%H 24時間表記の時 (00-23)
+     * @%I 12時間表記の時 (01-12)
+     * @%j 年内の通算日 (001-366)
+     * @%m 月 (01-12)
+     * @%M 分 (00-59)
+     * @%p ロケールのAM/PM表記
+     * @%Q ミリ秒 (000-999) ver 1.1 以降
+     * @%q マイクロ秒 (000000-999999) ver 1.1 以降
+     * @%S 秒 (00-60)
+     * @%U 日曜始まりの週番号 (00-53)
+     * @%w 曜日の数値 (0-6, 日曜=0)
+     * @%W 月曜始まりの週番号 (00-53)
+     * @%x ロケールの標準的な日付表現
+     * @%X ロケールの標準的な時刻表現
+     * @%y 世紀を除いた年 (00-99)
+     * @%Y 世紀を含む年
+     * @%z UTCからのオフセット (+hhmm/-hhmm)。glibcでは +0000 となる。
+     *     Microsoft Visual C++ ではローカル時間帯のオフセットが出力され、
+     *     UTCのログ時刻と一致しない。
+     * @%Z 時間帯の名前。glibcでは GMT または UTC となる。
+     *     Microsoft Visual C++ ではローカル時間帯の名前が出力され、
+     *     UTCのログ時刻と一致しない。
+     * %% パーセント記号
      * </pre>
+     * UTCであることを環境に依存せず示すには、%z/%Z の代わりに
+     * "Z" や "+0000" を文字列として記述する。
+     * 例: "%Y-%m-%dT%H:%M:%SZ" (W3C/ISO 8601形式)
      *
      * @param fmt 日時フォーマット
      *
@@ -223,35 +231,41 @@ namespace RTC
      *
      * @brief Set date/time format for adding the header
      *
-     * The format specification string is as follows:
+     * The date/time is always written in UTC (gmtime()), not in the local
+     * time zone. The format specification string is as follows:
      * <pre>
      * @%a abbreviated weekday name
      * @%A full weekday name
      * @%b abbreviated month name
      * @%B full month name
-     * @%c the standard date and time string
-     * @%d day of the month, as a number (1-31)
-     * @%H hour, 24 hour format (0-23)
-     * @%I hour, 12 hour format (1-12)
-     * @%j day of the year, as a number (1-366)
-     * @%m month as a number (1-12).
-     *    Note: some versions of Microsoft Visual C++ may use values that range
-     *    from 0-11.
-     * @%M minute as a number (0-59)
+     * @%c the standard date and time string of the current locale
+     * @%d day of the month as a decimal number (01-31)
+     * @%H hour, 24 hour format (00-23)
+     * @%I hour, 12 hour format (01-12)
+     * @%j day of the year as a decimal number (001-366)
+     * @%m month as a decimal number (01-12)
+     * @%M minute as a decimal number (00-59)
      * @%p locale's equivalent of AM or PM
-     * @%Q millisecond as a number (0-999) from ver 1.1
-     * @%q microsecond as a number (0-999) from ver 1.1
-     * @%S second as a number (0-59)
-     * @%U week of the year, sunday as the first day
-     * @%w weekday as a decimal (0-6, sunday=0)
-     * @%W week of the year, monday as the first day
-     * @%x standard date string
-     * @%X standard time string
-     * @%y year in decimal, without the century (0-99)
-     * @%Y year in decimal, with the century
-     * @%Z time zone name
+     * @%Q millisecond as a decimal number (000-999) from ver 1.1
+     * @%q microsecond as a decimal number (000000-999999) from ver 1.1
+     * @%S second as a decimal number (00-60)
+     * @%U week of the year, sunday as the first day (00-53)
+     * @%w weekday as a decimal number (0-6, sunday=0)
+     * @%W week of the year, monday as the first day (00-53)
+     * @%x standard date string of the current locale
+     * @%X standard time string of the current locale
+     * @%y year without the century as a decimal number (00-99)
+     * @%Y year with the century as a decimal number
+     * @%z offset from UTC (+hhmm/-hhmm). This is +0000 with glibc.
+     *     Microsoft Visual C++ prints the local time zone offset, which
+     *     does not match the UTC log time.
+     * @%Z time zone name. This is GMT or UTC with glibc.
+     *     Microsoft Visual C++ prints the local time zone name, which
+     *     does not match the UTC log time.
      * %% a percent sign
      * </pre>
+     * To mark the time as UTC portably, write a literal "Z" or "+0000"
+     * instead of %z or %Z, e.g. "%Y-%m-%dT%H:%M:%SZ" (W3C/ISO 8601).
      *
      * @param fmt Datetime format
      *
@@ -393,7 +407,7 @@ namespace RTC
      */
     static std::string getLevelString(int level)
     {
-        return m_levelString[level];
+        return *std::next(m_levelString, level);
     }
 
     /*!
@@ -420,7 +434,7 @@ namespace RTC
      */
     static std::string getLevelOutputString(int level)
     {
-        return m_levelOutputString[level];
+        return *std::next(m_levelOutputString, level);
     }
 
 
@@ -448,7 +462,7 @@ namespace RTC
      */
     static std::string getLevelColor(int level)
     {
-        return m_levelColor[level];
+        return *std::next(m_levelColor, level);
     }
     
 

@@ -102,6 +102,9 @@ namespace RTC
      * ルバックを呼び出す。データバッファがもし InPortBase から提供さ
      * れる場合はそのポインタを取る。
      *
+     * コンストラクタが例外を送出する場合も、渡されたオブジェクトと
+     * 自身が生成したバッファ等を解放してから送出する。
+     *
      * @param info ConnectorInfo
      * @param consumer OutPortConsumer
      * @param listeners ConnectorListeners 型のリスナオブジェクトリスト
@@ -121,6 +124,9 @@ namespace RTC
      * they would be called at the proper timing.  If data buffer is
      * given by OutPortBase, the pointer to the buffer is also given
      * as arguments.
+     *
+     * Even when the constructor throws, it releases the given object
+     * and the buffer and other resources it created before throwing.
      *
      * @param info ConnectorInfo
      * @param consumer OutPortConsumer
