@@ -1651,6 +1651,18 @@ namespace snmpmgr
                                                              const std::vector<Problem>& switching);
     /*!
      * @~japanese
+     * @brief 捨てた CPU のサンプル (get_loadable_modules() の先読みの後) がそろうまで待つ
+     *
+     * 応答のないロボットのサンプルはそろわないので、捨ててから cgroup_wait_seconds_ 秒までで打ち切る
+     * @~english
+     * @brief Waits until the CPU samples discarded after prefetching get_loadable_modules() are collected again
+     *
+     * Gives up cgroup_wait_seconds_ seconds after they were discarded, since robots not responding never get samples
+     * @~
+     */
+    void wait_cgroup_samples();
+    /*!
+     * @~japanese
      * @brief slave の異常終了を記録する
      *
      * @param robot ロボット名
@@ -1947,6 +1959,9 @@ namespace snmpmgr
     std::set<std::string> loadable_checked_;
     std::atomic<bool> prefetching_{false};           // 先に取っている間 (自動復旧の判断を止める)
     std::atomic<bool> loadable_prefetched_{false};   // 復旧・マイグレーションのために先に取ったか
+    // 先読みの後に CPU のサンプルを捨てた時刻 (monotonic。0 は捨てていない、またはそろった)。robots_mutex_ で守る
+    double cgroup_reset_at_ = 0;
+    static constexpr double cgroup_wait_seconds_ = 30.0;
     /*!
      * @~japanese
      * @brief 復旧・マイグレーションのために get_loadable_modules() の結果を先に取っておく
