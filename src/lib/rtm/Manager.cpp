@@ -205,8 +205,6 @@ namespace RTC
     shutdownNaming();
     shutdownManagerServant();
     shutdownORB();
-    // 終了待ち合わせ
-    m_threadOrb.join();
     m_listeners.manager_.postShutdown();
     shutdownLogger();
   }
@@ -1941,6 +1939,19 @@ namespace RTC
     catch (...)
     {
       RTC_ERROR(("Caught SystemException during perform_work."));
+    }
+
+    try
+    {
+      m_pORB->shutdown(false);
+    }
+    catch (CORBA::SystemException &)
+    {
+      RTC_ERROR(("Exception caught during ORB shutdown request."));
+    }
+    if (m_threadOrb.joinable())
+    {
+      m_threadOrb.join();
     }
 
     if (!CORBA::is_nil(m_pPOA))

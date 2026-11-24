@@ -359,6 +359,7 @@ namespace snmpmgr
               r->cg_last_ts = -1;
               r->cg_ignore_before_ns = static_cast<long long>(wallclock() * 1e9);
             }
+          cgroup_reset_at_ = monotonic();
         }
       prefetching_ = false;
     }).detach();
@@ -482,6 +483,7 @@ namespace snmpmgr
       }
     if (!switching.empty())
       {
+        wait_cgroup_samples();
         try
           {
             auto where = recovery_switch_other(cfg, rc, switching);
@@ -513,6 +515,38 @@ namespace snmpmgr
     });
     event(name_, ok ? "recovery_completed" : "recovery_failed", join(results, "; ") + " (" + fmt(elapsed, 2) + "s)");
     logfile(fmt(wallclock(), 6) + "\tRecoveryTime:" + std::to_string(elapsed) + "\t" + join(results, ";") + "\t");
+  }
+
+  void SNMPManager::wait_cgroup_samples()
+  {
+    size_t min_samples = static_cast<size_t>(prop_d("snmp.placement.min_cpu_samples", 3));
+    bool waited = false;
+    double t0 = monotonic();
+    while (running_)
+      {
+        {
+          std::lock_guard<std::recursive_mutex> g(robots_mutex_);
+          if (cgroup_reset_at_ <= 0) { break; }
+          std::vector<std::string> missing;
+          std::vector<std::shared_ptr<Robot>> all = robots_;
+          if (self_) { all.push_back(self_); }
+          for (auto& r : all)
+            {
+              if (r->cg_valid && r->cg_cpu_samples.size() < min_samples) { missing.push_back(r->name); }
+            }
+          bool expired = monotonic() - cgroup_reset_at_ >= cgroup_wait_seconds_;
+          if (missing.empty() || expired)
+            {
+              cgroup_reset_at_ = 0;
+              if (waited) { log("recovery: CPU samples " + std::string(missing.empty() ? "collected" : "still missing for " + join(missing, ", ")) +
+                                " after " + fmt(monotonic() - t0) + "s"); }
+              break;
+            }
+          if (!waited) { log("recovery: waiting for CPU samples of " + join(missing, ", ") + " (discarded after prefetching loadable modules)"); }
+          waited = true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      }
   }
 
   bool SNMPManager::recovery_resolved(const json& cfg, const json& rc, const std::string& name, const std::string& cause)

@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <new>
 
 #include <rtm/InPortBase.h>
 
@@ -585,10 +586,29 @@ namespace RTC
       {
         if (prop["interface_type"] != "csp_channel") return RTC::BAD_PARAMETER;
         if (csp_detail::validate(cprof) != RTC_OK) return RTC::BAD_PARAMETER;
-        auto* provider = dynamic_cast<OutPortCSPProvider*>(createProvider(cprof, prop));
-        if (!provider) return RTC::BAD_PARAMETER;
+        OutPortProvider* created = createProvider(cprof, prop);
+        auto* provider = dynamic_cast<OutPortCSPProvider*>(created);
+        if (!provider)
+          {
+            if (created != nullptr) { OutPortProviderFactory::instance().deleteObject(created); }
+            return RTC::BAD_PARAMETER;
+          }
         ConnectorInfo info(cprof.name, cprof.connector_id, CORBA_SeqUtil::refToVstring(cprof.ports), prop);
-        auto* connector = new OutPortDuplexConnector(info, provider, m_listeners);
+        OutPortDuplexConnector* connector(nullptr);
+        try
+          {
+            connector = new (std::nothrow) OutPortDuplexConnector(info, provider, m_listeners);
+          }
+        catch (...)
+          {
+            connector = nullptr;
+          }
+        if (connector == nullptr)
+          {
+            RTC_ERROR(("OutPortDuplexConnector creation failed"));
+            OutPortProviderFactory::instance().deleteObject(created);
+            return RTC::RTC_ERROR;
+          }
         connector->setEndian(csp_detail::littleEndian(cprof));
         m_connectors.push_back(connector);
         return RTC::RTC_OK;
@@ -682,8 +702,13 @@ namespace RTC
       {
         auto* connector = dynamic_cast<OutPortDuplexConnector*>(getConnectorById(cprof.connector_id));
         if (!connector) return RTC::BAD_PARAMETER;
-        auto* consumer = dynamic_cast<InPortCSPConsumer*>(createConsumer(cprof, prop));
-        if (!consumer) return RTC::BAD_PARAMETER;
+        InPortConsumer* created = createConsumer(cprof, prop);
+        auto* consumer = dynamic_cast<InPortCSPConsumer*>(created);
+        if (!consumer)
+          {
+            if (created != nullptr) { InPortConsumerFactory::instance().deleteObject(created); }
+            return RTC::BAD_PARAMETER;
+          }
         consumer->init(prop);
         connector->setConsumer(std::shared_ptr<InPortCSPConsumer>(consumer,
           [](InPortCSPConsumer* value) { InPortConsumer* base = value; InPortConsumerFactory::instance().deleteObject(base); }));
@@ -963,29 +988,33 @@ namespace RTC
           {
             provider->init(prop.getNode("provider"));
           }
-        catch (std::bad_alloc&)
+        catch (...)
           {
             RTC_ERROR(("provider creation failed"));
             OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
 
+        bool published(false);
+        try
+          {
 #ifndef ORB_IS_RTORB
-        if (!provider->publishInterface(cprof.properties))
-          {
-            RTC_ERROR(("publishing interface information error"));
-            OutPortProviderFactory::instance().deleteObject(provider);
-            return nullptr;
-          }
+            published = provider->publishInterface(cprof.properties);
 #else  // ORB_IS_RTORB
-        ::SDOPackage::NVList_ptr prop_ref(cprof.properties);
-        if (!provider->publishInterface(*prop_ref))
+            ::SDOPackage::NVList_ptr prop_ref(cprof.properties);
+            published = provider->publishInterface(*prop_ref);
+#endif  // ORB_IS_RTORB
+          }
+        catch (...)
+          {
+            published = false;
+          }
+        if (!published)
           {
             RTC_ERROR(("publishing interface information error"));
             OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
-#endif  // ORB_IS_RTORB
         return provider;
       }
 
@@ -1026,14 +1055,23 @@ namespace RTC
           {
             consumer->init(prop.getNode("consumer"));
           }
-        catch (std::bad_alloc&)
+        catch (...)
           {
             RTC_ERROR(("consumer creation failed"));
             InPortConsumerFactory::instance().deleteObject(consumer);
             return nullptr;
           }
 
-        if (!consumer->subscribeInterface(cprof.properties))
+        bool subscribed(false);
+        try
+          {
+            subscribed = consumer->subscribeInterface(cprof.properties);
+          }
+        catch (...)
+          {
+            subscribed = false;
+          }
+        if (!subscribed)
           {
             RTC_ERROR(("interface subscription failed."));
             InPortConsumerFactory::instance().deleteObject(consumer);
@@ -1072,14 +1110,15 @@ namespace RTC
                           prop);
 #endif  // ORB_IS_RTORB
 
+    OutPortConnector* connector(nullptr);
     try
       {
-        OutPortConnector* connector(nullptr);
-        connector = new OutPortPushConnector(profile, consumer, m_listeners);
+        connector = new (std::nothrow) OutPortPushConnector(profile, consumer, m_listeners);
 
         if (connector == nullptr)
           {
-            RTC_ERROR(("old compiler? new returned 0;"));
+            RTC_ERROR(("OutPortPushConnector allocation failed"));
+            InPortConsumerFactory::instance().deleteObject(consumer);
             return nullptr;
           }
         RTC_TRACE(("OutPortPushConnector created"));
@@ -1107,9 +1146,10 @@ namespace RTC
                       m_connectors.size()));
         return connector;
       }
-    catch (std::bad_alloc&)
+    catch (...)
       {
         RTC_ERROR(("OutPortPushConnector creation failed"));
+        delete connector;
         return nullptr;
       }
   }
@@ -1140,14 +1180,15 @@ namespace RTC
                           prop);
 #endif  // ORB_IS_RTORB
 
+    OutPortConnector* connector(nullptr);
     try
       {
-        OutPortConnector* connector(nullptr);
-        connector = new OutPortPullConnector(profile, provider, m_listeners);
+        connector = new (std::nothrow) OutPortPullConnector(profile, provider, m_listeners);
 
         if (connector == nullptr)
           {
-            RTC_ERROR(("old compiler? new returned 0;"));
+            RTC_ERROR(("OutPortPullConnector allocation failed"));
+            OutPortProviderFactory::instance().deleteObject(provider);
             return nullptr;
           }
         RTC_TRACE(("OutPortPullConnector created"));
@@ -1163,9 +1204,10 @@ namespace RTC
                       m_connectors.size()));
         return connector;
       }
-    catch (std::bad_alloc&)
+    catch (...)
       {
         RTC_ERROR(("OutPortPullConnector creation failed"));
+        delete connector;
         return nullptr;
       }
   }

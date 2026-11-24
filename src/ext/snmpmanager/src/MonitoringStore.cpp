@@ -26,7 +26,11 @@
 #include "SNMPManagerUtil.hpp"
 
 #ifdef SNMPMGR_WINSQLITE
+#pragma push_macro("NTDDI_VERSION")
+#undef NTDDI_VERSION
+#define NTDDI_VERSION 0x0A000000
 #include <winsqlite/winsqlite3.h>   // Windows SDK の SQLite (winsqlite3.dll)
+#pragma pop_macro("NTDDI_VERSION")
 #else
 #include <sqlite3.h>
 #endif

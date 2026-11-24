@@ -304,18 +304,14 @@ namespace RTC
     bool stdmsg_serialize(const MessageType& msg)
     {
       
-      eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
+      eprosima::fastcdr::FastBuffer fastbuffer;
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
                 eprosima::fastcdr::DDS_CDR);
-      m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       std_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.get_serialized_data_length();
-
-      
-      return true;
+      return storeSerializedData(ser, fastbuffer);
     }
     /*!
      * @if jp
@@ -374,18 +370,14 @@ namespace RTC
     bool geometrymsg_serialize(const MessageType& msg)
     {
       
-      eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
+      eprosima::fastcdr::FastBuffer fastbuffer;
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
                 eprosima::fastcdr::DDS_CDR);
-      m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       geometry_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.get_serialized_data_length();
-
-      
-      return true;
+      return storeSerializedData(ser, fastbuffer);
     }
     
     /*!
@@ -445,18 +437,14 @@ namespace RTC
     bool sensormsg_serialize(const MessageType& msg)
     {
       
-      eprosima::fastcdr::FastBuffer fastbuffer((char*) m_message.data, m_message.max_size);
+      eprosima::fastcdr::FastBuffer fastbuffer;
       eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
                 eprosima::fastcdr::DDS_CDR);
-      m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
       ser.serialize_encapsulation();
 
       sensor_msgs::msg::typesupport_fastrtps_cpp::cdr_serialize(msg, ser);
 
-      m_message.length = (uint32_t)ser.get_serialized_data_length();
-
-      
-      return true;
+      return storeSerializedData(ser, fastbuffer);
     }
     
     /*!
@@ -496,6 +484,52 @@ namespace RTC
     }
 
   protected:
+    /*!
+     * @if jp
+     *
+     * @brief 符号化したデータを送信用のバッファへ格納する
+     *
+     * 符号化結果の長さに合わせて送信用のバッファを確保し、データを
+     * コピーする。
+     *
+     * @param ser 符号化に使用したCdr
+     * @param buffer 符号化したデータを保持するFastBuffer
+     * @return true：格納成功、false：データが大きすぎる
+     *
+     * @else
+     *
+     * @brief Store serialized data in the payload buffer
+     *
+     * Reserve the payload buffer for the serialized length and copy
+     * the data.
+     *
+     * @param ser Cdr used for serialization
+     * @param buffer FastBuffer holding the serialized data
+     * @return true: stored, false: the data is too large
+     *
+     * @endif
+     */
+    bool storeSerializedData(eprosima::fastcdr::Cdr& ser,
+                             eprosima::fastcdr::FastBuffer& buffer)
+    {
+      const std::size_t length = ser.get_serialized_data_length();
+      if (length > UINT32_MAX)
+      {
+        return false;
+      }
+      if (length > m_message.max_size)
+      {
+        m_message.reserve(static_cast<uint32_t>(length));
+      }
+      if (length > 0)
+      {
+        std::memcpy(m_message.data, buffer.getBuffer(), length);
+      }
+      m_message.length = static_cast<uint32_t>(length);
+      m_message.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
+      return true;
+    }
+
     eprosima::fastdds::rtps::SerializedPayload_t m_message;
   };
 
