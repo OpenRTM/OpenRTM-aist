@@ -138,6 +138,13 @@ namespace RTM
 
   ManagerServant::~ManagerServant()
   {
+    deactivate();
+  }
+
+  void ManagerServant::deactivate()
+  {
+    if (m_deactivated) { return; }
+    m_deactivated = true;
     std::lock_guard<std::mutex> guardm(m_masterMutex);
     for (CORBA::ULong i(0); i < m_masters.length(); ++i)
       {

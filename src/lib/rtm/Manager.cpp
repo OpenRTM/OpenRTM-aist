@@ -1520,7 +1520,8 @@ namespace RTC
     }
     PortableServer::ObjectId_var oid = m_pPOA->servant_to_id(m_mgrservant);
     m_pPOA->deactivate_object(oid);
-    delete m_mgrservant;
+    m_mgrservant->deactivate();
+    m_mgrservant->_remove_ref();
     m_mgrservant = nullptr;
   }
 
