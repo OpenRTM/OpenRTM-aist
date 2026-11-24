@@ -37,8 +37,11 @@
 #include <rtm/PortConnectListener.h>
 #include <rtm/FsmActionListener.h>
 
+#include <atomic>
 #include <string>
 #include <vector>
+#include <memory>
+#include <mutex>
 
 #define ECOTHER_OFFSET 1000
 
@@ -5307,7 +5310,8 @@ namespace RTC
      * @brief RTC Finalize Status Flag
      * @endif
      */
-    bool m_exiting;
+    std::atomic<bool> m_exiting;
+    std::atomic<bool> m_exitRequested{false};
 
     /*!
      * @if jp
@@ -5449,7 +5453,17 @@ namespace RTC
       SdoServiceAdmin *m_sdoservice;
       std::string m_id;
     };
-    SdoServiceConsumerTerminator *m_sdoconterm;
+    std::vector<std::unique_ptr<SdoServiceConsumerTerminator>> m_sdoTerminators;
+    std::mutex m_sdoTermMutex;
+    bool m_sdoTerminating{false};
+    /*!
+     * @if jp
+     * @brief SDO通知を停止しサービス削除スレッドの完了を待つ
+     * @else
+     * @brief Stop SDO notifications and join service-removal threads
+     * @endif
+     */
+    void finalizeSdoService();
 
     //------------------------------------------------------------
     // Functor

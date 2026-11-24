@@ -21,6 +21,7 @@
 #define RTM_MANAGERSERVANT_H
 
 #include <mutex>
+#include <atomic>
 #include <rtm/idl/ManagerSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/SystemLogger.h>
@@ -750,6 +751,16 @@ namespace RTM
     static bool isProcessIDManager(const std::string& mgrname);
 
   private:
+    /*!
+     * @if jp
+     * @brief 相手への呼び出し中に一覧のロックを保持せず登録を解除する
+     * @else
+     * @brief Unregister peers without holding list locks during remote calls
+     * @endif
+     */
+    void detachManagers();
+    std::atomic<bool> m_detaching{false};
+
     /*!
      * @if jp
      * @brief ロガーオブジェクト

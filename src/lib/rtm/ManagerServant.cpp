@@ -136,6 +136,34 @@ namespace RTM
       }
   }
 
+  void ManagerServant::detachManagers()
+  {
+    ManagerList masters;
+    ManagerList slaves;
+    {
+      std::lock_guard<std::mutex> guard(m_masterMutex);
+      m_detaching.store(true);
+      masters = m_masters;
+      m_masters.length(0);
+    }
+    {
+      std::lock_guard<std::mutex> guard(m_slaveMutex);
+      slaves = m_slaves;
+      m_slaves.length(0);
+    }
+    // Never hold a list lock across a call to another manager.
+    for (CORBA::ULong i = 0; i < masters.length(); ++i)
+      {
+        try { if (!CORBA::is_nil(masters[i])) masters[i]->remove_slave_manager(m_objref.in()); }
+        catch (...) {}
+      }
+    for (CORBA::ULong i = 0; i < slaves.length(); ++i)
+      {
+        try { if (!CORBA::is_nil(slaves[i])) slaves[i]->remove_master_manager(m_objref.in()); }
+        catch (...) {}
+      }
+  }
+
   ManagerServant::~ManagerServant()
   {
     deactivate();
@@ -145,37 +173,7 @@ namespace RTM
   {
     if (m_deactivated) { return; }
     m_deactivated = true;
-    std::lock_guard<std::mutex> guardm(m_masterMutex);
-    for (CORBA::ULong i(0); i < m_masters.length(); ++i)
-      {
-        try
-          {
-            if (CORBA::is_nil(m_masters[i])) { continue; }
-            m_masters[i]
-              ->remove_slave_manager(m_objref.in());
-          }
-        catch (...)
-          {
-            m_masters[i] = RTM::Manager::_nil();
-          }
-      }
-    m_masters.length(0);
-
-    std::lock_guard<std::mutex> guards(m_slaveMutex);
-    for (CORBA::ULong i(0); i < m_slaves.length(); ++i)
-      {
-        try
-          {
-            if (CORBA::is_nil(m_slaves[i])) { continue; }
-            m_slaves[i]
-              ->remove_master_manager(m_objref.in());
-          }
-        catch (...)
-          {
-            m_slaves[i] = RTM::Manager::_nil();
-          }
-      }
-    m_slaves.length(0);
+    detachManagers();
 
 #ifndef ORB_IS_RTORB
     if (!CORBA::is_nil(m_objref))
@@ -783,6 +781,7 @@ namespace RTM
   RTC::ReturnCode_t ManagerServant::add_master_manager(RTM::Manager_ptr mgr)
   {
     std::lock_guard<std::mutex> guard(m_masterMutex);
+    if (m_detaching.load()) { return RTC::PRECONDITION_NOT_MET; }
     CORBA::Long index;
     RTC_TRACE(("add_master_manager(), %d masters", m_masters.length()));
     index = CORBA_SeqUtil::find(m_masters, is_equiv(mgr));
@@ -850,6 +849,7 @@ namespace RTM
   RTC::ReturnCode_t ManagerServant::add_slave_manager(RTM::Manager_ptr mgr)
   {
     std::lock_guard<std::mutex> guard(m_slaveMutex);
+    if (m_detaching.load()) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("add_slave_manager(), %d slaves", m_slaves.length()));
 
     CORBA::Long index;
@@ -913,42 +913,7 @@ namespace RTM
    */
   RTC::ReturnCode_t ManagerServant::shutdown()
   {
-    if (!m_isMaster)
-      {
-        std::lock_guard<std::mutex> guardm(m_masterMutex);
-        for (CORBA::ULong i(0); i < m_masters.length(); ++i)
-          {
-            try
-              {
-                if (CORBA::is_nil(m_masters[i])) { continue; }
-                m_masters[i]
-                  ->remove_slave_manager(m_objref.in());
-              }
-            catch (...)
-              {
-                m_masters[i] = RTM::Manager::_nil();
-              }
-          }
-        m_masters.length(0);
-      }
-    else
-      {
-        std::lock_guard<std::mutex> guards(m_slaveMutex);
-        for (CORBA::ULong i(0); i < m_slaves.length(); ++i)
-          {
-            try
-              {
-                if (CORBA::is_nil(m_slaves[i])) { continue; }
-                m_slaves[i]
-                 ->remove_master_manager(m_objref.in());
-              }
-            catch (...)
-              {
-                m_slaves[i] = RTM::Manager::_nil();
-              }
-          }
-        m_slaves.length(0);
-      }
+    detachManagers();
     ::RTC::Manager::terminate();
     return ::RTC::RTC_OK;
   }
@@ -1691,50 +1656,59 @@ namespace RTM
   */
   void ManagerServant::updateMasterManager()
     {
-      if (!m_isMaster && !CORBA::is_nil(m_objref))
-        {
-            {
-              std::lock_guard<std::mutex> guardm(m_masterMutex);
-              if (m_masters.length() > 0)
-                {
-                  for (CORBA::ULong i = 0; i < m_masters.length(); ++i)
-                    {
-                      try
-                        {
-                          if (m_masters[i]->_non_existent())
-                            {
-                              CORBA_SeqUtil::erase(m_masters, i); --i;
-                            }
-                        }
-                      catch (...)
-                        {
-                          RTC_ERROR(("Unknown exception cought."));
-                          CORBA_SeqUtil::erase(m_masters, i); --i;
-                        }
-                    }
-                }
-            }
-            
-          if (m_masters.length() == 0)
-            {
-              coil::Properties config = m_mgr.getConfig();
-              try
-                {
-                  RTM::Manager_var owner = findManager(config.getProperty("corba.master_manager"));
-                  if (CORBA::is_nil(owner))
-                    {
-                      RTC_INFO(("Master manager not found"));
-                      return;
-                    }
-                  add_master_manager(owner);
-                  owner->add_slave_manager(m_objref);
-                }
-              catch (...)
-                {
-                  RTC_ERROR(("Unknown exception cought."));
-                }
-            }
+      if (m_isMaster || CORBA::is_nil(m_objref) || m_detaching.load())
+        { return; }
 
+      ManagerList masters;
+      {
+        std::lock_guard<std::mutex> guard(m_masterMutex);
+        masters = m_masters;
+      }
+      for (CORBA::ULong i = 0; i < masters.length(); ++i)
+        {
+          bool exists = false;
+          try
+            {
+              exists = !masters[i]->_non_existent();
+            }
+          catch (...)
+            {
+              RTC_ERROR(("Unknown exception cought."));
+            }
+          if (!exists)
+            {
+              std::lock_guard<std::mutex> guard(m_masterMutex);
+              CORBA::Long index =
+                CORBA_SeqUtil::find(m_masters, is_equiv(masters[i]));
+              if (index >= 0) { CORBA_SeqUtil::erase(m_masters, index); }
+            }
+        }
+
+      {
+        std::lock_guard<std::mutex> guard(m_masterMutex);
+        if (m_masters.length() > 0) { return; }
+      }
+      if (m_detaching.load()) { return; }
+
+      coil::Properties config = m_mgr.getConfig();
+      try
+        {
+          RTM::Manager_var owner = findManager(config.getProperty("corba.master_manager"));
+          if (CORBA::is_nil(owner))
+            {
+              RTC_INFO(("Master manager not found"));
+              return;
+            }
+          if (add_master_manager(owner) != RTC::RTC_OK) { return; }
+          owner->add_slave_manager(m_objref);
+          if (m_detaching.load())
+            {
+              owner->remove_slave_manager(m_objref);
+            }
+        }
+      catch (...)
+        {
+          RTC_ERROR(("Unknown exception cought."));
         }
     }
 

@@ -72,7 +72,7 @@ namespace RTC
       m_sdoservice(*this),
       m_readAll(false), m_writeAll(false),
       m_readAllCompletion(false), m_writeAllCompletion(false),
-      m_insref(RTC::LightweightRTObject::_nil()), m_sdoconterm(nullptr)
+      m_insref(RTC::LightweightRTObject::_nil())
   {
     m_objref = this->_this();
     m_pSdoConfigImpl = new SDOPackage::Configuration_impl(m_configsets,
@@ -97,7 +97,7 @@ namespace RTC
       m_properties(default_conf), m_configsets(m_properties.getNode("conf")),
       m_sdoservice(*this),
       m_readAll(false), m_writeAll(false),
-      m_readAllCompletion(false), m_writeAllCompletion(false), m_sdoconterm(nullptr)
+      m_readAllCompletion(false), m_writeAllCompletion(false)
   {
     m_objref = this->_this();
     m_pSdoConfigImpl = new SDOPackage::Configuration_impl(m_configsets,
@@ -115,6 +115,7 @@ namespace RTC
   RTObject_impl::~RTObject_impl()
   {
     RTC_TRACE(("~RTObject_impl()"));
+    finalizeSdoService();
     m_pSdoConfigImpl->_remove_ref();
   }
 
@@ -373,7 +374,7 @@ namespace RTC
   {
     RTC_TRACE(("exit()"));
     if (m_created) { return RTC::PRECONDITION_NOT_MET; }
-    if (m_exiting) { return RTC::RTC_OK; }
+    if (m_exitRequested.exchange(true)) { return RTC::RTC_OK; }
 
     // finalize ECs
     finalizeMineEC();
@@ -800,12 +801,12 @@ namespace RTC
       }
     postOnFinalize(0, ret);
 
-    if (m_sdoconterm != nullptr)
-      {
-        m_sdoconterm->wait();
-        delete m_sdoconterm;
-        m_sdoconterm = nullptr;
-      }
+    std::vector<std::unique_ptr<SdoServiceConsumerTerminator>> tasks;
+    {
+      std::lock_guard<std::mutex> guard(m_sdoTermMutex);
+      tasks.swap(m_sdoTerminators);
+    }
+    for (auto& task : tasks) { task->wait(); }
     return ret;
   }
 
@@ -1933,15 +1934,27 @@ namespace RTC
   */
   void RTObject_impl::removeSdoServiceConsumerStartThread(const char* id)
   {
-    if (m_sdoconterm != nullptr)
-      {
-        m_sdoconterm->wait();
-        delete m_sdoconterm;
-        m_sdoconterm = nullptr;
-      }
-    m_sdoconterm = new SdoServiceConsumerTerminator();
-    m_sdoconterm->setSdoServiceConsumer(&m_sdoservice, id);
-    m_sdoconterm->activate();  
+    std::lock_guard<std::mutex> guard(m_sdoTermMutex);
+    if (m_sdoTerminating || id == nullptr) { return; }
+    std::unique_ptr<SdoServiceConsumerTerminator> task(new SdoServiceConsumerTerminator());
+    task->setSdoServiceConsumer(&m_sdoservice, id);
+    m_sdoTerminators.emplace_back(std::move(task));
+    m_sdoTerminators.back()->activate();
+  }
+
+  void RTObject_impl::finalizeSdoService()
+  {
+    {
+      std::lock_guard<std::mutex> guard(m_sdoTermMutex);
+      m_sdoTerminating = true;
+    }
+    m_sdoservice.finalize();
+    std::vector<std::unique_ptr<SdoServiceConsumerTerminator>> tasks;
+    {
+      std::lock_guard<std::mutex> guard(m_sdoTermMutex);
+      tasks.swap(m_sdoTerminators);
+    }
+    for (auto& task : tasks) { task->wait(); }
   }
 
   /*!
@@ -2581,6 +2594,7 @@ namespace RTC
       {
         finalizePorts();
         finalizeContexts();
+        finalizeSdoService();
         PortableServer::ObjectId_var oid1;
         oid1 = m_pPOA->servant_to_id(m_pSdoConfigImpl);
         PortableServer::ObjectId_var oid2;

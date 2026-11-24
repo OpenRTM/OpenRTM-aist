@@ -92,6 +92,27 @@ namespace RTC
   {
     return m_name == comp->getInstanceName();
   }
+  Manager::OperationGuard::OperationGuard(Manager& owner)
+  {
+    std::lock_guard<std::mutex> guard(owner.m_apiMutex);
+    const auto thread = std::this_thread::get_id();
+    if (owner.m_shutdownStarted && owner.m_shutdownThread != thread &&
+        owner.m_apiThreads.find(thread) == owner.m_apiThreads.end())
+      { return; }
+    ++owner.m_apiThreads[thread];
+    ++owner.m_activeOperations;
+    m_owner = &owner;
+  }
+
+  Manager::OperationGuard::~OperationGuard()
+  {
+    if (m_owner == nullptr) { return; }
+    std::lock_guard<std::mutex> guard(m_owner->m_apiMutex);
+    auto it = m_owner->m_apiThreads.find(std::this_thread::get_id());
+    if (--it->second == 0) { m_owner->m_apiThreads.erase(it); }
+    if (--m_owner->m_activeOperations == 0) { m_owner->m_apiCondition.notify_all(); }
+  }
+
   Manager::FactoryPredicate::~FactoryPredicate() = default;
   Manager::Finalized::~Finalized() = default;
 
@@ -170,6 +191,13 @@ namespace RTC
    */
   void Manager::shutdown()
   {
+    {
+      std::unique_lock<std::mutex> guard(m_apiMutex);
+      if (m_shutdownStarted) { return; }
+      m_shutdownStarted = true;
+      m_shutdownThread = std::this_thread::get_id();
+      m_apiCondition.wait(guard, [this] { return m_activeOperations == 0; });
+    }
     RTC_TRACE(("Manager::shutdown()"));
     m_listeners.manager_.preShutdown();
     shutdownComponents();
@@ -411,6 +439,8 @@ namespace RTC
   ReturnCode_t Manager::load(const std::string &fname,
                              const std::string &initfunc)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("Manager::load(fname = %s, initfunc = %s)",
                fname.c_str(), initfunc.c_str()));
 
@@ -430,6 +460,8 @@ namespace RTC
   ReturnCode_t Manager::load(coil::Properties &prop,
                              const std::string &initfunc)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return RTC::PRECONDITION_NOT_MET; }
     RTC_TRACE(("Manager::load(filename = %s, filepath = %s, language = %s, initfunc = %s)",
                prop["module_file_name"].c_str(), prop["module_file_path"].c_str(), prop["language"].c_str(), initfunc.c_str()));
 
@@ -497,6 +529,8 @@ namespace RTC
    */
   void Manager::unload(const char *fname)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("Manager::unload()"));
     std::string fnamestr(fname);
     m_listeners.module_.preUnload(fnamestr);
@@ -514,6 +548,8 @@ namespace RTC
    */
   void Manager::unloadAll()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("Manager::unloadAll()"));
     m_module->unloadAll();
     return;
@@ -528,6 +564,8 @@ namespace RTC
    */
   std::vector<coil::Properties> Manager::getLoadedModules()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getLoadedModules()"));
     return m_module->getLoadedModules();
   }
@@ -541,6 +579,8 @@ namespace RTC
    */
   std::vector<coil::Properties> Manager::getLoadableModules()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getLoadableModules()"));
     return m_module->getLoadableModules();
   }
@@ -559,6 +599,8 @@ namespace RTC
                                 RtcNewFunc new_func,
                                 RtcDeleteFunc delete_func)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::registerFactory(%s)", profile["type_name"].c_str()));
 
     std::string policy_name =
@@ -593,6 +635,8 @@ namespace RTC
 
   std::vector<coil::Properties> Manager::getFactoryProfiles()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     std::vector<FactoryBase *> factories(m_factory.getObjects());
     std::vector<coil::Properties> props;
     props.reserve(factories.size());
@@ -658,6 +702,8 @@ namespace RTC
    */
   RTObject_impl *Manager::createComponent(const char *comp_args)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::createComponent(%s)", comp_args));
     std::string argstr(comp_args);
     m_listeners.rtclifecycle_.preCreate(argstr);
@@ -860,6 +906,8 @@ namespace RTC
    */
   bool Manager::registerComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::registerComponent(%s)", comp->getInstanceName()));
     // ### NamingManager のみで代用可能
     m_compManager.registerObject(comp);
@@ -920,6 +968,8 @@ namespace RTC
    */
   bool Manager::unregisterComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return false; }
     RTC_TRACE(("Manager::unregisterComponent(%s)", comp->getInstanceName()));
     // ### NamingManager のみで代用可能
     m_compManager.unregisterObject(comp->getInstanceName());
@@ -939,6 +989,8 @@ namespace RTC
 
   ExecutionContextBase *Manager::createContext(const char *ec_args)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::createContext()"));
     RTC_TRACE(("ExecutionContext type: %s",
                m_config.getProperty("exec_cxt.periodic.type").c_str()));
@@ -971,6 +1023,8 @@ namespace RTC
    */
   void Manager::deleteComponent(RTObject_impl *comp)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("deleteComponent(RTObject*)"));
     // cleanup from manager's table, and naming serivce
     unregisterComponent(comp);
@@ -1006,6 +1060,8 @@ namespace RTC
 
   void Manager::deleteComponent(const char *instance_name)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_TRACE(("deleteComponent(%s)", instance_name));
     RTObject_impl *comp;
     comp = m_compManager.find(instance_name);
@@ -1026,6 +1082,8 @@ namespace RTC
    */
   RTObject_impl *Manager::getComponent(const char *instance_name)
   {
+    OperationGuard operation(*this);
+    if (!operation) { return nullptr; }
     RTC_TRACE(("Manager::getComponent(%s)", instance_name));
     return m_compManager.find(instance_name);
   }
@@ -1039,6 +1097,8 @@ namespace RTC
    */
   std::vector<RTObject_impl *> Manager::getComponents()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return {}; }
     RTC_TRACE(("Manager::getComponents()"));
     return m_compManager.getObjects();
   }
@@ -2210,11 +2270,13 @@ namespace RTC
   void Manager::shutdownComponents()
   {
     RTC_TRACE(("Manager::shutdownComponents()"));
+    std::vector<RTObject_impl*> exited;
     for (auto const &comp : m_namingManager->getObjects())
     {
       try
       {
-        comp->exit();
+        if (comp->exit() != RTC::PRECONDITION_NOT_MET)
+          { exited.emplace_back(comp); }
         coil::Properties p(comp->getInstanceName());
         p << comp->getProperties();
         RTC_PARANOID_STR((p));
@@ -2223,6 +2285,7 @@ namespace RTC
       {
       }
     }
+    waitFinalized(exited, std::chrono::seconds(10));
     cleanupComponents();
     for (auto const &m_ec : m_ecs)
     {
@@ -2262,6 +2325,8 @@ namespace RTC
 
   void Manager::cleanupComponents()
   {
+    OperationGuard operation(*this);
+    if (!operation) { return; }
     RTC_VERBOSE(("Manager::cleanupComponents()"));
     std::lock_guard<std::mutex> guard(m_finalized.mutex);
     RTC_VERBOSE(("%d components are marked as finalized.",
@@ -2276,8 +2341,30 @@ namespace RTC
   void Manager::notifyFinalized(RTObject_impl *comp)
   {
     RTC_TRACE(("Manager::notifyFinalized()"));
-    std::lock_guard<std::mutex> guard(m_finalized.mutex);
-    m_finalized.comps.emplace_back(comp);
+    {
+      std::lock_guard<std::mutex> guard(m_finalized.mutex);
+      m_finalized.comps.emplace_back(comp);
+    }
+    m_finalized.cond.notify_all();
+  }
+
+  void Manager::waitFinalized(const std::vector<RTObject_impl*>& comps,
+                              std::chrono::milliseconds timeout)
+  {
+    std::unique_lock<std::mutex> guard(m_finalized.mutex);
+    auto all_finalized = [this, &comps] {
+      for (auto const &comp : comps)
+        {
+          if (std::find(m_finalized.comps.begin(), m_finalized.comps.end(),
+                        comp) == m_finalized.comps.end())
+            { return false; }
+        }
+      return true;
+    };
+    if (!m_finalized.cond.wait_for(guard, timeout, all_finalized))
+      {
+        RTC_WARN(("Some components did not finish exit() in time."));
+      }
   }
 
   /*!

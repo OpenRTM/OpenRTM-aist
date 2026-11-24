@@ -359,6 +359,7 @@ namespace RTC
   void OutPortBase::activateInterfaces()
   {
     RTC_TRACE(("activateInterfaces()"));
+    std::lock_guard<std::mutex> guard(m_connectorsMutex);
 
     for (auto & connector : m_connectors)
       {
@@ -376,6 +377,7 @@ namespace RTC
   void OutPortBase::deactivateInterfaces()
   {
     RTC_TRACE(("deactivateInterfaces()"));
+    std::lock_guard<std::mutex> guard(m_connectorsMutex);
 
     for (auto & connector : m_connectors)
       {
