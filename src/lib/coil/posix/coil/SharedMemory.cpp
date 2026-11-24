@@ -17,7 +17,6 @@
  */
 
 
-#include <iterator>
 #include <coil/SharedMemory.h>
 #include <cstring>
 #include <utility>
@@ -205,9 +204,9 @@ namespace coil
       return -1;
     }
     if (size == 0) { return 0; }
-    if (!data) { return -1; }
+    if (data == nullptr) { return -1; }
 
-    memcpy(std::next(m_shm, pos), data, static_cast<size_t>(size));
+    memcpy(&m_shm[pos],&data[0],static_cast<size_t>(size));
     
     return 0;
   }
@@ -240,9 +239,9 @@ namespace coil
       return -1;
     }
     if (size == 0) { return 0; }
-    if (!data) { return -1; }
+    if (data == nullptr) { return -1; }
 
-    memcpy(data, std::next(m_shm, pos), static_cast<size_t>(size));
+    memcpy(&data[0],&m_shm[pos],static_cast<size_t>(size));
 
     return 0;
   }
@@ -271,7 +270,9 @@ namespace coil
     
     if (created())
     {
-        ::close(m_fd);
+        const int fd = m_fd;
+        m_fd = -1;
+        return ::close(fd);
     }
     else
     {
