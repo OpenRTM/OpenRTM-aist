@@ -26,6 +26,7 @@
 #include <rtm/Typename.h>
 #include <rtm/CSPTransport.h>
 #include <rtm/PortCallback.h>
+#include <memory>
 
 namespace RTC
 {
@@ -317,8 +318,9 @@ public:
       std::unique_lock<std::mutex> lock(m_mutex);
       if (!m_queue.empty())
       {
-        auto item = std::move(m_queue.front());
+        auto queued = std::move(m_queue.front());
         m_queue.pop_front();
+        Item& item = *queued;
         auto peer = m_peers.find(item.id);
         auto connection = peer == m_peers.end() ? std::shared_ptr<InPortDuplexConnector>() : peer->second.connector;
         auto convert = m_onReadConvert;
@@ -659,7 +661,8 @@ private:
     {
       std::lock_guard<std::mutex> lock(m_mutex);
       if (m_closed || m_peers.find(id) == m_peers.end()) return PORT_ERROR;
-      m_queue.push_back(Item{value, peer.event, ++m_ticket, id, converted});
+      std::unique_ptr<Item> item(new Item{value, peer.event, ++m_ticket, id, converted});
+      m_queue.push_back(std::move(item));
       m_changed.notify_all();
     }
     if (m_listeners) m_listeners->notifyIn(ConnectorDataListenerType::ON_BUFFER_WRITE, info, data);
@@ -674,7 +677,7 @@ private:
   bool m_retry{false};
   std::condition_variable m_changed;
   std::map<std::string, Peer> m_peers;
-  std::deque<Item> m_queue;
+  std::deque<std::unique_ptr<Item>> m_queue;
   size_t m_capacity{8}, m_ticket{0}, m_topology{0};
   double m_timeout{10.0};
   bool m_reading{false}, m_armed{false}, m_receiving{false}, m_probe{false};

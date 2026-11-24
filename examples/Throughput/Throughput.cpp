@@ -9,6 +9,7 @@
  * $Id$
  */
 
+#include <array>
 #include "Throughput.h"
 #include <cmath>
 
@@ -231,7 +232,7 @@ RTC::ReturnCode_t Throughput::onDeactivated(RTC::UniqueId  /*ec_id*/)
 
 RTC::ReturnCode_t Throughput::onExecute(RTC::UniqueId ec_id)
 {
-  static double logmul[] = {2.0, 2.5, 2.0};
+  static const std::array<double, 3> logmul{{2.0, 2.5, 2.0}};
   
   // Setting data length
   if (getDataSize() != m_datasize) { setDataSize(m_datasize); }

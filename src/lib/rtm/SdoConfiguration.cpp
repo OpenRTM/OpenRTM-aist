@@ -634,3 +634,12 @@ namespace SDOPackage
     return uuid->to_string();
   }
 } // namespace SDOPackage
+
+
+// Bi-Directional GIOP: servants activated by _this() live in the POA of the
+// Manager (see Manager::isBiDirectionalGIOP()).
+#include <rtm/Manager.h>
+PortableServer::POA_ptr SDOPackage::Configuration_impl::_default_POA()
+{
+  return ::RTC::Manager::instance().getPOA();
+}

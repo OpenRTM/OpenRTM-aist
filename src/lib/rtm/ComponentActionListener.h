@@ -150,8 +150,8 @@ namespace RTC
       if (type <
       PreComponentActionListenerType::PRE_COMPONENT_ACTION_LISTENER_NUM)
         {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 13> typeString =
+        {{
           "PRE_ON_INITIALIZE",
           "PRE_ON_FINALIZE",
           "PRE_ON_STARTUP",
@@ -165,7 +165,7 @@ namespace RTC
           "PRE_ON_STATE_UPDATE",
           "PRE_ON_RATE_CHANGED",
           "PRE_COMPONENT_ACTION_LISTENER_NUM"
-        };
+        }};
                 return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -317,8 +317,8 @@ namespace RTC
       if (type < 
       PostComponentActionListenerType::POST_COMPONENT_ACTION_LISTENER_NUM)
         {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 13> typeString =
+        {{
           "POST_ON_INITIALIZE",
           "POST_ON_FINALIZE",
           "POST_ON_STARTUP",
@@ -332,7 +332,7 @@ namespace RTC
           "POST_ON_STATE_UPDATE",
           "POST_ON_RATE_CHANGED",
           "POST_COMPONENT_ACTION_LISTENER_NUM"
-        };
+        }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -437,12 +437,12 @@ namespace RTC
     {
       if (type < PortActionListenerType::PORT_ACTION_LISTENER_NUM)
         {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 3> typeString =
+        {{
           "ADD_PORT",
           "REMOVE_PORT",
           "PORT_ACTION_LISTENER_NUM"
-        };
+        }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";
@@ -547,12 +547,12 @@ namespace RTC
     {
       if (type < ExecutionContextActionListenerType::EC_ACTION_LISTENER_NUM)
         {
-      static const char* const typeString[] =
-        {
+      static const std::array<const char*, 3> typeString =
+        {{
           "ATTACH_EC",
           "DETACH_ECT",
           "EC_ACTION_LISTENER_NUM"
-        };
+        }};
           return typeString[static_cast<uint8_t>(type)];
         }
       return "";

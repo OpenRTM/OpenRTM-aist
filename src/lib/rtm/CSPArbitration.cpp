@@ -131,8 +131,14 @@ void CSPSelectable::subscribeSelection(const ConnectorProfile& profile, PortServ
     auto priority = csp_detail::property(profile.properties, (prefix + "priority").c_str());
     if (csp_detail::property(profile.properties, (prefix + "version").c_str()) != "1" ||
         !priorityKey(identity) || !priorityKey(priority)) continue;
-    peers.push_back({i, identity, priority,
-      csp_detail::property(profile.properties, (prefix + "request_arbitration").c_str()) == "1"});
+    const bool requestArbitration =
+      csp_detail::property(profile.properties, (prefix + "request_arbitration").c_str()) == "1";
+    peers.emplace_back();
+    auto& peer = peers.back();
+    peer.portIndex = i;
+    peer.managerId = std::move(identity);
+    peer.priority = std::move(priority);
+    peer.requestArbitration = requestArbitration;
   }
   std::lock_guard<std::mutex> lock(m_metadataMutex);
   auto snapshot = std::atomic_load(&m_connections);

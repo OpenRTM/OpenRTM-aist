@@ -20,6 +20,7 @@
 #ifndef COIL_PERIODICTASK_H
 #define COIL_PERIODICTASK_H
 
+#include <atomic>
 #include <mutex>
 #include <condition_variable>
 #include <coil/TimeMeasure.h>
@@ -308,7 +309,7 @@ namespace coil
      * @brief Task execution period
      * @endif
      */
-    std::chrono::nanoseconds m_period{0};
+    std::atomic<std::chrono::nanoseconds> m_period{std::chrono::nanoseconds::zero()};
 
     /*!
      * @if jp
@@ -332,7 +333,7 @@ namespace coil
     {
     public:
       explicit alive_t(bool val) : value(val) {}
-      bool value;
+      std::atomic<bool> value;
       std::mutex mutex;
     };
 
@@ -356,6 +357,7 @@ namespace coil
     {
       explicit suspend_t(bool sus) : suspend(sus) {}
       bool suspend;
+      bool resetMeasurements{false};
       std::mutex mutex;
       std::condition_variable cond;
     };
@@ -389,7 +391,7 @@ namespace coil
      * @brief Task execution time measurement flag
      * @endif
      */
-    bool              m_execMeasure;
+    std::atomic<bool> m_execMeasure{false};
 
     /*!
      * @if jp
@@ -407,7 +409,7 @@ namespace coil
      * @brief Task execution time measurement max count
      * @endif
      */
-    unsigned int      m_execCountMax{1000};
+    std::atomic<unsigned int> m_execCountMax{1000};
 
     /*!
      * @if jp
@@ -434,7 +436,7 @@ namespace coil
      * @brief Task periodic time measurement flag
      * @endif
      */
-    bool              m_periodMeasure;
+    std::atomic<bool> m_periodMeasure{false};
 
     /*!
      * @if jp
@@ -452,7 +454,7 @@ namespace coil
      * @brief Task periodic time measurement max count
      * @endif
      */
-    unsigned int      m_periodCountMax{1000};
+    std::atomic<unsigned int> m_periodCountMax{1000};
 
     /*!
      * @if jp

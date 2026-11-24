@@ -16,6 +16,7 @@
  *
  */
 
+#include <array>
 #include <cassert>
 #include <rtm/ExecutionContextProfile.h>
 #include <rtm/CORBA_SeqUtil.h>
@@ -173,7 +174,7 @@ namespace RTC_impl
   const char*
   ExecutionContextProfile::getKindString(RTC::ExecutionKind kind) 
   {
-    static const char* const kinds[] = {"PERIODIC", "EVENT_DRIVEN", "OTHER"};
+    static const std::array<const char*, 3> kinds = {{"PERIODIC", "EVENT_DRIVEN", "OTHER"}};
     if (kind < RTC::PERIODIC || kind > RTC::OTHER)
       {
         return "";

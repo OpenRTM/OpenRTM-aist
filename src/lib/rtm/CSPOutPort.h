@@ -416,7 +416,8 @@ public:
       }
       if (!target.empty())
       {
-        Peer peer;
+        std::shared_ptr<OutPortDuplexConnector> connection;
+        bool little = true;
         OctetSeq bytes;
         bool send = false;
         {
@@ -424,8 +425,9 @@ public:
           auto it = m_peers.find(target);
           if (it != m_peers.end() && m_offer && m_pull.empty())
           {
-            peer = it->second;
-            send = csp_detail::encode(*m_offer, bytes, peer.little);
+            connection = it->second.connector;
+            little = it->second.little;
+            send = csp_detail::encode(*m_offer, bytes, little);
             if (send) m_offer.reset(); // Exclude a racing pull before releasing the lock.
           }
           m_push.clear();
@@ -433,7 +435,7 @@ public:
         if (send)
         {
           bool ok = false;
-          try { auto data = csp_detail::toBytes(bytes, peer.little); ok = peer.connector->send(data) == DataPortStatus::PORT_OK; }
+          try { auto data = csp_detail::toBytes(bytes, little); ok = connection->send(data) == DataPortStatus::PORT_OK; }
           catch (const CORBA::Exception&) {}
           std::lock_guard<std::mutex> lock(m_mutex);
           finish();

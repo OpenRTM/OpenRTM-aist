@@ -20,6 +20,7 @@
 #ifndef RTC_COMPONENTOBSERVERCONSUMER_H
 #define RTC_COMPONENTOBSERVERCONSUMER_H
 
+#include <array>
 #include <coil/Factory.h>
 #include <coil/stringutil.h>
 #include <rtm/SdoServiceConsumerBase.h>
@@ -127,16 +128,16 @@ namespace RTC
      */
     static inline const char* toString(OpenRTM::StatusKind kind)
     {
-      static const char* const kinds[] = 
-        {
+      static const std::array<const char*, 6> kinds =
+        {{
           "COMPONENT_PROFILE",
           "RTC_STATUS",
           "EC_STATUS",
           "PORT_PROFILE",
           "CONFIGURATION",
           "HEARTBEAT"
-        };
-      return static_cast<size_t>(kind) < sizeof(kinds)/sizeof(kinds[0]) ? kinds[kind] : "";
+        }};
+      return static_cast<size_t>(kind) < kinds.size() ? kinds[kind] : "";
     }
 
     /*!
@@ -562,7 +563,7 @@ namespace RTC
     SDOPackage::ServiceProfile m_profile;
     CorbaConsumer<OpenRTM::ComponentObserver> m_observer;
 
-    bool m_observed[OpenRTM::STATUS_KIND_NUM];
+    std::array<bool, OpenRTM::STATUS_KIND_NUM> m_observed;
 
     // ComponentProfile
     CompStatMsg m_compstat{*this};

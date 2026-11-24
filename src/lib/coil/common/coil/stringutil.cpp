@@ -942,7 +942,8 @@ namespace coil
     m_args.reserve(args.size());
     for (auto &&arg : args)
     {
-      m_args.emplace_back(arg.c_str(), arg.c_str() + arg.size() + 1);
+      m_args.emplace_back(arg.begin(), arg.end());
+      m_args.back().push_back('\0');
     }
     // make m_argv.
     m_argv.reserve(m_args.size() + 1);

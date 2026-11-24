@@ -167,7 +167,7 @@ namespace RTC
       }
 
     coil::vstring observedlist(coil::split(prop["observed_status"], ","));
-    bool flags[OpenRTM::STATUS_KIND_NUM];
+    std::array<bool, OpenRTM::STATUS_KIND_NUM> flags;
     for (bool & flag : flags)
       {
         flag = false;
