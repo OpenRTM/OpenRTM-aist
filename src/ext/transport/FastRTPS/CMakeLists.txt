@@ -20,7 +20,7 @@ endif()
 
 set(target FastRTPSTransport)
 
-set(srcs FastRTPSTransport.cpp FastRTPSTransport.h FastRTPSInPort.cpp FastRTPSInPort.h FastRTPSOutPort.cpp FastRTPSOutPort.h FastRTPSManager.cpp FastRTPSManager.h FastRTPSMessageInfo.cpp FastRTPSMessageInfo.h CORBACdrData.cpp CORBACdrData.h CORBACdrDataPubSubTypes.cpp CORBACdrDataPubSubTypes.h)
+set(srcs FastRTPSTransport.cpp FastRTPSTransport.h FastRTPSInPort.cpp FastRTPSInPort.h FastRTPSOutPort.cpp FastRTPSOutPort.h FastRTPSManager.cpp FastRTPSManager.h FastRTPSMessageInfo.cpp FastRTPSMessageInfo.h CORBACdrData.cpp CORBACdrData.h CORBACdrDataPubSubTypes.cpp CORBACdrDataPubSubTypes.h DDSEndpoints.cpp DDSEndpoints.h)
 
 
 if(VXWORKS AND NOT RTP)

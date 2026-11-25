@@ -23,6 +23,7 @@
 #endif
 
 #include "FastDDSInPort.h"
+#include "DDSEndpoints.h"
 #include "FastDDSManager.h"
 #include "FastDDSMessageInfo.h"
 #include <coil/UUID.h>
@@ -73,6 +74,18 @@ namespace RTC
     if (participant == nullptr)
     {
       return;
+    }
+
+    if (m_reader)
+    {
+      const auto guid = openrtm_fastdds::guid_bytes(m_reader->guid());
+      if (m_subscriber->delete_datareader(m_reader) != RETCODE_OK)
+      {
+        RTC_ERROR(("Failed to delete DataReader"));
+        return;
+      }
+      openrtm_fastdds::removed(guid);
+      m_reader = nullptr;
     }
 
     if (m_subscriber != nullptr)
@@ -293,6 +306,10 @@ namespace RTC
         Rparam,
         &m_listener);
 
+    if (m_reader)
+    {
+      openrtm_fastdds::added(openrtm_fastdds::Kind::reader, openrtm_fastdds::guid_bytes(m_reader->guid()), marshaling_type);
+    }
     if (m_reader == nullptr)
     {
         participant->delete_subscriber(m_subscriber);
@@ -459,9 +476,9 @@ namespace RTC
     RTC_PARANOID(("onNewDataMessage()"));
 
     RTC_PARANOID(("take_next_sample"));
-    if(sub->take_next_sample(&m_data, &m_info))
+    while (sub->take_next_sample(&m_data, &m_info) == eprosima::fastdds::dds::RETCODE_OK)
     {
-      if(m_info.valid_data == eprosima::fastdds::rtps::ALIVE)
+      if (m_info.valid_data)
       {
           m_provider->put(m_data);
       }

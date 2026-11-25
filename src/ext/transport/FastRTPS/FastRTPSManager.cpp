@@ -22,6 +22,7 @@
 #endif
 
 #include "FastRTPSManager.h"
+#include "DDSEndpoints.h"
 #include <fastrtps/participant/Participant.h>
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/Domain.h>
@@ -159,6 +160,7 @@ namespace RTC
   {
       Logger rtclog("FastRTPSManager");
       RTC_INFO(("FastRTPSManager::shutdown()"));
+      openrtm_fastrtps::shutdown();
       eprosima::fastrtps::Domain::removeParticipant(m_participant);
       manager = nullptr;
   }

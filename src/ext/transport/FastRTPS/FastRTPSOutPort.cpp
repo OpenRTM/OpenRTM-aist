@@ -36,6 +36,7 @@
 #pragma warning(pop)
 #endif
 #include "FastRTPSOutPort.h"
+#include "DDSEndpoints.h"
 #include "FastRTPSManager.h"
 #include "FastRTPSMessageInfo.h"
 
@@ -69,6 +70,14 @@ namespace RTC
   FastRTPSOutPort::~FastRTPSOutPort(void)
   {
     RTC_PARANOID(("~FastRTPSOutPort()"));
+    if (m_publisher)
+    {
+      const auto guid = openrtm_fastrtps::guid_bytes(m_publisher->getGuid());
+      if (eprosima::fastrtps::Domain::removePublisher(m_publisher))
+      {
+        openrtm_fastrtps::removed(guid);
+      }
+    }
     
   }
 
@@ -193,6 +202,10 @@ namespace RTC
     outputLog(Wparam);
     
     m_publisher = eprosima::fastrtps::Domain::createPublisher(participant, *Wparam, (eprosima::fastrtps::PublisherListener*)&m_listener);
+    if (m_publisher)
+    {
+      openrtm_fastrtps::added(openrtm_fastrtps::Kind::writer, openrtm_fastrtps::guid_bytes(m_publisher->getGuid()), marshaling_type);
+    }
 
     delete Wparam;
     if (m_publisher == nullptr)
