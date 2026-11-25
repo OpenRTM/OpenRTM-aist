@@ -23,6 +23,7 @@
 #endif
 
 #include "FastRTPSInPort.h"
+#include "DDSEndpoints.h"
 #include <coil/UUID.h>
 #include <fastrtps/participant/Participant.h>
 #include <fastrtps/attributes/ParticipantAttributes.h>
@@ -72,7 +73,11 @@ namespace RTC
 
     if (m_subscriber != nullptr)
     {
-        eprosima::fastrtps::Domain::removeSubscriber(m_subscriber);
+        const auto guid = openrtm_fastrtps::guid_bytes(m_subscriber->getGuid());
+        if (eprosima::fastrtps::Domain::removeSubscriber(m_subscriber))
+        {
+          openrtm_fastrtps::removed(guid);
+        }
     }
 
   }
@@ -210,6 +215,10 @@ namespace RTC
 
 
     m_subscriber = eprosima::fastrtps::Domain::createSubscriber(participant, *Rparam, (eprosima::fastrtps::SubscriberListener*)&m_listener);
+    if (m_subscriber)
+    {
+      openrtm_fastrtps::added(openrtm_fastrtps::Kind::reader, openrtm_fastrtps::guid_bytes(m_subscriber->getGuid()), marshaling_type);
+    }
 
 
 

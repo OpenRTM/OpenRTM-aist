@@ -22,6 +22,7 @@
 #endif
 
 #include "FastDDSManager.h"
+#include "DDSEndpoints.h"
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/domain/qos/DomainParticipantQos.hpp>
@@ -172,6 +173,7 @@ namespace RTC
     }
 
     auto* factory = DomainParticipantFactory::get_instance();
+    openrtm_fastdds::shutdown();
     auto ret = factory->delete_participant(m_participant);
     if (ret == eprosima::fastdds::dds::RETCODE_OK)
     {

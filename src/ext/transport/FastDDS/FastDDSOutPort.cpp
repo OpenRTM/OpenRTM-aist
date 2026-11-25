@@ -37,6 +37,7 @@
 #pragma warning(pop)
 #endif
 #include "FastDDSOutPort.h"
+#include "DDSEndpoints.h"
 #include "FastDDSManager.h"
 #include "FastDDSMessageInfo.h"
 #include <stdexcept>
@@ -81,12 +82,14 @@ namespace RTC
 
     if (m_writer != nullptr && m_publisher != nullptr)
     {
+        const auto guid = openrtm_fastdds::guid_bytes(m_writer->guid());
         if (m_publisher->delete_datawriter(m_writer)
             != eprosima::fastdds::dds::RETCODE_OK)
         {
             RTC_ERROR(("Failed to delete DataWriter"));
             return;
         }
+        openrtm_fastdds::removed(guid);
         m_writer = nullptr;
     }
 
@@ -264,6 +267,10 @@ namespace RTC
     
     // DataWriter生成
     m_writer = m_publisher->create_datawriter(m_dds_topic, Wparam, &m_listener);
+    if (m_writer)
+    {
+      openrtm_fastdds::added(openrtm_fastdds::Kind::writer, openrtm_fastdds::guid_bytes(m_writer->guid()), marshaling_type);
+    }
     if (m_writer == nullptr)
     {
         RTC_ERROR(("Failed to create DataWriter"));
@@ -299,7 +306,7 @@ namespace RTC
         return DataPortStatus::PRECONDITION_NOT_MET;
     }
     //if (m_publisher->write(&data))
-    if (m_writer->write(&data))
+    if (m_writer->write(&data) == eprosima::fastdds::dds::RETCODE_OK)
     {
         RTC_PARANOID(("write:OK"));
         return DataPortStatus::PORT_OK;
